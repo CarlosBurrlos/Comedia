@@ -21,3 +21,41 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Built application files
+frontend/*/build/
+
+# Crashlytics configuations
+frontend/com_crashlytics_export_strings.xml
+
+# Local configuration file (sdk path, etc)
+frontend/local.properties
+
+# Gradle generated files
+frontend/.gradle/
+
+# Signing files
+frontend/.signing/
+
+# User-specific configurations
+frontend/.idea/libraries/
+frontend/.idea/workspace.xml
+frontend/.idea/tasks.xml
+frontend/.idea/.name
+frontend/.idea/compiler.xml
+frontend/.idea/copyright/profiles_settings.xml
+frontend/.idea/encodings.xml
+frontend/.idea/misc.xml
+frontend/.idea/modules.xml
+frontend/.idea/scopes/scope_settings.xml
+frontend/.idea/vcs.xml
+frontend/*.iml
+
+# OS-specific files
+frontend/.DS_Store
+frontend/.DS_Store?
+frontend/._*
+frontend/.Spotlight-V100
+frontend/.Trashes
+frontend/ehthumbs.db
+frontend/Thumbs.db

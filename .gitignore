@@ -53,6 +53,7 @@ frontend/.idea/libraries/
 frontend/.idea/workspace.xml
 frontend/.idea/tasks.xml
 frontend/.idea/.name
+frontend/.idea/codeStyles/Project.xml
 frontend/.idea/compiler.xml
 frontend/.idea/copyright/profiles_settings.xml
 frontend/.idea/encodings.xml
@@ -149,4 +150,3 @@ backend/functions/typings/
 
 # Node.js dependency directory
 backend/functions/node_modules/
-

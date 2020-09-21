@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "752944458739",
+    "firebase_url": "https://comedia-6f804.firebaseio.com",
+    "project_id": "comedia-6f804",
+    "storage_bucket": "comedia-6f804.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752944458739:android:6d1f0a8c53ad42c0490086",
+        "android_client_info": {
+          "package_name": "com.purdue.comedia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "752944458739-mctr0ul6mp85i8ip2ksii4oqn1rvmh2n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.purdue.comedia",
+            "certificate_hash": "f4f27f20bb8bc73ebdd572864bec775dd22b0df1"
+          }
+        },
+        {
+          "client_id": "752944458739-rfr7a1b79p7tm1n0j5i4cc7d0pah5uot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAHO522kaSwYFpBRZMb67IFGCRB4Y9vE4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "752944458739-rfr7a1b79p7tm1n0j5i4cc7d0pah5uot.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

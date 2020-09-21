@@ -44,7 +44,6 @@ frontend/local.properties
 
 # Gradle generated files
 frontend/.gradle/
-frontend/build.gradle
 frontend/gradle/wrapper/
 
 # Signing files

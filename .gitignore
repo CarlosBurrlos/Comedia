@@ -70,10 +70,18 @@ backend/*.log
 backend/npm-debug.log*
 backend/yarn-debug.log*
 backend/yarn-error.log*
-backend/lerna-debug.log*
+backend/firebase-debug.log*
+backend/firebase-debug.*.log*
 
-# Diagnostic reports (https://nodejs.org/api/report.html)
-backend/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# Firebase cache
+backend/.firebase/
+
+# Firebase config
+
+# Uncomment this if you'd like others to create their own Firebase project.
+# For a team working on the same Firebase project(s), it is recommended to leave
+# it commented so all members can deploy to the same project(s) in .firebaserc.
+# .firebaserc
 
 # Runtime data
 backend/pids
@@ -86,12 +94,11 @@ backend/lib-cov
 
 # Coverage directory used by tools like istanbul
 backend/coverage
-backend/*.lcov
 
 # nyc test coverage
 backend/.nyc_output
 
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 backend/.grunt
 
 # Bower dependency directory (https://bower.io/)
@@ -100,30 +107,17 @@ backend/bower_components
 # node-waf configuration
 backend/.lock-wscript
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
+# Compiled binary addons (http://nodejs.org/api/addons.html)
 backend/build/Release
 
 # Dependency directories
 backend/node_modules/
-backend/jspm_packages/
-
-# Snowpack dependency directory (https://snowpack.dev/)
-backend/web_modules/
-
-# TypeScript cache
-backend/*.tsbuildinfo
 
 # Optional npm cache directory
 backend/.npm
 
 # Optional eslint cache
 backend/.eslintcache
-
-# Microbundle cache
-backend/.rpt2_cache/
-backend/.rts2_cache_cjs/
-backend/.rts2_cache_es/
-backend/.rts2_cache_umd/
 
 # Optional REPL history
 backend/.node_repl_history
@@ -136,47 +130,3 @@ backend/.yarn-integrity
 
 # dotenv environment variables file
 backend/.env
-backend/.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-backend/.cache
-backend/.parcel-cache
-
-# Next.js build output
-backend/.next
-backend/out
-
-# Nuxt.js build / generate output
-backend/.nuxt
-backend/dist
-
-# Gatsby files
-backend/.cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
-
-# vuepress build output
-backend/.vuepress/dist
-
-# Serverless directories
-backend/.serverless/
-
-# FuseBox cache
-backend/.fusebox/
-
-# DynamoDB Local files
-backend/.dynamodb/
-
-# TernJS port file
-backend/.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-backend/.vscode-test
-
-# yarn v2
-backend/.yarn/cache
-backend/.yarn/unplugged
-backend/.yarn/build-state.yml
-backend/.yarn/install-state.gz
-backend/.pnp.*

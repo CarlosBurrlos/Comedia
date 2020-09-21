@@ -139,3 +139,14 @@ backend/.yarn-integrity
 
 # dotenv environment variables file
 backend/.env
+
+# Compiled JavaScript files
+**/*.js
+**/*.js.map
+
+# TypeScript v1 declaration files
+backend/functions/typings/
+
+# Node.js dependency directory
+backend/functions/node_modules/
+

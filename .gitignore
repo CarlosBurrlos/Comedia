@@ -61,6 +61,7 @@ frontend/.idea/modules.xml
 frontend/.idea/scopes/scope_settings.xml
 frontend/.idea/vcs.xml
 frontend/*.iml
+frontend/.idea/codeStyles/Project.xml
 
 # OS-specific files
 frontend/.DS_Store
@@ -139,4 +140,3 @@ backend/.yarn-integrity
 
 # dotenv environment variables file
 backend/.env
-frontend/.idea/codeStyles/Project.xml

@@ -139,3 +139,4 @@ backend/.yarn-integrity
 
 # dotenv environment variables file
 backend/.env
+frontend/.idea/codeStyles/Project.xml

@@ -1,9 +1,9 @@
-import * as functions from 'firebase-functions';
+import {https} from 'firebase-functions';
+import createServer from './server/CreateGraphQLServer';
 
-// Start writing Firebase Functions
-// https://firebase.google.com/docs/functions/typescript
+const server = createServer();
 
-export const helloWorld = functions.https.onRequest((request, response) => {
-    functions.logger.info("Hello logs!", {structuredData: true});
-    response.send("Hello from Firebase!");
-});
+// Graphql api
+const api = https.onRequest(server);
+
+export {api};

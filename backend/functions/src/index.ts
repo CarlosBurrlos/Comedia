@@ -1,15 +1,9 @@
 import {https} from 'firebase-functions';
 import createServer from './server/CreateGraphQLServer';
 
-const serverPromise = createServer();
+const server = createServer();
 
 // Graphql api
-let api;
-
-serverPromise.then((server) => {
-    api = https.onRequest(server);
-}).catch(() => {
-    console.log("Failed to start server.")
-})
+const api = https.onRequest(server);
 
 export {api};

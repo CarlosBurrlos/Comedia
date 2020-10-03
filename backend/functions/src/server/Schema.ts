@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {buildSchema, Field, FieldResolver, Resolver} from "type-graphql";
+import {buildSchemaSync, Field, FieldResolver, Query, Resolver} from "type-graphql";
 import User from "./schema/User";
 import Post from "./schema/Post";
 import Comment from "./schema/Comment";
@@ -156,8 +156,16 @@ class ProfileResolver {
     }
 }
 
-const schema = buildSchema({
-    resolvers: [UserResolver, PostResolver, CommentResolver, ProfileResolver],
+@Resolver()
+class BasicResolver {
+    @Query()
+    hello(): string {
+        return 'world'
+    }
+}
+
+const schema = buildSchemaSync({
+    resolvers: [BasicResolver, UserResolver, PostResolver, CommentResolver, ProfileResolver],
     emitSchemaFile: {
         path: 'C:\\Users\\nicho\\Desktop\\schema.txt'
     }

@@ -3,11 +3,11 @@ import {ApolloServer} from 'apollo-server-express';
 
 import schema from './Schema';
 
-async function createGraphQLServer() {
+function createGraphQLServer() {
     const app = express();
 
     const apolloServer = new ApolloServer({
-        schema: await schema,
+        schema: schema,
         // Enable graphiql gui
         introspection: true,
         playground: true

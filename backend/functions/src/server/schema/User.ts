@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {Field, ObjectType} from "type-graphql";
 import Comment from "./Comment";
 import Post from "./Post";
@@ -23,7 +24,7 @@ class User {
     savedPosts!: Post[];
     @Field((type?: void) => [Comment])
     comments!: Comment[];
-    @Field()
+    @Field((type?: void) => Profile)
     profile!: Profile;
 }
 

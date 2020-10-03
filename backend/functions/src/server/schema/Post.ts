@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {Field, ObjectType} from "type-graphql";
 import Comment from "./Comment";
 import PostType from "./PostType";
@@ -5,11 +6,11 @@ import User from "./User";
 
 @ObjectType()
 class Post {
-    @Field()
+    @Field((type?: void) => User)
     poster!: User;
     @Field()
     genre!: string;
-    @Field()
+    @Field((type?: void) => PostType)
     type!: PostType;
     @Field()
     content!: string;

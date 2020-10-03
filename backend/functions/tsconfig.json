@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
+    "target": "ES2017",
     "lib": [
       "esnext.asynciterable"
     ],

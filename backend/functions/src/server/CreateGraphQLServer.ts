@@ -2,14 +2,12 @@ import express from 'express';
 import {ApolloServer} from 'apollo-server-express';
 
 import schema from './Schema';
-import resolvers from './ResolverFunctions';
 
-function createGraphQLServer() {
+async function createGraphQLServer() {
     const app = express();
 
     const apolloServer = new ApolloServer({
-        typeDefs: schema,
-        resolvers,
+        schema: await schema,
         // Enable graphiql gui
         introspection: true,
         playground: true

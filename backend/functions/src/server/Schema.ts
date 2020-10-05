@@ -4,25 +4,19 @@ import User from "./schema/User";
 import Post from "./schema/Post";
 import Comment from "./schema/Comment";
 import Profile from "./schema/Profile";
-
-@Resolver((of?: void) => User)
-class UserResolver {
-}
-
-@Resolver((of?: void) => Post)
-class PostResolver {
-}
-
-@Resolver((of?: void) => Comment)
-class CommentResolver {
-}
-
-@Resolver((of?: void) => Profile)
-class ProfileResolver {
-}
+import * as admin from 'firebase-admin';
+admin.initializeApp();
 
 @Resolver()
 class BasicResolver {
+    @Query(() => User)
+    async user(@Arg('username',() => String) username: string): Promise<User> {
+        const users = await admin.firestore().collection("users").where('username','==',username).get();
+        //console.log("users");
+        //users.docs.forEach((user) => {console.log(user.data())});
+        return users.docs[0].data() as User;
+    }
+
     @Query(() => [User])
     users(@Arg('ids', () => [String]) ids: string[]): User[] {
         return [ new User() ];
@@ -45,9 +39,6 @@ class BasicResolver {
 }
 
 const schema = buildSchemaSync({
-    resolvers: [BasicResolver, UserResolver, PostResolver, CommentResolver, ProfileResolver],
-    emitSchemaFile: {
-        path: 'C:\\Users\\nicho\\Desktop\\schema.txt'
-    }
+    resolvers: [BasicResolver]
 });
 export default schema;

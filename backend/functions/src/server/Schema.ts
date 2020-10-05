@@ -1,10 +1,13 @@
 import "reflect-metadata";
-import {Arg, buildSchemaSync, Field, FieldResolver, Query, Resolver} from "type-graphql";
+import {Arg, buildSchemaSync, Query, Resolver} from "type-graphql";
 import User from "./schema/User";
 import Post from "./schema/Post";
 import Comment from "./schema/Comment";
 import Profile from "./schema/Profile";
-import PostType from "./schema/PostType";
+//import PostType from "./schema/PostType";
+
+import * as admin from 'firebase-admin';
+admin.initializeApp();
 
 // @Resolver()
 // class ComediaResolver {
@@ -29,135 +32,16 @@ import PostType from "./schema/PostType";
 //     }
 // }
 
-@Resolver((of?: void) => User)
-class UserResolver {
-    @FieldResolver()
-    username(): string {
-        return '';
-    }
-
-    @FieldResolver()
-    email(): string {
-        return '';
-    }
-
-    @FieldResolver()
-    password(): string {
-        return '';
-    }
-
-    @FieldResolver((type?: void) => [User])
-    usersFollowing(): User[] {
-        return [];
-    }
-
-    @FieldResolver((type?: void) => [User])
-    followers(): User[] {
-        return [];
-    }
-
-    @FieldResolver()
-    genresFollowing(): string[] {
-        return [];
-    }
-
-    @FieldResolver((type?: void) => [Post])
-    createdPosts(): Post[] {
-        return [];
-    }
-
-    @Field((type?: void) => [Post])
-    savedPosts(): Post[] {
-        return [];
-    }
-
-    @FieldResolver((type?: void) => [Comment])
-    comments(): Comment[] {
-        return [];
-    }
-
-    @FieldResolver()
-    profile(): Profile {
-        return new Profile();
-    }
-}
-
-@Resolver((of?: void) => Post)
-class PostResolver {
-    @FieldResolver()
-    poster(): User {
-        return new User();
-    }
-
-    @FieldResolver()
-    genre(): string {
-        return '';
-    }
-
-    @FieldResolver()
-    type(): PostType {
-        return PostType.TEXT;
-    }
-
-    @FieldResolver()
-    content(): string {
-        return '';
-    }
-
-    @FieldResolver((type?: void) => [Comment])
-    comments(): Comment[] {
-        return [];
-    }
-
-    @FieldResolver()
-    upvoteCount(): number {
-        return -1;
-    }
-
-    @FieldResolver()
-    downvoteCount(): number {
-        return -1;
-    }
-}
-
-@Resolver((of?: void) => Comment)
-class CommentResolver {
-    @FieldResolver()
-    poster(): User {
-        return new User();
-    }
-
-    @FieldResolver()
-    parent(): Post {
-        return new Post();
-    }
-
-    @FieldResolver()
-    content(): string {
-        return '';
-    }
-}
-
-@Resolver((of?: void) => Profile)
-class ProfileResolver {
-    @FieldResolver()
-    user(): User {
-        return new User();
-    }
-
-    @FieldResolver()
-    profileImage(): string {
-        return '';
-    }
-
-    @FieldResolver()
-    biography(): string {
-        return '';
-    }
-}
-
 @Resolver()
 class BasicResolver {
+    @Query(() => User)
+    async user(@Arg('username',() => String) username: string): Promise<User> {
+        const users = await admin.firestore().collection("users").where('username','==',username).get();
+        //console.log("users");
+        //users.docs.forEach((user) => {console.log(user.data())});
+        return users.docs[0].data() as User;
+    }
+
     @Query(() => [User])
     users(@Arg('ids', () => [String]) ids: string[]): User[] {
         return [];
@@ -180,9 +64,6 @@ class BasicResolver {
 }
 
 const schema = buildSchemaSync({
-    resolvers: [BasicResolver, UserResolver, PostResolver, CommentResolver, ProfileResolver],
-    emitSchemaFile: {
-        path: 'C:\\Users\\nicho\\Desktop\\schema.txt'
-    }
+    resolvers: [BasicResolver]
 });
 export default schema;

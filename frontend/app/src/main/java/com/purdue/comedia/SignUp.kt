@@ -1,6 +1,5 @@
 package com.purdue.comedia
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -8,12 +7,18 @@ import android.util.Patterns
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class SignUp : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    var signingUp = true
+    private var signingUp = true
+    private val ref = FirebaseDatabase.getInstance().getReference("username")
+
+    class LoginUser(val id: String, val username: String, val email: String) {
+        constructor() : this("", "", "") {}
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,11 +45,47 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun loginUser() {
-        // Todo: Login User. Check username and password through firebase.
-        auth.signInWithEmailAndPassword(
-            registerUsername.text.toString(),
-            registerPassword.text.toString()
-        )
+
+        var email = ""
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(registerUsername.text).matches()) {
+            // Get username's corresponding email from firebase database
+            ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()) {
+                        for (aUser in p0.children) {
+                            val userObject = aUser.getValue(LoginUser::class.java)
+                            if (userObject!!.username == registerUsername.text.toString()) {
+                                email = userObject.email
+                                break
+                            }
+                        }
+                    }
+
+                    if (email.isEmpty()) {
+                        toast("Username does not exist. Please sign up for an account.")
+                        return
+                    }
+
+                    performFirebaseLogin(email) // Sign In
+
+                }
+
+                override fun onCancelled(p0: DatabaseError) {
+                    toast("Unable to create account. Err Code: *READ_ERR")
+                }
+            })
+
+        } else {
+            // Else was email entered
+            email = registerUsername.text.toString()
+            performFirebaseLogin(email)
+        }
+
+    }
+
+    private fun performFirebaseLogin(email: String) {
+        auth.signInWithEmailAndPassword(email, registerPassword.text.toString())
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
@@ -56,7 +97,7 @@ class SignUp : AppCompatActivity() {
                         toast("Please verify your email address")
                     }
                 } else {
-                    // If sign in fails, display a message to the user.
+                    // If sign in fails, display why to the user.
                     Log.w("*Fail", "createUserWithEmail:failure", task.exception)
                     toast(task.exception?.message.toString())
                 }
@@ -65,6 +106,36 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun signUpUser() {
+        // Check for unique username
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(p0: DataSnapshot) {
+                var isUnique = true
+                if (p0.exists()) {
+                    for (aUser in p0.children) {
+                        val userObject = aUser.getValue(LoginUser::class.java)
+                        if (userObject!!.username == registerUsername.text.toString()) {
+                            isUnique = false
+                            break
+                        }
+                    }
+                }
+                
+                if (isUnique) {
+                    toast("Making User")
+                    createFirebaseUser() // Username is unique. Continue with account creation.
+                } else {
+                    toast("Username already exists. Please select a new username.")
+                }
+
+            }
+
+            override fun onCancelled(p0: DatabaseError) {
+                toast("Unable to create account. Err Code: *READ_ERR")
+            }
+        })
+    }
+
+    private fun createFirebaseUser() {
         // Checks completed. Continue with sign up. Create new account.
         auth.createUserWithEmailAndPassword(
             registerEmail.text.toString(),
@@ -72,26 +143,33 @@ class SignUp : AppCompatActivity() {
         )
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    // Save username and email pair to Firebase database
+                    val userID = ref.push().key // Creates key inside username
+                    val theUsername = registerUsername.text.toString()
+                    val theEmail = registerEmail.text.toString()
+                    if (userID != null) {
+                        ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
+                    } else {
+                        toast("Unable to create account. Err Code: *WRITE_ERR")
+                        return@addOnCompleteListener
+                    }
+
                     // Send email verification
                     auth.currentUser!!.sendEmailVerification()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
+                        .addOnCompleteListener { emailTask ->
+                            if (emailTask.isSuccessful) {
                                 auth.signOut()
                                 toast("Email Sent. Verify email and login.")
                                 toggleSignInAndSignUp()
-                                // Sign in and verification successful
-                                //updateUI(true, auth.currentUser)
                             } else {
-                                toast(task.exception?.message.toString())
+                                toast(emailTask.exception?.message.toString())
                             }
                         }
                 } else {
-                    // Sign in fails, display a message to the user.
-                    Log.w("*Fail", "createUserWithEmail:failure", task.exception)
+                    // If sign in fails, display why to the user.
                     toast(task.exception?.message.toString())
                 }
             }
-
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {
@@ -101,7 +179,7 @@ class SignUp : AppCompatActivity() {
             registerUsername.error = "Please Enter Username"
             registerUsername.requestFocus()
             return false
-        } else if (registerUsername.text.contains("[^a-z]")) {
+        } else if (registerUsername.text.contains(regex = Regex("[^a-z1-9]"))) {
             registerUsername.error = "Username can only contain lowercase letters from a-z"
             registerUsername.requestFocus()
             return false
@@ -129,6 +207,7 @@ class SignUp : AppCompatActivity() {
             signingUp = true
             signUpTextView.text = "Sign Up"
             supportActionBar?.title = "Sign Up"
+            registerUsername.hint = "Username"
             registerEmail.alpha = 1F
             registerEmail.isClickable = true
             btnRegister.text = "Register"
@@ -137,6 +216,7 @@ class SignUp : AppCompatActivity() {
             signingUp = false
             signUpTextView.text = "Login"
             supportActionBar?.title = "Login"
+            registerUsername.hint = "Username/Email"
             registerEmail.alpha = 0F
             registerEmail.isClickable = false
             btnRegister.text = "Login"

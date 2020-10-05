@@ -19,6 +19,7 @@ class profileTab : Fragment() {
 
     // 3. Declare Parameters here
     private var sampleVar2: String? = null
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +34,7 @@ class profileTab : Fragment() {
     // Change Sign In Button Text
     override fun onResume() {
         super.onResume()
-        if (theLoginBtn != null && FirebaseAuth.getInstance().currentUser != null) {
+        if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
         } else {
             theLoginBtn!!.text = "Sign In"
@@ -52,19 +53,19 @@ class profileTab : Fragment() {
         // Login Button Functionality
         val loginBtn: Button = root.findViewById(R.id.btnToLoginPage)
         theLoginBtn = loginBtn
-        if (FirebaseAuth.getInstance().currentUser != null) {
+        if (auth.currentUser != null) {
             loginBtn.text = "Sign out"
         } else {
             loginBtn.text = "Sign In"
         }
 
         loginBtn.setOnClickListener {
-            if (FirebaseAuth.getInstance().currentUser == null) {
+            if (auth.currentUser == null) {
                 // Go to sign up screen
                 startActivity(Intent(view!!.context, SignUp::class.java))
             } else {
                 // Sign Out
-                FirebaseAuth.getInstance().signOut()
+                auth.signOut()
                 loginBtn.text = "Sign In"
                 Toast.makeText(view!!.context, "Signed Out.", Toast.LENGTH_SHORT).show()
             }

@@ -49,11 +49,16 @@ class SignUp : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     val user = auth.currentUser
-                    updateUI(true, user)
+                    if (user!!.isEmailVerified) {
+                        updateUI(true, user)
+                    } else {
+                        auth.signOut()
+                        toast("Please verify your email address")
+                    }
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w("*Fail", "createUserWithEmail:failure", task.exception)
-                    updateUI(true,null)
+                    toast(task.exception?.message.toString())
                 }
 
             }
@@ -67,22 +72,37 @@ class SignUp : AppCompatActivity() {
         )
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in successful
-                    val user = auth.currentUser
-                    updateUI(true, user)
+                    // Send email verification
+                    auth.currentUser!!.sendEmailVerification()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                auth.signOut()
+                                toast("Email Sent. Verify email and login.")
+                                toggleSignInAndSignUp()
+                                // Sign in and verification successful
+                                //updateUI(true, auth.currentUser)
+                            } else {
+                                toast(task.exception?.message.toString())
+                            }
+                        }
                 } else {
                     // Sign in fails, display a message to the user.
                     Log.w("*Fail", "createUserWithEmail:failure", task.exception)
-                    updateUI(true, null)
+                    toast(task.exception?.message.toString())
                 }
             }
 
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {
+
         // Check unique username
         if (registerUsername.text.isEmpty()) {
             registerUsername.error = "Please Enter Username"
+            registerUsername.requestFocus()
+            return false
+        } else if (registerUsername.text.contains("[^a-z]")) {
+            registerUsername.error = "Username can only contain lowercase letters from a-z"
             registerUsername.requestFocus()
             return false
         }
@@ -138,16 +158,21 @@ class SignUp : AppCompatActivity() {
         if (isCustomCheck) {
             if (currentUser == null) {
                 // Sign up failed.
-                Toast.makeText(baseContext, "Sign Up Failed.", Toast.LENGTH_SHORT).show()
+                toast("Sign Up Failed.")
             } else {
                 // Sign up successful.
-                Toast.makeText(baseContext, "Sign In Successful!", Toast.LENGTH_SHORT).show()
+                toast("Sign In Successful!")
 
                 // Go back to previous page
                 finish()
             }
         }
 
+    }
+
+    private fun toast(str: String) {
+        if (str.length < 60) Toast.makeText(baseContext, str, Toast.LENGTH_SHORT).show()
+        else Toast.makeText(baseContext, str, Toast.LENGTH_LONG).show()
     }
 
 }

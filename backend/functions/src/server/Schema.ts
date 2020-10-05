@@ -159,22 +159,22 @@ class ProfileResolver {
 @Resolver()
 class BasicResolver {
     @Query(() => [User])
-    users(@Arg('ids', () => [Number]) ids: number[]): User[] {
+    users(@Arg('ids', () => [String]) ids: string[]): User[] {
         return [];
     }
 
     @Query(() => [Post])
-    posts(@Arg('ids', () => [Number]) ids: number[]): Post[] {
+    posts(@Arg('ids', () => [String]) ids: string[]): Post[] {
         return [];
     }
 
     @Query(() => [Comment])
-    comments(@Arg('ids', () => [Number]) ids: number[]): Comment[] {
+    comments(@Arg('ids', () => [String]) ids: string[]): Comment[] {
         return [];
     }
 
     @Query(() => [Profile])
-    profiles(@Arg('ids', () => [Number]) ids: number[]): Profile[] {
+    profiles(@Arg('ids', () => [String]) ids: string[]): Profile[] {
         return [];
     }
 }

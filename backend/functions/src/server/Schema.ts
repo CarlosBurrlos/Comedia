@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {buildSchemaSync, Field, FieldResolver, Query, Resolver} from "type-graphql";
+import {Arg, buildSchemaSync, Field, FieldResolver, Query, Resolver} from "type-graphql";
 import User from "./schema/User";
 import Post from "./schema/Post";
 import Comment from "./schema/Comment";
@@ -158,9 +158,24 @@ class ProfileResolver {
 
 @Resolver()
 class BasicResolver {
-    @Query()
-    hello(): string {
-        return 'world'
+    @Query(() => [User])
+    users(@Arg('ids', () => [Number]) ids: number[]): User[] {
+        return [];
+    }
+
+    @Query(() => [Post])
+    posts(@Arg('ids', () => [Number]) ids: number[]): Post[] {
+        return [];
+    }
+
+    @Query(() => [Comment])
+    comments(@Arg('ids', () => [Number]) ids: number[]): Comment[] {
+        return [];
+    }
+
+    @Query(() => [Profile])
+    profiles(@Arg('ids', () => [Number]) ids: number[]): Profile[] {
+        return [];
     }
 }
 

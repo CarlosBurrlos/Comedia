@@ -1,11 +1,16 @@
 package com.purdue.comedia
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.profile_tab.*
 
 /**
  * A Fragment representing the profile Tab
@@ -23,6 +28,18 @@ class profileTab : Fragment() {
         }
     }
 
+    var theLoginBtn: Button? = null
+
+    // Change Sign In Button Text
+    override fun onResume() {
+        super.onResume()
+        if (theLoginBtn != null && FirebaseAuth.getInstance().currentUser != null) {
+            theLoginBtn!!.text = "Sign Out"
+        } else {
+            theLoginBtn!!.text = "Sign In"
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -30,8 +47,28 @@ class profileTab : Fragment() {
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.profile_tab, container, false)
 
-        // Setup the elements of the view here
+        /** Setup the elements of the view here **/
 
+        // Login Button Functionality
+        val loginBtn: Button = root.findViewById(R.id.btnToLoginPage)
+        theLoginBtn = loginBtn
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            loginBtn.text = "Sign out"
+        } else {
+            loginBtn.text = "Sign In"
+        }
+
+        loginBtn.setOnClickListener {
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                // Go to sign up screen
+                startActivity(Intent(view!!.context, SignUp::class.java))
+            } else {
+                // Sign Out
+                FirebaseAuth.getInstance().signOut()
+                loginBtn.text = "Sign In"
+                Toast.makeText(view!!.context, "Signed Out.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         return root
     }

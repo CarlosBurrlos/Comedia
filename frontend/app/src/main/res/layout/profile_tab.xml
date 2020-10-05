@@ -26,7 +26,11 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="24dp"
         android:layout_marginTop="18dp"
-        tools:src="@tools:sample/avatars" />
+        android:background="#FFFFFF"
+        android:contentDescription="imageDesc"
+        app:srcCompat="@drawable/profile_placeholder"
+        tools:src="@drawable/profile_placeholder"
+        tools:srcCompat="@drawable/profile_placeholder" />
 
     <TextView
         android:id="@+id/bioTextProfilePage"
@@ -34,8 +38,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="135dp"
-        android:layout_marginTop="63dp"
+        android:layout_marginStart="133dp"
+        android:layout_marginTop="64dp"
         android:text="BIO"
         android:textSize="16sp" />
 
@@ -45,7 +49,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="131dp"
-        android:layout_marginTop="91dp"
+        android:layout_marginStart="133dp"
+        android:layout_marginTop="90dp"
         android:text="FOLLOWERS" />
+
+    <Button
+        android:id="@+id/btnToLoginPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="307dp"
+        android:text="Login" />
 </RelativeLayout>

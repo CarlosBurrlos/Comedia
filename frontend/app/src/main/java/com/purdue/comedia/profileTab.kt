@@ -31,8 +31,7 @@ class profileTab : Fragment() {
         val root = inflater.inflate(R.layout.profile_tab, container, false)
 
         // Setup the elements of the view here
-        val textView: TextView = root.findViewById(R.id.fragment_two_text)
-        textView.text = "This will be the Profile Page"
+
 
         return root
     }

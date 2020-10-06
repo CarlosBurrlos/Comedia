@@ -201,13 +201,13 @@ class profileTab : Fragment() {
     // Called once a user edits the profile. New strings are passed to this function.
     private fun editProfileOntoFirebase(profileImageUrl: String, bioText: String) {
         if (auth.uid == null) return
-        val profileModel = UserProfileModel()
+        val profileModel = PartialProfileModel()
         profileModel.profileImage = profileImageUrl
         profileModel.biography = bioText
         saveUserProfile(auth.uid as String, profileModel)
     }
 
-    private fun saveUserProfile(uid: String, profileModel: UserProfileModel) {
+    private fun saveUserProfile(uid: String, profileModel: PartialProfileModel) {
         queryForUser(uid, {
             val profileReference = it.get("profile") as DocumentReference?
             val setOptions = SetOptions.merge()
@@ -241,9 +241,4 @@ class profileTab : Fragment() {
         Toast.makeText(context, str, Toast.LENGTH_LONG).show()
     }
 
-}
-
-class UserProfileModel {
-    var profileImage: String = ""
-    var biography: String = ""
 }

@@ -194,10 +194,22 @@ class SignUp : AppCompatActivity() {
 
     // Called after a new user has registered
     private fun createNewFirebaseUser() {
-        val username = registerUsername.text.toString()
-        val email = registerEmail.text.toString()
+        if (auth.uid == null) return
 
-        firestore.collection("users")
+        val userModel = UserModel()
+        userModel.username = registerUsername.text.toString()
+        userModel.email = registerEmail.text.toString()
+        val user = firestore.collection("users").document(auth.uid!!)
+
+        val profileModel = ProfileModel()
+        profileModel.biography = "No bio yet!"
+        profileModel.profileImage = ""
+        profileModel.user = user
+        firestore.collection("profiles").add(user)
+            .addOnSuccessListener {
+                userModel.profile = it
+                user.set(userModel)
+            }
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {

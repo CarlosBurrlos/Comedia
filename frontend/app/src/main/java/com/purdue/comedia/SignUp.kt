@@ -205,7 +205,7 @@ class SignUp : AppCompatActivity() {
         profileModel.biography = "No bio yet!"
         profileModel.profileImage = ""
         profileModel.user = user
-        firestore.collection("profiles").add(user)
+        firestore.collection("profiles").add(profileModel)
             .addOnSuccessListener {
                 userModel.profile = it
                 user.set(userModel)

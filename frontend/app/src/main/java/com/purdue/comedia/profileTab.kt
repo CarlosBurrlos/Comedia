@@ -2,6 +2,7 @@ package com.purdue.comedia
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +14,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.Source
-import org.w3c.dom.Document
+import com.google.firebase.firestore.*
+import kotlinx.android.synthetic.main.profile_tab.*
 import java.lang.Exception
 
 
@@ -51,7 +49,7 @@ class profileTab : Fragment() {
 
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
-        queryForUser(uid, ::updateProfileView)
+        queryForUser("example", ::updateProfileTabView) { e -> println(e) }
     }
 
     private fun queryForUser(uid: String, successCallback: ((DocumentSnapshot) -> Unit)? = null, failureCallback: ((Exception) -> Unit)? = null): Task<DocumentSnapshot> {
@@ -62,9 +60,20 @@ class profileTab : Fragment() {
             .addOnFailureListener { failureCallback?.invoke(it) }
     }
 
-    private fun updateProfileView(snapshot: DocumentSnapshot) {
-        println(snapshot.get("profile"))
-        return
+    private fun updateProfileTabView(snapshot: DocumentSnapshot) {
+        (snapshot.get("profile") as DocumentReference?)
+            ?.get()
+            ?.addOnSuccessListener { updateProfileFields(it) }
+            ?.addOnFailureListener { e -> println(e) }
+        profileUsername.text = snapshot.get("username") as String? ?: "Unknown"
+    }
+
+    private fun updateProfileFields(snapshot: DocumentSnapshot) {
+        val avatarUri = Uri.parse(snapshot.get("profileImage") as String?)
+        if (avatarUri.query != null) {
+            profileImage.setImageURI(avatarUri)
+        }
+        bioTextProfilePage.text = snapshot.get("biography") as String? ?: ""
     }
 
     // Gets run everytime the screen is presented
@@ -162,7 +171,7 @@ class profileTab : Fragment() {
 
     // Called when the profile page loads or when the profile has been edited
     private fun updateProfile() {
-        // Todo: Load profile data from firebase and update fields
+        loadUserProfile(auth.uid)
     }
 
     // Skeleton code to setup class

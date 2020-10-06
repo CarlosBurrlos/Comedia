@@ -119,9 +119,8 @@ class SignUp : AppCompatActivity() {
                         }
                     }
                 }
-                
+
                 if (isUnique) {
-                    toast("Making User")
                     createFirebaseUser() // Username is unique. Continue with account creation.
                 } else {
                     toast("Username already exists. Please select a new username.")
@@ -179,7 +178,7 @@ class SignUp : AppCompatActivity() {
             registerUsername.error = "Please Enter Username"
             registerUsername.requestFocus()
             return false
-        } else if (registerUsername.text.contains(regex = Regex("[^a-z1-9]"))) {
+        } else if (signingUp && registerUsername.text.contains(regex = Regex("[^a-z1-9]"))) {
             registerUsername.error = "Username can only contain lowercase letters from a-z"
             registerUsername.requestFocus()
             return false
@@ -239,7 +238,7 @@ class SignUp : AppCompatActivity() {
             if (currentUser == null) {
                 // Sign up failed.
                 toast("Sign Up Failed.")
-            } else {
+            } else if (currentUser.isEmailVerified) {
                 // Sign up successful.
                 toast("Sign In Successful!")
 

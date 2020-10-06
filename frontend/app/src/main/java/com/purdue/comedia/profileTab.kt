@@ -49,7 +49,7 @@ class profileTab : Fragment() {
 
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
-        queryForUser("example", ::updateProfileTabView) { e -> println(e) }
+        queryForUser(uid, ::updateProfileTabView) { e -> println(e) }
     }
 
     private fun queryForUser(uid: String, successCallback: ((DocumentSnapshot) -> Unit)? = null, failureCallback: ((Exception) -> Unit)? = null): Task<DocumentSnapshot> {

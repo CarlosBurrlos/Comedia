@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -31,6 +32,7 @@ class SignUp : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         supportActionBar?.title = "Sign Up"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Button to switch between logging in and signing up
         btnToggleRegister.setOnClickListener {
@@ -60,7 +62,9 @@ class SignUp : AppCompatActivity() {
                     if (p0.exists()) {
                         for (aUser in p0.children) {
                             val userObject = aUser.getValue(LoginUser::class.java)
-                            if (userObject!!.username == registerUsername.text.toString().toLowerCase()) {
+                            if (userObject!!.username == registerUsername.text.toString()
+                                    .toLowerCase()
+                            ) {
                                 email = userObject.email
                                 break
                             }
@@ -256,6 +260,13 @@ class SignUp : AppCompatActivity() {
 
     }
 
+    // Allow back button to work
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        this.finish()
+        return true
+    }
+
+    // Hide Keyboard on a non-text field screen tap
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         if (currentFocus != null) {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

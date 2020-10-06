@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -33,6 +34,7 @@ class SignUp : AppCompatActivity() {
 
         supportActionBar?.title = "Sign Up"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        signInLoader.isVisible = false
 
         // Button to switch between logging in and signing up
         btnToggleRegister.setOnClickListener {
@@ -41,6 +43,7 @@ class SignUp : AppCompatActivity() {
 
         btnRegister.setOnClickListener {
             if (checkInputFields(signingUp)) {
+                signInLoader.isVisible = true
                 if (signingUp) {
                     signUpUser() // Sign up user
                 } else {
@@ -70,17 +73,16 @@ class SignUp : AppCompatActivity() {
                             }
                         }
                     }
-
                     if (email.isEmpty()) {
+                        signInLoader.isVisible = false
                         snack("Username does not exist. Please sign up for an account.")
                         return
                     }
-
                     performFirebaseLogin(email) // Sign In
-
                 }
 
                 override fun onCancelled(p0: DatabaseError) {
+                    signInLoader.isVisible = false
                     snack("Unable to create account. Err Code: *READ_ERR")
                 }
             })
@@ -99,6 +101,7 @@ class SignUp : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     val user = auth.currentUser
+                    signInLoader.isVisible = false
                     if (user!!.isEmailVerified) {
                         updateUI(true, user)
                     } else {
@@ -108,9 +111,9 @@ class SignUp : AppCompatActivity() {
                 } else {
                     // If sign in fails, display why to the user.
                     Log.w("*Fail", "createUserWithEmail:failure", task.exception)
+                    signInLoader.isVisible = false
                     snack(task.exception?.message.toString())
                 }
-
             }
     }
 
@@ -130,20 +133,22 @@ class SignUp : AppCompatActivity() {
                 }
 
                 if (isUnique) {
-                    createFirebaseUser() // Username is unique. Continue with account creation.
+                    createFirebaseUserAccount() // Username is unique. Continue with account creation.
                 } else {
+                    signInLoader.isVisible = false
                     snack("Username already exists. Please select a new username.")
                 }
 
             }
 
             override fun onCancelled(p0: DatabaseError) {
+                signInLoader.isVisible = false
                 snack("Unable to create account. Err Code: *READ_ERR")
             }
         })
     }
 
-    private fun createFirebaseUser() {
+    private fun createFirebaseUserAccount() {
         // Checks completed. Continue with sign up. Create new account.
         auth.createUserWithEmailAndPassword(
             registerEmail.text.toString(),
@@ -158,6 +163,7 @@ class SignUp : AppCompatActivity() {
                     if (userID != null) {
                         ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
                     } else {
+                        signInLoader.isVisible = false
                         snack("Unable to create account. Err Code: *WRITE_ERR")
                         return@addOnCompleteListener
                     }
@@ -166,18 +172,30 @@ class SignUp : AppCompatActivity() {
                     auth.currentUser!!.sendEmailVerification()
                         .addOnCompleteListener { emailTask ->
                             if (emailTask.isSuccessful) {
+                                createNewFirebaseUser() // Add new user to firebase database
                                 auth.signOut()
+                                signInLoader.isVisible = false
                                 snack("Email Sent. Verify email and login.")
                                 toggleSignInAndSignUp()
                             } else {
+                                signInLoader.isVisible = false
                                 snack(emailTask.exception?.message.toString())
                             }
                         }
                 } else {
                     // If sign in fails, display why to the user.
+                    signInLoader.isVisible = false
                     snack(task.exception?.message.toString())
                 }
             }
+    }
+
+    // Called after a new user has registered
+    private fun createNewFirebaseUser() {
+        val username = registerUsername.text.toString()
+        val email = registerEmail.text.toString()
+
+        // Todo: Create new user on Firebase
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {

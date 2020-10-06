@@ -1,16 +1,18 @@
 package com.purdue.comedia
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
+import android.widget.EditText
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.profile_tab.*
+
 
 /**
  * A Fragment representing the profile Tab
@@ -29,16 +31,22 @@ class profileTab : Fragment() {
         }
     }
 
-    var theLoginBtn: Button? = null
+    private var theLoginBtn: Button? = null
 
-    // Change Sign In Button Text
+    // Gets run everytime the screen is presented
     override fun onResume() {
         super.onResume()
+
+        // Change Sign In Button Text
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
-        } else {
+        } else if (theLoginBtn != null) {
             theLoginBtn!!.text = "Sign In"
         }
+
+        // Reload data from firebase each time profile page loads
+        updateProfile()
+
     }
 
     override fun onCreateView(
@@ -70,9 +78,60 @@ class profileTab : Fragment() {
             }
         }
 
+        val btnEditProfile: Button = root.findViewById(R.id.btnEditProfile)
+        btnEditProfile.setOnClickListener {
+            textInputAlert() // Present alert to input the new text
+        }
+
         return root
     }
 
+    private fun textInputAlert() {
+        val bioText = EditText(context)
+        bioText.hint = "Bio"
+        val profileUrl = EditText(context)
+        profileUrl.hint = "Profile"
+
+        val subTextInputLayout = TextInputLayout(context)
+        subTextInputLayout.addView(bioText)
+
+        val textInputLayout = TextInputLayout(context)
+        textInputLayout.setPadding(
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0,
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0
+        )
+
+        textInputLayout.addView(profileUrl)
+        textInputLayout.addView(subTextInputLayout)
+
+        val alert = AlertDialog.Builder(context)
+            .setTitle("Edit Profile")
+            .setView(textInputLayout)
+            .setMessage("Enter bio and Image URL for profile")
+            .setPositiveButton("Confirm") { dialog, _ ->
+                // Handle new profile information
+                editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
+                dialog.cancel()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }.create()
+
+        alert.show()
+
+    }
+
+    // Called once a user edits the profile. New strings are passed to this function.
+    private fun editProfileOntoFirebase(profileImageUrl: String, bioText: String) {
+        //Todo: Upload these two strings to firebase and refresh the page: updateProfile()
+    }
+
+    // Called when the profile page loads or when the profile has been edited
+    private fun updateProfile() {
+        // Todo: Load profile data from firebase and update fields
+    }
+
+    // Skeleton code to setup class
     companion object {
 
         // 1. Create Arguments Here
@@ -88,4 +147,9 @@ class profileTab : Fragment() {
                 }
             }
     }
+
+    private fun toast(str: String) {
+        Toast.makeText(context, str, Toast.LENGTH_LONG).show()
+    }
+
 }

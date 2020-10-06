@@ -31,7 +31,7 @@ class feedTab : Fragment() {
 
         // Setup the elements of the view here
         val textView: TextView = root.findViewById(R.id.fragment_one_text)
-        textView.text = "This will be the feed"
+        textView.text = "User Feed"
 
         return root
     }

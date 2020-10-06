@@ -1,10 +1,14 @@
 package com.purdue.comedia
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
@@ -16,6 +20,7 @@ class SignUp : AppCompatActivity() {
     private var signingUp = true
     private val ref = FirebaseDatabase.getInstance().getReference("username")
 
+    // Required for interacting with realtime database
     class LoginUser(val id: String, val username: String, val email: String) {
         constructor() : this("", "", "") {}
     }
@@ -55,7 +60,7 @@ class SignUp : AppCompatActivity() {
                     if (p0.exists()) {
                         for (aUser in p0.children) {
                             val userObject = aUser.getValue(LoginUser::class.java)
-                            if (userObject!!.username == registerUsername.text.toString()) {
+                            if (userObject!!.username == registerUsername.text.toString().toLowerCase()) {
                                 email = userObject.email
                                 break
                             }
@@ -63,7 +68,7 @@ class SignUp : AppCompatActivity() {
                     }
 
                     if (email.isEmpty()) {
-                        toast("Username does not exist. Please sign up for an account.")
+                        snack("Username does not exist. Please sign up for an account.")
                         return
                     }
 
@@ -72,7 +77,7 @@ class SignUp : AppCompatActivity() {
                 }
 
                 override fun onCancelled(p0: DatabaseError) {
-                    toast("Unable to create account. Err Code: *READ_ERR")
+                    snack("Unable to create account. Err Code: *READ_ERR")
                 }
             })
 
@@ -94,12 +99,12 @@ class SignUp : AppCompatActivity() {
                         updateUI(true, user)
                     } else {
                         auth.signOut()
-                        toast("Please verify your email address")
+                        snack("Please verify your email address")
                     }
                 } else {
                     // If sign in fails, display why to the user.
                     Log.w("*Fail", "createUserWithEmail:failure", task.exception)
-                    toast(task.exception?.message.toString())
+                    snack(task.exception?.message.toString())
                 }
 
             }
@@ -123,13 +128,13 @@ class SignUp : AppCompatActivity() {
                 if (isUnique) {
                     createFirebaseUser() // Username is unique. Continue with account creation.
                 } else {
-                    toast("Username already exists. Please select a new username.")
+                    snack("Username already exists. Please select a new username.")
                 }
 
             }
 
             override fun onCancelled(p0: DatabaseError) {
-                toast("Unable to create account. Err Code: *READ_ERR")
+                snack("Unable to create account. Err Code: *READ_ERR")
             }
         })
     }
@@ -149,7 +154,7 @@ class SignUp : AppCompatActivity() {
                     if (userID != null) {
                         ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
                     } else {
-                        toast("Unable to create account. Err Code: *WRITE_ERR")
+                        snack("Unable to create account. Err Code: *WRITE_ERR")
                         return@addOnCompleteListener
                     }
 
@@ -158,15 +163,15 @@ class SignUp : AppCompatActivity() {
                         .addOnCompleteListener { emailTask ->
                             if (emailTask.isSuccessful) {
                                 auth.signOut()
-                                toast("Email Sent. Verify email and login.")
+                                snack("Email Sent. Verify email and login.")
                                 toggleSignInAndSignUp()
                             } else {
-                                toast(emailTask.exception?.message.toString())
+                                snack(emailTask.exception?.message.toString())
                             }
                         }
                 } else {
                     // If sign in fails, display why to the user.
-                    toast(task.exception?.message.toString())
+                    snack(task.exception?.message.toString())
                 }
             }
     }
@@ -209,6 +214,7 @@ class SignUp : AppCompatActivity() {
             registerUsername.hint = "Username"
             registerEmail.alpha = 1F
             registerEmail.isClickable = true
+            registerEmail.isFocusable = true
             btnRegister.text = "Register"
             btnToggleRegister.text = "Already have an account? Login here"
         } else {
@@ -218,6 +224,7 @@ class SignUp : AppCompatActivity() {
             registerUsername.hint = "Username/Email"
             registerEmail.alpha = 0F
             registerEmail.isClickable = false
+            registerEmail.isFocusable = false
             btnRegister.text = "Login"
             btnToggleRegister.text = "Click here to create a new account"
         }
@@ -237,7 +244,7 @@ class SignUp : AppCompatActivity() {
         if (isCustomCheck) {
             if (currentUser == null) {
                 // Sign up failed.
-                toast("Sign Up Failed.")
+                snack("Sign Up Failed.")
             } else if (currentUser.isEmailVerified) {
                 // Sign up successful.
                 toast("Sign In Successful!")
@@ -249,9 +256,20 @@ class SignUp : AppCompatActivity() {
 
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (currentFocus != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun snack(str: String) {
+        Snackbar.make(findViewById(android.R.id.content), str, Snackbar.LENGTH_LONG).show()
+    }
+
     private fun toast(str: String) {
-        if (str.length < 60) Toast.makeText(baseContext, str, Toast.LENGTH_SHORT).show()
-        else Toast.makeText(baseContext, str, Toast.LENGTH_LONG).show()
+        Toast.makeText(baseContext, str, Toast.LENGTH_LONG).show()
     }
 
 }

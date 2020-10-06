@@ -67,7 +67,6 @@ class profileTab : Fragment() {
                 // Sign Out
                 auth.signOut()
                 loginBtn.text = "Sign In"
-                Toast.makeText(view!!.context, "Signed Out.", Toast.LENGTH_SHORT).show()
             }
         }
 

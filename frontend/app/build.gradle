@@ -24,7 +24,7 @@ android {
     }
 
     lintOptions {
-        disable 'SetTextI18n', 'HardcodedText'
+        disable 'SetTextI18n', 'HardcodedText', 'DefaultLocale'
     }
 
 }

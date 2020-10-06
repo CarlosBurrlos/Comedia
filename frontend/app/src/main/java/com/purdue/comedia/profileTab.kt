@@ -10,8 +10,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.Task
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Source
+import org.w3c.dom.Document
+import java.lang.Exception
 
 
 /**
@@ -22,6 +29,10 @@ class profileTab : Fragment() {
     // 3. Declare Parameters here
     private var sampleVar2: String? = null
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private var displayAccountUID: String? = null
+    private var profile = UserProfileModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +43,29 @@ class profileTab : Fragment() {
     }
 
     private var theLoginBtn: Button? = null
+
+    override fun onStart() {
+        super.onStart()
+        loadUserProfile(auth.uid)
+    }
+
+    private fun loadUserProfile(uid: String?) {
+        if (uid == null) return
+        queryForUser(uid, ::updateProfileView)
+    }
+
+    private fun queryForUser(uid: String, successCallback: ((DocumentSnapshot) -> Unit)? = null, failureCallback: ((Exception) -> Unit)? = null): Task<DocumentSnapshot> {
+        return firestore.collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { successCallback?.invoke(it) }
+            .addOnFailureListener { failureCallback?.invoke(it) }
+    }
+
+    private fun updateProfileView(snapshot: DocumentSnapshot) {
+        println(snapshot.get("profile"))
+        return
+    }
 
     // Gets run everytime the screen is presented
     override fun onResume() {
@@ -152,4 +186,10 @@ class profileTab : Fragment() {
         Toast.makeText(context, str, Toast.LENGTH_LONG).show()
     }
 
+}
+
+class UserProfileModel {
+    var user = ""
+    var bio = ""
+    var profileImage = ""
 }

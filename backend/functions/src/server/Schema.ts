@@ -11,15 +11,22 @@ admin.initializeApp();
 class BasicResolver {
     @Query(() => User)
     async user(@Arg('username',() => String) username: string): Promise<User> {
-        const users = await admin.firestore().collection("users").where('username','==',username).get();
+        const users = await admin.firestore().collection('users')
+                .where('username','==',username).get();
         //console.log("users");
         //users.docs.forEach((user) => {console.log(user.data())});
         return users.docs[0].data() as User;
     }
 
     @Query(() => [User])
-    users(@Arg('ids', () => [String]) ids: string[]): User[] {
-        return [ new User() ];
+    async users(@Arg('ids', () => [String]) ids: string[]): Promise<User[]> {
+        const query = admin.firestore().collection('users')
+            .where(admin.firestore.FieldPath.documentId(), 'in', ids)
+            .get()
+            .then(response => {
+                return response.docs.map(document => document.data()) as User[];
+            });
+        return (await query) as User[];
     }
 
     @Query(() => [Post])

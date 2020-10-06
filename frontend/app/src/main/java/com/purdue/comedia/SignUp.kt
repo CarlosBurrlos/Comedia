@@ -14,11 +14,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class SignUp : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var signingUp = true
     private val ref = FirebaseDatabase.getInstance().getReference("username")
 
@@ -195,7 +197,7 @@ class SignUp : AppCompatActivity() {
         val username = registerUsername.text.toString()
         val email = registerEmail.text.toString()
 
-        // Todo: Create new user on Firebase
+        firestore.collection("users")
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {

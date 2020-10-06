@@ -53,7 +53,11 @@ class profileTab : Fragment() {
         queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
     }
 
-    private fun queryForUser(uid: String, successCallback: ((DocumentSnapshot) -> Unit)? = null, failureCallback: ((Exception) -> Unit)? = null): Task<DocumentSnapshot> {
+    private fun queryForUser(
+        uid: String,
+        successCallback: ((DocumentSnapshot) -> Unit)? = null,
+        failureCallback: ((Exception) -> Unit)? = null
+    ): Task<DocumentSnapshot> {
         return firestore.collection("users")
             .document(uid)
             .get()
@@ -79,8 +83,8 @@ class profileTab : Fragment() {
         AsyncTask<String, Void, Bitmap?>() {
         val setImageView: (Bitmap?) -> Unit = imageCallback
 
-        override fun doInBackground(vararg p0: String?): Bitmap? {
-            return downloadImage(p0[0] ?: "")
+        override fun doInBackground(vararg urlArgs: String?): Bitmap? {
+            return downloadImage(urlArgs[0] ?: "")
         }
 
         private fun downloadImage(url: String): Bitmap? {

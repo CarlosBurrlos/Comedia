@@ -2,7 +2,9 @@ package com.purdue.comedia
 
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +18,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.profile_tab.*
+import java.io.BufferedInputStream
 import java.lang.Exception
+import java.net.URL
 
 
 /**
@@ -28,9 +32,6 @@ class profileTab : Fragment() {
     private var sampleVar2: String? = null
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    private var displayAccountUID: String? = null
-    private var profile = UserProfileModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +50,7 @@ class profileTab : Fragment() {
 
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
-        queryForUser(uid, ::updateProfileTabView) { e -> println(e) }
+        queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
     }
 
     private fun queryForUser(uid: String, successCallback: ((DocumentSnapshot) -> Unit)? = null, failureCallback: ((Exception) -> Unit)? = null): Task<DocumentSnapshot> {
@@ -60,20 +61,49 @@ class profileTab : Fragment() {
             .addOnFailureListener { failureCallback?.invoke(it) }
     }
 
-    private fun updateProfileTabView(snapshot: DocumentSnapshot) {
+    private fun loadProfileTabView(snapshot: DocumentSnapshot) {
         (snapshot.get("profile") as DocumentReference?)
             ?.get()
-            ?.addOnSuccessListener { updateProfileFields(it) }
+            ?.addOnSuccessListener { loadProfileFields(it) }
             ?.addOnFailureListener { e -> println(e) }
         profileUsername.text = snapshot.get("username") as String? ?: "Unknown"
     }
 
-    private fun updateProfileFields(snapshot: DocumentSnapshot) {
-        val avatarUri = Uri.parse(snapshot.get("profileImage") as String?)
-        if (avatarUri.query != null) {
-            profileImage.setImageURI(avatarUri)
-        }
+    private fun loadProfileFields(snapshot: DocumentSnapshot) {
+        val url = (snapshot.get("profileImage") as String?) ?: ""
+        RetrieveImageTask(::setProfileImage).execute(url)
         bioTextProfilePage.text = snapshot.get("biography") as String? ?: ""
+    }
+
+    private class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
+        AsyncTask<String, Void, Bitmap?>() {
+        val setImageView: (Bitmap?) -> Unit = imageCallback
+
+        override fun doInBackground(vararg p0: String?): Bitmap? {
+            return downloadImage(p0[0] ?: "")
+        }
+
+        private fun downloadImage(url: String): Bitmap? {
+            return try {
+                val avatarUrl = URL(url)
+                val connection = avatarUrl.openConnection()
+                connection.connect()
+                val stream = BufferedInputStream(connection.getInputStream())
+                BitmapFactory.decodeStream(stream)
+            } catch (e: Exception) {
+                println(e)
+                null
+            }
+        }
+
+        override fun onPostExecute(result: Bitmap?) {
+            super.onPostExecute(result)
+            this.setImageView(result)
+        }
+    }
+
+    private fun setProfileImage(image: Bitmap?) {
+        profileImage.setImageBitmap(image)
     }
 
     // Gets run everytime the screen is presented
@@ -166,7 +196,19 @@ class profileTab : Fragment() {
 
     // Called once a user edits the profile. New strings are passed to this function.
     private fun editProfileOntoFirebase(profileImageUrl: String, bioText: String) {
-        //Todo: Upload these two strings to firebase and refresh the page: updateProfile()
+        if (auth.uid == null) return
+        val profileModel = UserProfileModel()
+        profileModel.profileImage = profileImageUrl
+        profileModel.biography = bioText
+        saveUserProfile(auth.uid as String, profileModel)
+    }
+
+    private fun saveUserProfile(uid: String, profileModel: UserProfileModel) {
+        queryForUser(uid, {
+            val profileReference = it.get("profile") as DocumentReference?
+            val setOptions = SetOptions.merge()
+            profileReference?.set(profileModel, setOptions)
+        })
     }
 
     // Called when the profile page loads or when the profile has been edited
@@ -198,7 +240,6 @@ class profileTab : Fragment() {
 }
 
 class UserProfileModel {
-    var user = ""
-    var bio = ""
-    var profileImage = ""
+    var profileImage: String = ""
+    var biography: String = ""
 }

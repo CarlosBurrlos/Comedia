@@ -45,7 +45,7 @@ class profileTab : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        loadUserProfile(auth.uid)
+        updateProfile()
     }
 
     private fun loadUserProfile(uid: String?) {
@@ -145,14 +145,12 @@ class profileTab : Fragment() {
         }
 
         loginBtn.setOnClickListener {
-            if (auth.currentUser == null) {
-                // Go to sign up screen
-                startActivity(Intent(view!!.context, SignUp::class.java))
-            } else {
+            if (auth.currentUser != null) {
                 // Sign Out
                 auth.signOut()
                 loginBtn.text = "Sign In"
             }
+            startActivity(Intent(view!!.context, SignUp::class.java))
         }
 
         val btnEditProfile: Button = root.findViewById(R.id.btnEditProfile)
@@ -188,6 +186,7 @@ class profileTab : Fragment() {
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
                 editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
+                updateProfile()
                 dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->

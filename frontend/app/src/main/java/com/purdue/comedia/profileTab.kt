@@ -12,15 +12,19 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.graphics.drawable.RoundedBitmapDrawable
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
-import java.lang.Exception
 import java.net.URL
 
 
@@ -116,7 +120,10 @@ class profileTab : Fragment() {
     }
 
     private fun setProfileImage(image: Bitmap?) {
+        val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
+        drawable.isCircular = true
         profileImage.setImageBitmap(image)
+        profileImage.setImageDrawable(drawable)
     }
 
     // Gets run everytime the screen is presented
@@ -127,16 +134,8 @@ class profileTab : Fragment() {
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
 
-//            // Logic to prompt for profile edit page
-//            if (!promptedForProfile && savedProfileUrl.isEmpty() &&
-//                bioTextProfilePage.text.toString() == "No bio yet!") {
-//                promptedForProfile = true
-//                textInputAlert()
-//            }
-
         } else if (theLoginBtn != null) {
             theLoginBtn!!.text = "Sign In"
-            //promptedForProfile = false
         }
 
         // Reload data from firebase each time profile page loads
@@ -219,6 +218,7 @@ class profileTab : Fragment() {
                 if (profileUrl.text.isEmpty()) profileUrl.setText(savedProfileUrl)
                 editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
                 updateProfile()
+                toast("Profile Updated")
                 dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->

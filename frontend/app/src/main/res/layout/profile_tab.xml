@@ -26,7 +26,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="24dp"
         android:layout_marginTop="18dp"
-        android:background="#FFFFFF"
+        android:background="#80FFFFFF"
         android:contentDescription="imageDesc"
         app:srcCompat="@drawable/profile_placeholder"
         tools:src="@drawable/profile_placeholder"

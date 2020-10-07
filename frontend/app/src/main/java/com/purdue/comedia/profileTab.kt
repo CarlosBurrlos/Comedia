@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
@@ -155,7 +156,16 @@ class profileTab : Fragment() {
 
         val btnEditProfile: Button = root.findViewById(R.id.btnEditProfile)
         btnEditProfile.setOnClickListener {
-            textInputAlert() // Present alert to input the new text
+            if (auth.currentUser != null) {
+                textInputAlert() // Present alert to input the new text
+            } else {
+                // User not signed in, present alert
+                Snackbar.make(root.findViewById(R.id.profileScreen),
+                    "You must be signed in to edit your profile", Snackbar.LENGTH_LONG)
+                    .setAction("Login") {
+                        startActivity(Intent(view!!.context, SignUp::class.java))
+                    }.show()
+            }
         }
 
         return root

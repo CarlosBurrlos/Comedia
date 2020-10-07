@@ -80,7 +80,12 @@ class profileTab : Fragment() {
         val url = (snapshot.get("profileImage") as String?) ?: ""
         savedProfileUrl = url
         RetrieveImageTask(::setProfileImage).execute(url)
-        bioTextProfilePage.text = snapshot.get("biography") as String? ?: ""
+        val newBio = snapshot.get("biography") as String? ?: ""
+        bioTextProfilePage.text = newBio
+        if (url.isEmpty() && newBio == "No bio yet!" && !promptedForProfile) {
+            textInputAlert()
+            promptedForProfile = true
+        }
     }
 
     private class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
@@ -122,15 +127,16 @@ class profileTab : Fragment() {
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
 
-            // Logic to prompt for profile edit page
-            if (!promptedForProfile && savedProfileUrl.isEmpty() &&
-                bioTextProfilePage.text.toString() == "No bio yet!") {
-                promptedForProfile = true
-                textInputAlert()
-            }
+//            // Logic to prompt for profile edit page
+//            if (!promptedForProfile && savedProfileUrl.isEmpty() &&
+//                bioTextProfilePage.text.toString() == "No bio yet!") {
+//                promptedForProfile = true
+//                textInputAlert()
+//            }
 
         } else if (theLoginBtn != null) {
             theLoginBtn!!.text = "Sign In"
+            //promptedForProfile = false
         }
 
         // Reload data from firebase each time profile page loads
@@ -157,6 +163,7 @@ class profileTab : Fragment() {
         }
 
         loginBtn.setOnClickListener {
+            promptedForProfile = false
             if (auth.currentUser != null) {
                 // Sign Out
                 auth.signOut()
@@ -205,7 +212,7 @@ class profileTab : Fragment() {
         val alert = AlertDialog.Builder(context)
             .setTitle("Edit Profile")
             .setView(textInputLayout)
-            .setMessage("Enter bio and Image URL for profile")
+            .setMessage("Profile is empty. Please Enter bio and Image URL for profile")
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
                 if (bioText.text.isEmpty()) bioText.setText(bioTextProfilePage.text)

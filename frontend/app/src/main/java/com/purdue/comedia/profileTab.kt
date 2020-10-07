@@ -34,6 +34,7 @@ class profileTab : Fragment() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var savedProfileUrl = ""
+    private var promptedForProfile = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,7 +122,10 @@ class profileTab : Fragment() {
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
 
-            if (savedProfileUrl.isEmpty() && bioTextProfilePage.text.toString() == "No bio yet!") {
+            // Logic to prompt for profile edit page
+            if (!promptedForProfile && savedProfileUrl.isEmpty() &&
+                bioTextProfilePage.text.toString() == "No bio yet!") {
+                promptedForProfile = true
                 textInputAlert()
             }
 
@@ -167,8 +171,10 @@ class profileTab : Fragment() {
                 textInputAlert() // Present alert to input the new text
             } else {
                 // User not signed in, present alert
-                Snackbar.make(root.findViewById(R.id.profileScreen),
-                    "You must be signed in to edit your profile", Snackbar.LENGTH_LONG)
+                Snackbar.make(
+                    root.findViewById(R.id.profileScreen),
+                    "You must be signed in to edit your profile", Snackbar.LENGTH_LONG
+                )
                     .setAction("Login") {
                         startActivity(Intent(view!!.context, SignUp::class.java))
                     }.show()

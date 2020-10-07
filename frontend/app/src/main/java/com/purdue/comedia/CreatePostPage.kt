@@ -14,6 +14,7 @@ import com.google.firebase.database.*
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_create_post_page.*
+import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class CreatePostPage : AppCompatActivity() {
 
@@ -33,6 +34,10 @@ class CreatePostPage : AppCompatActivity() {
             createPost()
         }
 
+        radioBtnImage.setOnClickListener { postBodyField.hint = "Enter a joke image URL" }
+        radioBtnUrl.setOnClickListener { postBodyField.hint = "Enter a joke website URL" }
+        radioBtnText.setOnClickListener { postBodyField.hint = "Joke Body" }
+
     }
 
     // Called when user presses the 'Post' button
@@ -43,12 +48,20 @@ class CreatePostPage : AppCompatActivity() {
         val genre = postGenreField.text.toString()
         val isAnonymous = postAnonymousSwitch.isActivated
 
-        // Array for conversion from numeric post type to string post type
-        val numToString = arrayOf("","txt","img","url")
+        if (title.isEmpty()) {
+            postTitleField.error = "Please enter a title"
+            postTitleField.requestFocus()
+            return
+        }
+        if (body.isEmpty()) {
+            postBodyField.error = "A body is required"
+            postBodyField.requestFocus()
+            return
+        }
 
         // Create post model
         val postModel = PostModel()
-        postModel.type = numToString[postType]
+        postModel.type = postType
         postModel.title = title
         postModel.content = body
         postModel.genre = genre
@@ -71,11 +84,11 @@ class CreatePostPage : AppCompatActivity() {
         }
     }
 
-    private fun grabPostType(): Int {
-        if (radioBtnText.isActivated) return 1
-        if (radioBtnImage.isActivated) return 2
-        if (radioBtnUrl.isActivated) return 3
-        else return 1
+    private fun grabPostType(): String {
+        if (radioBtnText.isChecked) return "txt"
+        if (radioBtnImage.isChecked) return "img"
+        if (radioBtnUrl.isChecked) return "url"
+        else return "txt"
     }
 
     /** Helper Functions **/

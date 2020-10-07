@@ -43,8 +43,10 @@ class CreatePostPage : AppCompatActivity() {
         val genre = postGenreField.text.toString()
         val isAnonymous = postAnonymousSwitch.isActivated
 
+        // Array for conversion from numeric post type to string post type
         val numToString = arrayOf("","txt","img","url")
 
+        // Create post model
         val postModel = PostModel()
         postModel.type = numToString[postType]
         postModel.title = title
@@ -52,18 +54,21 @@ class CreatePostPage : AppCompatActivity() {
         postModel.genre = genre
         postModel.isAnon = isAnonymous
         postModel.poster = firestore.collection("users").document(auth.uid!!)
+
+        // Add the post model to the database
         firestore.collection("posts").add(postModel).addOnSuccessListener {
+            // On a newly created post, get the post reference (for references)
+            newPost ->
             firestore.collection("users").document(auth.uid!!).get().addOnSuccessListener {
+                // Add the newly created post to the created post list of the user
                 user ->
                 val postList = user.get("createdPosts") as ArrayList<DocumentReference>
-                postList.add(it)
+                postList.add(newPost)
                 firestore.collection("users").document(auth.uid!!).update("createdPosts",postList).addOnSuccessListener {
                     finish() // Dismisses the screen
                 }
             }
         }
-
-
     }
 
     private fun grabPostType(): Int {

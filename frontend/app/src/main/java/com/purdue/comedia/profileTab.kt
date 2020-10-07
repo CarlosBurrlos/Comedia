@@ -33,6 +33,7 @@ class profileTab : Fragment() {
     private var sampleVar2: String? = null
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private var savedProfileUrl = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +77,7 @@ class profileTab : Fragment() {
 
     private fun loadProfileFields(snapshot: DocumentSnapshot) {
         val url = (snapshot.get("profileImage") as String?) ?: ""
+        savedProfileUrl = url
         RetrieveImageTask(::setProfileImage).execute(url)
         bioTextProfilePage.text = snapshot.get("biography") as String? ?: ""
     }
@@ -118,6 +120,11 @@ class profileTab : Fragment() {
         // Change Sign In Button Text
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
+
+            if (savedProfileUrl.isEmpty() && bioTextProfilePage.text.toString() == "No bio yet!") {
+                textInputAlert()
+            }
+
         } else if (theLoginBtn != null) {
             theLoginBtn!!.text = "Sign In"
         }
@@ -195,6 +202,8 @@ class profileTab : Fragment() {
             .setMessage("Enter bio and Image URL for profile")
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
+                if (bioText.text.isEmpty()) bioText.setText(bioTextProfilePage.text)
+                if (profileUrl.text.isEmpty()) profileUrl.setText(savedProfileUrl)
                 editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
                 updateProfile()
                 dialog.cancel()
@@ -208,8 +217,9 @@ class profileTab : Fragment() {
     }
 
     // Called once a user edits the profile. New strings are passed to this function.
-    private fun editProfileOntoFirebase(profileImageUrl: String, bioText: String) {
+    private fun editProfileOntoFirebase(profileImageUrl: String = "", bioText: String) {
         if (auth.uid == null) return
+        if (profileImageUrl.isEmpty() && bioText.isEmpty()) return
         val profileModel = PartialProfileModel()
         profileModel.profileImage = profileImageUrl
         profileModel.biography = bioText

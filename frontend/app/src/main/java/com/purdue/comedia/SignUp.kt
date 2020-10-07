@@ -203,7 +203,7 @@ class SignUp : AppCompatActivity() {
 
         val profileModel = ProfileModel()
         profileModel.biography = "No bio yet!"
-        profileModel.profileImage = ""
+        profileModel.profileImage = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
         profileModel.user = user
         firestore.collection("profiles").add(profileModel)
             .addOnSuccessListener {

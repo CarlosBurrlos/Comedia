@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -23,6 +24,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import kotlinx.android.synthetic.main.activity_create_post_page.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -214,12 +216,16 @@ class profileTab : Fragment() {
             .setMessage("Profile is empty. Please Enter bio and Image URL for profile")
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
+                if (!URLUtil.isValidUrl(profileUrl.text.toString())) {
+                    profileUrl.setText(savedProfileUrl)
+                }
                 if (bioText.text.isEmpty()) bioText.setText(bioTextProfilePage.text)
                 if (profileUrl.text.isEmpty()) profileUrl.setText(savedProfileUrl)
                 editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
                 updateProfile()
                 toast("Profile Updated")
                 dialog.cancel()
+
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.webkit.URLUtil
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -55,6 +56,11 @@ class CreatePostPage : AppCompatActivity() {
         }
         if (body.isEmpty()) {
             postBodyField.error = "A body is required"
+            postBodyField.requestFocus()
+            return
+        }
+        if ((postType == "img" || postType == "url") && !URLUtil.isValidUrl(body)) {
+            postBodyField.error = "Please enter a valid URL"
             postBodyField.requestFocus()
             return
         }

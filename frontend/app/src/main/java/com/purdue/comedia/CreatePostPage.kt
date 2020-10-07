@@ -8,13 +8,23 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_create_post_page.*
 
 class CreatePostPage : AppCompatActivity() {
 
+    private lateinit var auth: FirebaseAuth
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post_page)
+
+        auth = FirebaseAuth.getInstance()
 
         supportActionBar?.title = "Post a Joke"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -33,11 +43,27 @@ class CreatePostPage : AppCompatActivity() {
         val genre = postGenreField.text.toString()
         val isAnonymous = postAnonymousSwitch.isActivated
 
-        // Todo: Create post with variables above onto Firebase
+        val numToString = arrayOf("","txt","img","url")
+
+        val postModel = PostModel()
+        postModel.type = numToString[postType]
+        postModel.title = title
+        postModel.content = body
+        postModel.genre = genre
+        postModel.isAnon = isAnonymous
+        postModel.poster = firestore.collection("users").document(auth.uid!!)
+        firestore.collection("posts").add(postModel).addOnSuccessListener {
+            firestore.collection("users").document(auth.uid!!).get().addOnSuccessListener {
+                user ->
+                val postList = user.get("createdPosts") as ArrayList<DocumentReference>
+                postList.add(it)
+                firestore.collection("users").document(auth.uid!!).update("createdPosts",postList).addOnSuccessListener {
+                    finish() // Dismisses the screen
+                }
+            }
+        }
 
 
-
-        finish() // Dismisses the screen
     }
 
     private fun grabPostType(): Int {
@@ -71,5 +97,4 @@ class CreatePostPage : AppCompatActivity() {
     private fun toast(str: String) {
         Toast.makeText(baseContext, str, Toast.LENGTH_LONG).show()
     }
-
 }

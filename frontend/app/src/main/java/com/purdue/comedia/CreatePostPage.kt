@@ -10,12 +10,9 @@ import android.webkit.URLUtil
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_create_post_page.*
-import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class CreatePostPage : AppCompatActivity() {
 
@@ -32,7 +29,7 @@ class CreatePostPage : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         btnSubmitPost.setOnClickListener {
-            createPost(auth.uid)
+            createPost()
         }
 
         radioBtnImage.setOnClickListener { postBodyField.hint = "Enter a joke image URL" }
@@ -41,47 +38,47 @@ class CreatePostPage : AppCompatActivity() {
 
     }
 
-    // Called when user presses the 'Post' button
-    private fun createPost(uid: String?) {
-        val postType = grabPostType() // 1: Text, 2: Image URL, 3: URL
-        val title = postTitleField.text.toString()
-        val body = postBodyField.text.toString()
-        val genre = postGenreField.text.toString()
-        val isAnonymous = postAnonymousSwitch.isActivated
+    public fun createPost() {
+        val newPost = PostModel()
+        newPost.type = grabPostType()
+        newPost.title = postTitleField.text.toString()
+        newPost.content = postBodyField.text.toString()
+        newPost.genre = postGenreField.text.toString()
+        newPost.isAnon = postAnonymousSwitch.isActivated
+        createPost(auth.uid, newPost, firestore)
+    }
 
+
+    // Called when user presses the 'Post' button
+    public fun createPost(uid: String?, new_post: PostModel, firestore: FirebaseFirestore) {
         if (uid == null) {
             postTitleField.error = "You must be logged in"
             postTitleField.requestFocus()
             return
         }
 
-        if (title.isEmpty()) {
+        if (new_post.title.isEmpty()) {
             postTitleField.error = "Please enter a title"
             postTitleField.requestFocus()
             return
         }
-        if (body.isEmpty()) {
+        if (new_post.content.isEmpty()) {
             postBodyField.error = "A body is required"
             postBodyField.requestFocus()
             return
         }
-        if ((postType == "img" || postType == "url") && !URLUtil.isValidUrl(body)) {
+        if (new_post.type.isEmpty()) {
+            return
+        }
+        if ((new_post.type == "img" || new_post.type == "url") && !URLUtil.isValidUrl(new_post.content)) {
             postBodyField.error = "Please enter a valid URL"
             postBodyField.requestFocus()
             return
         }
-
-        // Create post model
-        val postModel = PostModel()
-        postModel.type = postType
-        postModel.title = title
-        postModel.content = body
-        postModel.genre = genre
-        postModel.isAnon = isAnonymous
-        postModel.poster = firestore.collection("users").document(uid!!)
+        new_post.poster = firestore.collection("users").document(uid!!)
 
         // Add the post model to the database
-        firestore.collection("posts").add(postModel).addOnSuccessListener {
+        firestore.collection("posts").add(new_post).addOnSuccessListener {
             // On a newly created post, get the post reference (for references)
             newPost ->
             firestore.collection("users").document(uid).get().addOnSuccessListener {

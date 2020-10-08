@@ -10,10 +10,12 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isVisible
+import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_sign_up.*
 
@@ -60,7 +62,6 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun loginUser() {
-
         var email = ""
 
         if (!Patterns.EMAIL_ADDRESS.matcher(registerUsername.text).matches()) {
@@ -173,19 +174,21 @@ class SignUp : AppCompatActivity() {
                         return@addOnCompleteListener
                     }
 
-                    // Send email verification
-                    auth.currentUser!!.sendEmailVerification()
-                        .addOnCompleteListener { emailTask ->
-                            if (emailTask.isSuccessful) {
-                                createNewFirebaseUser() // Add new user to firebase database
-                                auth.signOut()
-                                signInLoader.isVisible = false
-                                snack("Email Sent. Verify email and login.")
-                                toggleSignInAndSignUp()
-                            } else {
-                                signInLoader.isVisible = false
-                                snack(emailTask.exception?.message.toString())
-                            }
+                    createNewFirebaseUser()
+                        .addOnSuccessListener {
+                            // Send email verification
+                            auth.currentUser!!.sendEmailVerification()
+                                .addOnCompleteListener { emailTask ->
+                                    if (emailTask.isSuccessful) {
+                                        auth.signOut()
+                                        signInLoader.isVisible = false
+                                        snack("Email Sent. Verify email and login.")
+                                        toggleSignInAndSignUp()
+                                    } else {
+                                        signInLoader.isVisible = false
+                                        snack(emailTask.exception?.message.toString())
+                                    }
+                                }
                         }
                 } else {
                     // If sign in fails, display why to the user.
@@ -196,9 +199,7 @@ class SignUp : AppCompatActivity() {
     }
 
     // Called after a new user has registered
-    private fun createNewFirebaseUser() {
-        if (auth.uid == null) return
-
+    private fun createNewFirebaseUser(): Task<DocumentReference> {
         val userModel = UserModel()
         userModel.username = registerUsername.text.toString()
         userModel.email = registerEmail.text.toString()
@@ -208,7 +209,7 @@ class SignUp : AppCompatActivity() {
         profileModel.biography = "No bio yet!"
         profileModel.profileImage = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
         profileModel.user = user
-        firestore.collection("profiles").add(profileModel)
+        return firestore.collection("profiles").add(profileModel)
             .addOnSuccessListener {
                 userModel.profile = it
                 user.set(userModel)

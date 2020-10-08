@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -81,6 +82,10 @@ class profileTab : Fragment() {
     }
 
     private fun loadProfileTabView(snapshot: DocumentSnapshot) {
+        if (snapshot.get("profile") == null) {
+            Log.w("**MISSING", "Missing profile!")
+            return
+        }
         val profile = (snapshot.get("profile")!! as DocumentReference)
         FirestoreUtility.resolveReference(profile, ::loadProfileFields)
         profileUsername.text = snapshot.get("username") as String? ?: "Unknown"

@@ -32,7 +32,7 @@ class CreatePostPage : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         btnSubmitPost.setOnClickListener {
-            createPost()
+            createPost(auth.uid)
         }
 
         radioBtnImage.setOnClickListener { postBodyField.hint = "Enter a joke image URL" }
@@ -42,12 +42,18 @@ class CreatePostPage : AppCompatActivity() {
     }
 
     // Called when user presses the 'Post' button
-    private fun createPost() {
+    private fun createPost(uid: String?) {
         val postType = grabPostType() // 1: Text, 2: Image URL, 3: URL
         val title = postTitleField.text.toString()
         val body = postBodyField.text.toString()
         val genre = postGenreField.text.toString()
         val isAnonymous = postAnonymousSwitch.isActivated
+
+        if (uid == null) {
+            postTitleField.error = "You must be logged in"
+            postTitleField.requestFocus()
+            return
+        }
 
         if (title.isEmpty()) {
             postTitleField.error = "Please enter a title"
@@ -72,18 +78,18 @@ class CreatePostPage : AppCompatActivity() {
         postModel.content = body
         postModel.genre = genre
         postModel.isAnon = isAnonymous
-        postModel.poster = firestore.collection("users").document(auth.uid!!)
+        postModel.poster = firestore.collection("users").document(uid!!)
 
         // Add the post model to the database
         firestore.collection("posts").add(postModel).addOnSuccessListener {
             // On a newly created post, get the post reference (for references)
             newPost ->
-            firestore.collection("users").document(auth.uid!!).get().addOnSuccessListener {
+            firestore.collection("users").document(uid).get().addOnSuccessListener {
                 // Add the newly created post to the created post list of the user
                 user ->
                 val postList = user.get("createdPosts") as ArrayList<DocumentReference>
                 postList.add(newPost)
-                firestore.collection("users").document(auth.uid!!).update("createdPosts",postList).addOnSuccessListener {
+                firestore.collection("users").document(uid).update("createdPosts",postList).addOnSuccessListener {
                     finish() // Dismisses the screen
                 }
             }

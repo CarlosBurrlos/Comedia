@@ -38,6 +38,9 @@ class SignUp : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         signInLoader.isVisible = false
 
+        registerEmail.isClickable = true
+        registerEmail.isFocusable = true
+
         // Button to switch between logging in and signing up
         btnToggleRegister.setOnClickListener {
             toggleSignInAndSignUp()

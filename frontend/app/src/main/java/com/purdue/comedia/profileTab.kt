@@ -70,7 +70,7 @@ class profileTab : Fragment() {
         RetrieveImageTask(::setProfileImage).execute(url)
         val newBio = snapshot.get("biography") as String? ?: ""
         bioTextProfilePage.text = newBio
-        if (url.isEmpty() && newBio == "No bio yet!" && !promptedForProfile) {
+        if (url == "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png" && newBio == "No bio yet!" && !promptedForProfile) {
             textInputAlert()
             promptedForProfile = true
         }

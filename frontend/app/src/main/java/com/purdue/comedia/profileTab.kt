@@ -53,6 +53,28 @@ class profileTab : Fragment() {
         updateProfile()
     }
 
+    // Gets run everytime the screen is presented
+    override fun onResume() {
+        super.onResume()
+
+        // Change Sign In Button Text
+        if (theLoginBtn != null && auth.currentUser != null) {
+            theLoginBtn!!.text = "Sign Out"
+
+        } else if (theLoginBtn != null) {
+            theLoginBtn!!.text = "Sign In"
+        }
+
+        // Reload data from firebase each time profile page loads
+        updateProfile()
+
+    }
+
+    // Called when the profile page loads or when the profile has been edited
+    private fun updateProfile() {
+        loadUserProfile(auth.uid)
+    }
+
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
         FirestoreUtility.queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
@@ -108,23 +130,6 @@ class profileTab : Fragment() {
         drawable.isCircular = true
         profileImage.setImageBitmap(image)
         profileImage.setImageDrawable(drawable)
-    }
-
-    // Gets run everytime the screen is presented
-    override fun onResume() {
-        super.onResume()
-
-        // Change Sign In Button Text
-        if (theLoginBtn != null && auth.currentUser != null) {
-            theLoginBtn!!.text = "Sign Out"
-
-        } else if (theLoginBtn != null) {
-            theLoginBtn!!.text = "Sign In"
-        }
-
-        // Reload data from firebase each time profile page loads
-        updateProfile()
-
     }
 
     override fun onCreateView(
@@ -225,11 +230,6 @@ class profileTab : Fragment() {
         profileModel.profileImage = profileImageUrl
         profileModel.biography = bioText
         FirestoreUtility.updateUserProfile(auth.uid as String, profileModel)
-    }
-
-    // Called when the profile page loads or when the profile has been edited
-    private fun updateProfile() {
-        loadUserProfile(auth.uid)
     }
 
     // Skeleton code to setup class

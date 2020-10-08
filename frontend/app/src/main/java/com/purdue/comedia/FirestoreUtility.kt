@@ -8,7 +8,7 @@ import com.google.firebase.firestore.SetOptions
 
 class FirestoreUtility {
     companion object {
-        private val firestore = FirebaseFirestore.getInstance()
+        var firestore = FirebaseFirestore.getInstance()
 
         private fun reportError(error: java.lang.Exception) {
             println(error.message)

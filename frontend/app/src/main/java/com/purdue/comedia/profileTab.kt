@@ -35,7 +35,6 @@ class profileTab : Fragment() {
     // 3. Declare Parameters here
     private var sampleVar2: String? = null
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var savedProfileUrl = ""
     private var promptedForProfile = false
 

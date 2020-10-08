@@ -1,12 +1,11 @@
 package com.purdue.comedia
 
-import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Test
 
 import org.junit.Assert.*
-import org.junit.Before
+import org.junit.BeforeClass
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -14,9 +13,11 @@ import org.junit.Before
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
-    lateinit var firestore: FirebaseFirestore
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var userModel: UserModel
+    private lateinit var profileModel: ProfileModel
 
-    @Before
+    @BeforeClass
     fun setupEmulators() {
         firestore = FirebaseFirestore.getInstance()
         firestore.useEmulator("localhost", 8080)
@@ -28,12 +29,12 @@ class ExampleUnitTest {
         val user = firestoreInstance.collection("users").document("test")
         val profile = firestoreInstance.collection("profiles").document("test")
 
-        val userModel = UserModel()
+        userModel = UserModel()
         userModel.username = "test"
         userModel.email = "test@test.com"
         userModel.profile = profile
 
-        val profileModel = ProfileModel()
+        profileModel = ProfileModel()
         profileModel.biography = "testing"
         profileModel.profileImage = "test.com/test.jpg"
         profileModel.user = user
@@ -43,7 +44,6 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun test_query_for_user_gives_correct_result_on_success() {
     }
 }

@@ -16,15 +16,12 @@ import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
-import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
-import kotlinx.android.synthetic.main.activity_create_post_page.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -59,26 +56,12 @@ class profileTab : Fragment() {
 
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
-        queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
-    }
-
-    private fun queryForUser(
-        uid: String,
-        successCallback: ((DocumentSnapshot) -> Unit)? = null,
-        failureCallback: ((Exception) -> Unit)? = null
-    ): Task<DocumentSnapshot> {
-        return firestore.collection("users")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { successCallback?.invoke(it) }
-            .addOnFailureListener { failureCallback?.invoke(it) }
+        FirestoreUtility.queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
     }
 
     private fun loadProfileTabView(snapshot: DocumentSnapshot) {
-        (snapshot.get("profile") as DocumentReference?)
-            ?.get()
-            ?.addOnSuccessListener { loadProfileFields(it) }
-            ?.addOnFailureListener { e -> println(e) }
+        val profile = (snapshot.get("profile")!! as DocumentReference)
+        FirestoreUtility.resolveReference(profile, ::loadProfileFields)
         profileUsername.text = snapshot.get("username") as String? ?: "Unknown"
     }
 
@@ -242,15 +225,7 @@ class profileTab : Fragment() {
         val profileModel = PartialProfileModel()
         profileModel.profileImage = profileImageUrl
         profileModel.biography = bioText
-        saveUserProfile(auth.uid as String, profileModel)
-    }
-
-    private fun saveUserProfile(uid: String, profileModel: PartialProfileModel) {
-        queryForUser(uid, {
-            val profileReference = it.get("profile") as DocumentReference?
-            val setOptions = SetOptions.merge()
-            profileReference?.set(profileModel, setOptions)
-        })
+        FirestoreUtility.updateUserProfile(auth.uid as String, profileModel)
     }
 
     // Called when the profile page loads or when the profile has been edited

@@ -43,6 +43,18 @@ class ExampleUnitTest {
         profile.set(profileModel)
     }
 
+    private fun createTestPost(firestoreInstance: FirebaseFirestore) {
+        val uid = "test"
+        val postModel = PostModel()
+        postModel.title = "Test Post"
+        postModel.content = "This is a test post."
+        postModel.genre = "test"
+        postModel.type = "txt"
+        postModel.isAnon = false
+        val cpp = CreatePostPage()
+        cpp.createPost(uid, postModel, firestoreInstance)
+    }
+
     @Test
     fun test_query_for_user_gives_correct_result_on_success() {
     }

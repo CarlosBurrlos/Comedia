@@ -29,16 +29,13 @@ class FirestoreUtility {
         fun updateUserProfile(
             uid: String,
             profileModel: PartialProfileModel
-        ): Task<DocumentSnapshot> {
-            return queryForUser(
-                uid,
-                {
-                    val profileReference = it.get("profile") as DocumentReference?
+        ): Task<Void> {
+            return queryForUser(uid, failureCallback = ::reportError)
+                .continueWithTask {
+                    val profileReference = it.result?.get("profile") as DocumentReference?
                     val setOptions = SetOptions.merge()
-                    profileReference?.set(profileModel, setOptions)
-                },
-                ::reportError
-            )
+                    return@continueWithTask profileReference!!.set(profileModel, setOptions)
+                }
         }
 
         fun resolveReference(

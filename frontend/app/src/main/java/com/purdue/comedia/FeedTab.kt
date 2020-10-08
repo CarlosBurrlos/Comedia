@@ -10,7 +10,7 @@ import android.widget.TextView
 /**
  * A Fragment representing the Feed Tab
  */
-class feedTab : Fragment() {
+class FeedTab : Fragment() {
     // 3. Declare Parameters here
     private var sampleVar1: String? = null
 
@@ -44,7 +44,7 @@ class feedTab : Fragment() {
         // Return a new instance of the feedTab
         @JvmStatic
         fun newInstance(sampleVar1: String) =
-            feedTab().apply {
+            FeedTab().apply {
                 arguments = Bundle().apply {
                     // 2. Put parameters into arguments from step 1
                     putString(ARG_PARAM1, sampleVar1)

@@ -13,7 +13,7 @@ class PagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getItem(position: Int): Fragment {
         return when (position) {
             0 -> {
-                feedTab.newInstance("A Sample Parameter")
+                FeedTab.newInstance("A Sample Parameter")
             }
             else -> {
                 return profileTab.newInstance("Another Sample Parameter")

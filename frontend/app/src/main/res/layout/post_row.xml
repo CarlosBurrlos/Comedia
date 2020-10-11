@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/feedPostTitle"
+        android:layout_width="228dp"
+        android:layout_height="32dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="16dp"
+        android:text="Joke Title"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/feedProfileImage"
+        app:layout_constraintVertical_bias="0.073" />
+
+    <TextView
+        android:id="@+id/feedPostBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="Joke Body"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle" />
+
+    <TextView
+        android:id="@+id/feedPostGenre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Genre"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/feedPostTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.83"
+        app:layout_constraintStart_toEndOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toTopOf="@+id/feedPostTitle" />
+
+    <Button
+        android:id="@+id/feedBtnUpvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Upvote"
+        app:layout_constraintStart_toStartOf="@+id/feedPostBody"
+        app:layout_constraintTop_toBottomOf="@+id/feedPostBody" />
+
+    <Button
+        android:id="@+id/feedBtnDownvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Downvote"
+        app:layout_constraintStart_toEndOf="@+id/feedBtnUpvote"
+        app:layout_constraintTop_toTopOf="@+id/feedBtnUpvote" />
+
+    <Button
+        android:id="@+id/feedBtnComment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Comment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.301"
+        app:layout_constraintStart_toEndOf="@+id/feedBtnDownvote"
+        app:layout_constraintTop_toTopOf="@+id/feedBtnDownvote" />
+
+    <ImageView
+        android:id="@+id/feedProfileImage"
+        android:layout_width="40dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/profile_placeholder" />
+
+    <TextView
+        android:id="@+id/feedProfileAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Author"
+        app:layout_constraintBottom_toBottomOf="@+id/feedProfileImage"
+        app:layout_constraintStart_toEndOf="@+id/feedProfileImage"
+        app:layout_constraintTop_toTopOf="@+id/feedProfileImage" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

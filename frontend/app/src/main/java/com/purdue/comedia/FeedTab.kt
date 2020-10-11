@@ -1,11 +1,14 @@
 package com.purdue.comedia
 
+import MainAdapter
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * A Fragment representing the Feed Tab
@@ -32,6 +35,11 @@ class FeedTab : Fragment() {
         // Setup the elements of the view here
         val textView: TextView = root.findViewById(R.id.fragment_one_text)
         textView.text = "User Feed"
+
+        // Setup Recycler View
+        val recyclerView: RecyclerView = root.findViewById(R.id.recyclerView_feed)
+        recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
+        recyclerView.adapter = MainAdapter() // Setup table logic
 
         return root
     }

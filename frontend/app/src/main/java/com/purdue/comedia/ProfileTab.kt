@@ -24,6 +24,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -147,6 +148,14 @@ class ProfileTab : Fragment() {
 
         /** Setup the elements of the view here **/
 
+        // View saved posts
+        val btnViewSavedPosts: Button = root.findViewById(R.id.btnViewSavedPosts)
+        btnViewSavedPosts.setOnClickListener {
+            val intent = Intent(view!!.context, CustomFeed::class.java)
+            intent.putExtra(MainAdapter.NAV_TITLE, "Saved Posts")
+            startActivity(intent)
+        }
+
         // Login Button Functionality
         val loginBtn: Button = root.findViewById(R.id.btnToLoginPage)
         theLoginBtn = loginBtn
@@ -180,6 +189,7 @@ class ProfileTab : Fragment() {
                         startActivity(Intent(view!!.context, SignUp::class.java))
                     }.show()
             }
+
         }
 
         // Setup Recycler View

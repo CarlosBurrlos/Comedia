@@ -6,22 +6,20 @@ import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-/** To view profile of another user */
-class ProfileView : AppCompatActivity() {
+class CustomFeed : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile_view)
+        setContentView(R.layout.activity_custom_feed)
 
-        supportActionBar?.title = "Profile"
+        supportActionBar?.title = intent.getStringExtra(MainAdapter.NAV_TITLE)
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
         // Setup Recycler View
-        val recyclerView: RecyclerView = findViewById(R.id.userRecyclerView)
+        val recyclerView: RecyclerView = findViewById(R.id.customRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this) // Position to absolute pos.
         recyclerView.adapter = MainAdapter() // Setup table logic
 
     }
-
 
     // Allow back button to work
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

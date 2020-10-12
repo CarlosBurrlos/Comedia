@@ -20,13 +20,27 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
         return CustomViewHolder(cellForRow)
     }
 
+    companion object {
+        val NAV_TITLE = "NAV_TITLE"
+    }
+
     // Setup Row UI Elements
     override fun onBindViewHolder(holder: CustomViewHolder, rowIndex: Int) {
-        holder.view.feedPostTitle.text = "Joke Title. Row: $rowIndex"
+        val view = holder.view
+        val context = holder.view.context
+
+        view.feedPostTitle.text = "Joke Title. Row: $rowIndex"
 
         // Setup Profile Page
-        holder.view.feedProfileImage.setOnClickListener {
-            holder.view.context.startActivity(Intent(holder.view.context, ProfileView::class.java))
+        view.feedProfileImage.setOnClickListener {
+            view.context.startActivity(Intent(context, ProfileView::class.java))
+        }
+
+        // Setup Tapping on Genre
+        view.feedPostGenre.setOnClickListener {
+            val intent = Intent(context, CustomFeed::class.java)
+            intent.putExtra(NAV_TITLE, view.feedPostGenre.text.toString())
+            view.context.startActivity(intent)
         }
 
     }

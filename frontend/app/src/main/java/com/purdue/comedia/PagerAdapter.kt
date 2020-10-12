@@ -16,7 +16,7 @@ class PagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 FeedTab.newInstance("A Sample Parameter")
             }
             else -> {
-                return profileTab.newInstance("Another Sample Parameter")
+                return ProfileTab.newInstance("Another Sample Parameter")
             }
         }
     }

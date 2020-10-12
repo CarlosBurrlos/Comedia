@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".profileTab"
+    tools:context=".ProfileTab"
     android:id="@+id/profileScreen">
 
     <TextView
@@ -58,8 +58,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="307dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="136dp"
+        android:layout_marginEnd="55dp"
         android:text="Login" />
 
     <Button
@@ -71,4 +72,25 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="116dp"
         android:text="Edit Profile" />
+
+    <Button
+        android:id="@+id/btnViewSavedPosts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="168dp"
+        android:text="View Saved" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/myRecyclerView"
+        android:layout_width="376dp"
+        android:layout_height="447dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="235dp"
+        android:layout_marginBottom="49dp" />
 </RelativeLayout>

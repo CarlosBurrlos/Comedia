@@ -17,12 +17,13 @@ import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -31,7 +32,7 @@ import java.net.URL
 /**
  * A Fragment representing the profile Tab
  */
-class profileTab : Fragment() {
+class ProfileTab : Fragment() {
 
     // 3. Declare Parameters here
     private var sampleVar2: String? = null
@@ -181,6 +182,11 @@ class profileTab : Fragment() {
             }
         }
 
+        // Setup Recycler View
+        val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
+        recyclerView.adapter = MainAdapter() // Setup table logic
+
         return root
     }
 
@@ -246,7 +252,7 @@ class profileTab : Fragment() {
         // Return a new instance of the feedTab
         @JvmStatic
         fun newInstance(sampleVar2: String) =
-            profileTab().apply {
+            ProfileTab().apply {
                 arguments = Bundle().apply {
                     // 2. Put parameters into arguments from step 1
                     putString(ARG_PARAM1, sampleVar2)

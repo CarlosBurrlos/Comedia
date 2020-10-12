@@ -1,8 +1,10 @@
+package com.purdue.comedia
+
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.purdue.comedia.R
 import kotlinx.android.synthetic.main.post_row.view.*
 
 // Recycler View Manager
@@ -21,6 +23,12 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
     // Setup Row UI Elements
     override fun onBindViewHolder(holder: CustomViewHolder, rowIndex: Int) {
         holder.view.feedPostTitle.text = "Joke Title. Row: $rowIndex"
+
+        // Setup Profile Page
+        holder.view.feedProfileImage.setOnClickListener {
+            holder.view.context.startActivity(Intent(holder.view.context, ProfileView::class.java))
+        }
+
     }
 
 }

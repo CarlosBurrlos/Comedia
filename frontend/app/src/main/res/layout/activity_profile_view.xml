@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileView">
+
+    <TextView
+        android:id="@+id/userProfileUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="133dp"
+        android:layout_marginTop="19dp"
+        android:text="USERNAME"
+        android:textSize="32sp" />
+
+    <ImageView
+        android:id="@+id/userProfileImage"
+        android:layout_width="95dp"
+        android:layout_height="90dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="18dp"
+        android:background="#80FFFFFF"
+        android:contentDescription="imageDesc"
+        app:srcCompat="@drawable/profile_placeholder"
+        tools:src="@drawable/profile_placeholder"
+        tools:srcCompat="@drawable/profile_placeholder" />
+
+    <TextView
+        android:id="@+id/userProfileBio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="133dp"
+        android:layout_marginTop="64dp"
+        android:text="BIO"
+        android:textSize="16sp" />
+
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="85dp"
+        android:layout_marginTop="190dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioUserPosts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:checked="true"
+            android:text="User Posts" />
+
+        <RadioButton
+            android:id="@+id/radioUserInteraction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="User Interactions" />
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/userbtnFollow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="110dp"
+        android:text="Follow" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/userRecyclerView"
+        android:layout_width="394dp"
+        android:layout_height="417dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="248dp"
+        android:layout_marginBottom="66dp" />
+
+</RelativeLayout>

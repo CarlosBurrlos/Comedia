@@ -41,7 +41,7 @@
         android:orientation="horizontal">
 
         <RadioButton
-            android:id="@+id/radioButton"
+            android:id="@+id/radioUserPosts"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -50,7 +50,7 @@
             android:text="Chronological" />
 
         <RadioButton
-            android:id="@+id/radioButton2"
+            android:id="@+id/radioUserInteraction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -72,7 +72,7 @@
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView_feed"
+        android:id="@+id/feedRecyclerView"
         android:layout_width="372dp"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"

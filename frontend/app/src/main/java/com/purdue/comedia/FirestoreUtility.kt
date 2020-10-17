@@ -17,20 +17,21 @@ class FirestoreUtility {
         fun queryForUser(
             uid: String,
             successCallback: ((DocumentSnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit)? = null
+            failureCallback: ((Exception) -> Unit) = ::reportError
         ): Task<DocumentSnapshot> {
             return firestore.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback(it) }
         }
 
         fun updateUserProfile(
             uid: String,
-            profileModel: PartialProfileModel
+            profileModel: PartialProfileModel,
+            failureCallback: (Exception) -> Unit = ::reportError
         ): Task<Void> {
-            return queryForUser(uid, failureCallback = ::reportError)
+            return queryForUser(uid, failureCallback = failureCallback)
                 .continueWithTask {
                     val profileReference = it.result?.get("profile") as DocumentReference?
                     val setOptions = SetOptions.merge()
@@ -40,11 +41,12 @@ class FirestoreUtility {
 
         fun resolveReference(
             reference: DocumentReference,
-            successCallback: ((DocumentSnapshot) -> Unit)? = null
+            successCallback: ((DocumentSnapshot) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit) = ::reportError
         ): Task<DocumentSnapshot> {
             return reference.get()
                 .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { reportError(it) }
+                .addOnFailureListener { failureCallback(it) }
         }
     }
 }

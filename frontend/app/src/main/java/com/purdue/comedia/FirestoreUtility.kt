@@ -66,7 +66,7 @@ class FirestoreUtility {
             failureCallback: ((Exception) -> Unit)? = null
         ): Task<DocumentSnapshot> {
             return queryForUser(uid, {
-                user->
+                    user->
                 firestore.collection("posts")
                     .whereEqualTo("poster",user)
                     .orderBy("created")
@@ -75,6 +75,42 @@ class FirestoreUtility {
                     .addOnSuccessListener { successCallback?.invoke(it) }
                     .addOnFailureListener { failureCallback?.invoke(it) }
             })
+        }
+
+        // Queries posts posted by a given set of users (up to 10)
+        fun queryMultiUserFeed(
+            users: List<DocumentReference>,
+            successCallback: ((QuerySnapshot) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit)? = null
+        ) {
+            if (users.size > 10) {
+                return
+            }
+            firestore.collection("posts")
+                .whereIn("poster",users)
+                .orderBy("created")
+                .limit(feedLimit.toLong())
+                .get()
+                .addOnSuccessListener { successCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback?.invoke(it) }
+        }
+
+        // Queries posts posted with a given set of genres (up to 10)
+        fun queryMultiGenreFeed(
+            genres: List<String>,
+            successCallback: ((QuerySnapshot) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit)? = null
+        ) {
+            if (genres.size > 10) {
+                return
+            }
+            firestore.collection("posts")
+                .whereIn("genre",genres)
+                .orderBy("created")
+                .limit(feedLimit.toLong())
+                .get()
+                .addOnSuccessListener { successCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback?.invoke(it) }
         }
 
         fun resolveReference(

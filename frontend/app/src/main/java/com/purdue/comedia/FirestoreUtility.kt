@@ -9,6 +9,7 @@ import com.google.firebase.firestore.SetOptions
 class FirestoreUtility {
     companion object {
         var firestore = FirebaseFirestore.getInstance()
+        const val feedLimit = 10
 
         private fun reportError(error: java.lang.Exception) {
             println(error.message)
@@ -37,6 +38,14 @@ class FirestoreUtility {
                     return@continueWithTask profileReference!!.set(profileModel, setOptions)
                 }
         }
+
+//        fun queryProfileFeed(
+//            uid: String,
+//            successCallback: ((DocumentSnapshot) -> Unit)? = null,
+//            failureCallback: ((Exception) -> Unit)? = null
+//        ): Task<DocumentSnapshot> {
+//            return queryForUser(uid, )
+//        }
 
         fun resolveReference(
             reference: DocumentReference,

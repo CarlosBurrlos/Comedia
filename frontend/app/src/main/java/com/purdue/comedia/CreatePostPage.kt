@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.purdue.comedia.FirestoreUtility.Companion.firestore
 import kotlinx.android.synthetic.main.activity_create_post_page.*
 
 class CreatePostPage : AppCompatActivity() {
@@ -81,6 +82,9 @@ class CreatePostPage : AppCompatActivity() {
         firestore.collection("posts").add(new_post).addOnSuccessListener {
             // On a newly created post, get the post reference (for references)
             newPost ->
+            val timestamp = com.google.firebase.firestore.FieldValue.serverTimestamp()
+            // Callback not needed
+            newPost.update("created",timestamp);
             firestore.collection("users").document(uid).get().addOnSuccessListener {
                 // Add the newly created post to the created post list of the user
                 user ->

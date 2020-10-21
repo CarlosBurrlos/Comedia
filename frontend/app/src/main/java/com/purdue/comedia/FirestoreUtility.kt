@@ -1,15 +1,12 @@
 package com.purdue.comedia
 
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.*
 
 class FirestoreUtility {
     companion object {
         var firestore = FirebaseFirestore.getInstance()
-        const val feedLimit = 10
+        const val feedLimit = 100
 
         private fun reportError(error: java.lang.Exception) {
             println(error.message)
@@ -39,13 +36,23 @@ class FirestoreUtility {
                 }
         }
 
-//        fun queryProfileFeed(
-//            uid: String,
-//            successCallback: ((DocumentSnapshot) -> Unit)? = null,
-//            failureCallback: ((Exception) -> Unit)? = null
-//        ): Task<DocumentSnapshot> {
-//            return queryForUser(uid, )
-//        }
+        // Queries a group of posts posted by the given user id (sorted by time)
+        fun queryProfileFeed(
+            uid: String,
+            successCallback: ((QuerySnapshot) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit)? = null
+        ): Task<DocumentSnapshot> {
+            return queryForUser(uid, {
+                user->
+                firestore.collection("posts")
+                    .whereEqualTo("poster",user)
+                    .orderBy("created")
+                    .limit(feedLimit.toLong())
+                    .get()
+                    .addOnSuccessListener { successCallback?.invoke(it) }
+                    .addOnFailureListener { failureCallback?.invoke(it) }
+            })
+        }
 
         fun resolveReference(
             reference: DocumentReference,

@@ -10,9 +10,7 @@ import android.webkit.URLUtil
 import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.purdue.comedia.FirestoreUtility.Companion.firestore
 import kotlinx.android.synthetic.main.activity_create_post_page.*
 
 class CreatePostPage : AppCompatActivity() {
@@ -40,19 +38,14 @@ class CreatePostPage : AppCompatActivity() {
     }
 
     public fun createPost() {
-        val newPost = PostModel()
-        newPost.type = grabPostType()
-        newPost.title = postTitleField.text.toString()
-        newPost.content = postBodyField.text.toString()
-        newPost.genre = postGenreField.text.toString()
-        newPost.isAnon = postAnonymousSwitch.isActivated
-        createPost(auth.uid, newPost, firestore)
-    }
+        val new_post = PostModel()
+        new_post.type = grabPostType()
+        new_post.title = postTitleField.text.toString()
+        new_post.content = postBodyField.text.toString()
+        new_post.genre = postGenreField.text.toString()
+        new_post.isAnon = postAnonymousSwitch.isActivated
 
-
-    // Called when user presses the 'Post' button
-    public fun createPost(uid: String?, new_post: PostModel, firestore: FirebaseFirestore) {
-        if (uid == null) {
+        if (auth.uid == null) {
             postTitleField.error = "You must be logged in"
             postTitleField.requestFocus()
             return
@@ -76,25 +69,9 @@ class CreatePostPage : AppCompatActivity() {
             postBodyField.requestFocus()
             return
         }
-        new_post.poster = firestore.collection("users").document(uid!!)
 
-        // Add the post model to the database
-        firestore.collection("posts").add(new_post).addOnSuccessListener {
-            // On a newly created post, get the post reference (for references)
-            newPost ->
-            val timestamp = com.google.firebase.firestore.FieldValue.serverTimestamp()
-            // Callback not needed
-            newPost.update("created",timestamp);
-            firestore.collection("users").document(uid).get().addOnSuccessListener {
-                // Add the newly created post to the created post list of the user
-                user ->
-                val postList = user.get("createdPosts") as ArrayList<DocumentReference>
-                postList.add(newPost)
-                firestore.collection("users").document(uid).update("createdPosts",postList).addOnSuccessListener {
-                    finish() // Dismisses the screen
-                }
-            }
-        }
+        FirestoreUtility.createPost(auth.uid, new_post)
+        finish()
     }
 
     private fun grabPostType(): String {

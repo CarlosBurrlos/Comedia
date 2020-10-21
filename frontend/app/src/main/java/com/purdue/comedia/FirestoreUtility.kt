@@ -50,14 +50,19 @@ class FirestoreUtility {
                     newPost ->
                 val timestamp = com.google.firebase.firestore.FieldValue.serverTimestamp()
                 // Callback not needed
-                newPost.update("created",timestamp);
+                newPost.update("created", timestamp);
 
                 // Update the user object's createdPosts
                 firestore.collection("users")
                     .document(uid)
-                    .update("createdPosts",com.google.firebase.firestore.FieldValue.arrayUnion(newPost))
+                    .update(
+                        "createdPosts",
+                        com.google.firebase.firestore.FieldValue.arrayUnion(newPost)
+                    )
             }
         }
+
+        
 
         // Queries a group of posts posted by the given user id (sorted by time)
         fun queryProfileFeed(

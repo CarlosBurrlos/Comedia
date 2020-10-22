@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,9 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
-import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -80,7 +77,7 @@ class ProfileTab : Fragment() {
 
     private fun loadUserProfile(uid: String?) {
         if (uid == null) return
-        FirestoreUtility.queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
+        FirestoreUtility.queryForUserByUID(uid, ::loadProfileTabView) { e -> println(e) }
     }
 
     private fun loadProfileTabView(user: UserModel) {

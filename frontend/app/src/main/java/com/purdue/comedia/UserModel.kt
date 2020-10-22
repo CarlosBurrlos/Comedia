@@ -6,10 +6,12 @@ class UserModel {
     lateinit var username: String
     lateinit var email: String
     var comments = ArrayList<DocumentReference>()
-    var createdPosts = ArrayList<DocumentReference>()
     var followers = ArrayList<DocumentReference>()
-    val genresFollowing = ArrayList<String>()
-    val savedPosts = ArrayList<DocumentReference>()
-    val usersFollowing = ArrayList<DocumentReference>()
+    var usersFollowing = ArrayList<DocumentReference>()
+    var genresFollowing = ArrayList<String>()
+    var createdPosts = ArrayList<DocumentReference>()
+    var savedPosts = ArrayList<DocumentReference>()
+    var upvotedPosts = ArrayList<DocumentReference>()
+    var downvotedPosts = ArrayList<DocumentReference>()
     var profile: DocumentReference? = null
 }

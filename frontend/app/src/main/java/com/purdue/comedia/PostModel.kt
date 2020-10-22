@@ -12,4 +12,6 @@ class PostModel {
     var downvoteCount: Number = 0
     var poster: DocumentReference? = null
     var comments = ArrayList<DocumentReference>()
+    var upvoteList = ArrayList<DocumentReference>()
+    var downvoteList = ArrayList<DocumentReference>()
 }

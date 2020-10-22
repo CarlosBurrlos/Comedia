@@ -83,14 +83,10 @@ class ProfileTab : Fragment() {
         FirestoreUtility.queryForUser(uid, ::loadProfileTabView) { e -> println(e) }
     }
 
-    private fun loadProfileTabView(snapshot: DocumentSnapshot) {
-        if (snapshot.get("profile") == null) {
-            Log.w("**MISSING", "Missing profile!")
-            return
-        }
-        val profile = (snapshot.get("profile")!! as DocumentReference)
+    private fun loadProfileTabView(user: UserModel) {
+        val profile = user.profile!!
         FirestoreUtility.resolveReference(profile, ::loadProfileFields)
-        profileUsername.text = snapshot.get("username") as String? ?: "Unknown"
+        profileUsername.text = user.username
     }
 
     private fun loadProfileFields(snapshot: DocumentSnapshot) {

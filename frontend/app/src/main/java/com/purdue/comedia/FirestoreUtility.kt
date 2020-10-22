@@ -1,42 +1,73 @@
 package com.purdue.comedia
 
-import android.webkit.URLUtil
+import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
-import kotlinx.android.synthetic.main.activity_create_post_page.*
 
 class FirestoreUtility {
     companion object {
         var firestore = FirebaseFirestore.getInstance()
-        const val feedLimit = 100
+        private const val feedLimit = 100
+
+        fun queryForUser(
+            uid: String,
+            successCallback: ((UserModel) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit) = ::reportError
+        ): Task<UserModel> {
+            return firestore.collection("users")
+                .document(uid)
+                .get()
+                .continueWith(convertToModel(::convertToUser))
+                .addOnSuccessListener { successCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback(it) }
+        }
+
+        private fun <TContinuationResult> convertToModel(
+            conversionFunction: (DocumentSnapshot) -> TContinuationResult
+        ): Continuation<DocumentSnapshot, TContinuationResult> {
+            return Continuation {
+                if (it.exception != null) throw it.exception!!
+                return@Continuation conversionFunction(it.result!!)
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        private fun convertToUser(it: DocumentSnapshot): UserModel {
+            val model = UserModel()
+            println("BUILDING USER")
+            model.username = it.get("username")!! as String
+            model.email = it.get("email")!! as String
+            model.comments = it.get("comments")!! as ArrayList<DocumentReference>
+            model.followers = it.get("followers")!! as ArrayList<DocumentReference>
+            model.usersFollowing = it.get("usersFollowing")!! as ArrayList<DocumentReference>
+            model.genresFollowing = it.get("genresFollowing")!! as ArrayList<String>
+            model.createdPosts = it.get("createdPosts")!! as ArrayList<DocumentReference>
+            model.savedPosts = it.get("savedPosts")!! as ArrayList<DocumentReference>
+            model.upvotedPosts = it.get("upvotedPosts")!! as ArrayList<DocumentReference>
+            model.downvotedPosts = it.get("downvotedPosts")!! as ArrayList<DocumentReference>
+            model.profile = it.get("profile")!! as DocumentReference
+            println("USER BUILT")
+            return model
+        }
 
         private fun reportError(error: java.lang.Exception) {
             println(error.message)
         }
 
-        fun queryForUser(
-            uid: String,
-            successCallback: ((DocumentSnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit) = ::reportError
-        ): Task<DocumentSnapshot> {
-            return firestore.collection("users")
-                .document(uid)
-                .get()
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback(it) }
-        }
-
         fun updateUserProfile(
             uid: String,
             profileModel: PartialProfileModel,
+            successCallback: (() -> Unit)? = null,
             failureCallback: (Exception) -> Unit = ::reportError
         ): Task<Void> {
-            return queryForUser(uid, failureCallback = failureCallback)
+            return queryForUser(uid)
                 .continueWithTask {
-                    val profileReference = it.result?.get("profile") as DocumentReference?
+                    val profileReference = it.result!!.profile!!
                     val setOptions = SetOptions.merge()
-                    return@continueWithTask profileReference!!.set(profileModel, setOptions)
+                    return@continueWithTask profileReference.set(profileModel, setOptions)
                 }
+                .addOnSuccessListener { successCallback?.invoke() }
+                .addOnFailureListener(failureCallback)
         }
 
         fun createPost(
@@ -63,24 +94,22 @@ class FirestoreUtility {
             }
         }
 
-        
 
         // Queries a group of posts posted by the given user id (sorted by time)
         fun queryProfileFeed(
             uid: String,
             successCallback: ((QuerySnapshot) -> Unit)? = null,
             failureCallback: ((Exception) -> Unit)? = null
-        ): Task<DocumentSnapshot> {
-            return queryForUser(uid, {
-                    user->
-                firestore.collection("posts")
-                    .whereEqualTo("poster",user)
-                    .orderBy("created")
-                    .limit(feedLimit.toLong())
-                    .get()
-                    .addOnSuccessListener { successCallback?.invoke(it) }
-                    .addOnFailureListener { failureCallback?.invoke(it) }
-            })
+        ): Task<QuerySnapshot> {
+            return firestore.collection("posts")
+                .whereEqualTo(
+                    "poster", firestore.collection("users").document(uid)
+                )
+                .orderBy("created")
+                .limit(feedLimit.toLong())
+                .get()
+                .addOnSuccessListener { successCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback?.invoke(it) }
         }
 
         // Queries posts posted by a given set of users (up to 10)
@@ -93,7 +122,7 @@ class FirestoreUtility {
                 return
             }
             firestore.collection("posts")
-                .whereIn("poster",users)
+                .whereIn("poster", users)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()
@@ -111,7 +140,7 @@ class FirestoreUtility {
                 return
             }
             firestore.collection("posts")
-                .whereIn("genre",genres)
+                .whereIn("genre", genres)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()

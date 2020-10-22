@@ -22,6 +22,7 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
 
     companion object {
         val NAV_TITLE = "NAV_TITLE"
+        val IS_GENRE = "IS_GENRE"
     }
 
     // Setup Row UI Elements

@@ -188,6 +188,22 @@ class ProfileTab : Fragment() {
 
         }
 
+        // Genre Button functionality
+        val btnViewSavedGenres: Button = root.findViewById(R.id.btnViewSavedGenres)
+        btnViewSavedGenres.setOnClickListener {
+            val intent = Intent(view!!.context, GenresAndUserList::class.java)
+            intent.putExtra(MainAdapter.IS_GENRE, true)
+            startActivity(intent)
+        }
+
+        // Following Button functionality
+        val btnViewFollowing: Button = root.findViewById(R.id.btnViewFollowing)
+        btnViewFollowing.setOnClickListener {
+            val intent = Intent(view!!.context, GenresAndUserList::class.java)
+            intent.putExtra(MainAdapter.IS_GENRE, false)
+            startActivity(intent)
+        }
+
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position

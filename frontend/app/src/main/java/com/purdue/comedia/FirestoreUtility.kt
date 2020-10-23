@@ -12,39 +12,12 @@ class FirestoreUtility {
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
 
-        fun userRefByUID(uid: String): DocumentReference {
-            return firestore.collection("users")
-                .document(uid)
-        }
-
-        fun queryForUserByUID(
-            uid: String,
-            successCallback: ((UserModel) -> Unit)? = null,
+        fun resolveReference(
+            reference: DocumentReference,
+            successCallback: ((DocumentSnapshot) -> Unit)? = null,
             failureCallback: ((Exception) -> Unit) = ::reportError
-        ): Task<UserModel> {
-            return userRefByUID(uid)
-                .get()
-                .continueWith(convertResult(::convertDocumentSnapshotToUser))
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback(it) }
-        }
-
-        fun queryForUserRefByName(username: String): Task<DocumentReference> {
-            return firestore.collection("users")
-                .whereEqualTo("username", username)
-                .get()
-                .continueWith(convertResult(::convertQuerySnapshotToUserRef))
-        }
-
-        fun queryForUserByName(
-            username: String,
-            successCallback: ((UserModel) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit) = ::reportError
-        ): Task<UserModel> {
-            return firestore.collection("users")
-                .whereEqualTo("username", username)
-                .get()
-                .continueWith(convertResult(::convertQuerySnapshotToUser))
+        ): Task<DocumentSnapshot> {
+            return reference.get()
                 .addOnSuccessListener { successCallback?.invoke(it) }
                 .addOnFailureListener { failureCallback(it) }
         }
@@ -58,8 +31,19 @@ class FirestoreUtility {
             }
         }
 
+        private fun reportError(error: java.lang.Exception) {
+            println(error.message)
+        }
+
+        private fun convertToUserLookup(snapshot: DocumentSnapshot): UserLookupModel {
+            val model = UserLookupModel()
+            model.email = snapshot.get("email")!! as String
+            model.uid = snapshot.get("username")!! as String
+            return model
+        }
+
         @Suppress("UNCHECKED_CAST")
-        private fun convertDocumentSnapshotToUser(snapshot: DocumentSnapshot): UserModel {
+        private fun convertToUser(snapshot: DocumentSnapshot): UserModel {
             val model = UserModel()
             model.username = snapshot.get("username")!! as String
             model.email = snapshot.get("email")!! as String
@@ -72,29 +56,97 @@ class FirestoreUtility {
             model.upvotedPosts = snapshot.get("upvotedPosts")!! as ArrayList<DocumentReference>
             model.downvotedPosts = snapshot.get("downvotedPosts")!! as ArrayList<DocumentReference>
             model.profile = snapshot.get("profile")!! as DocumentReference
-            println("USER BUILT")
             return model
         }
 
-        private fun convertQuerySnapshotToUsers(snapshot: QuerySnapshot): List<UserModel> {
-            val users = ArrayList<UserModel>()
-            for (document in snapshot.documents) {
-                val model = convertDocumentSnapshotToUser(document)
-                users.add(model)
-            }
-            return users
+        private fun convertToProfile(snapshot: DocumentSnapshot): ProfileModel {
+            val model = ProfileModel()
+            model.user = snapshot.get("user")!! as DocumentReference
+            model.profileImage = snapshot.get("profileImage")!! as String
+            model.biography = snapshot.get("biography")!! as String
+            return model
         }
 
-        private fun convertQuerySnapshotToUser(snapshot: QuerySnapshot): UserModel {
-            return convertDocumentSnapshotToUser(snapshot.documents[0])
+        @Suppress("UNCHECKED_CAST")
+        private fun convertToPost(snapshot: DocumentSnapshot): PostModel {
+            val model = PostModel()
+            model.comments = snapshot.get("comments")!! as ArrayList<DocumentReference>
+            model.content = snapshot.get("content")!! as String
+            model.downvoteCount = snapshot.get("downvoteCount")!! as Int
+            model.downvoteList = snapshot.get("downvoteList")!! as ArrayList<DocumentReference>
+            model.upvoteCount = snapshot.get("upvoteCount")!! as Int
+            model.upvoteList = snapshot.get("upvoteList")!! as ArrayList<DocumentReference>
+            model.isAnon = snapshot.get("isAnon")!! as Boolean
+            model.poster = snapshot.get("poster")!! as DocumentReference
+            model.title = snapshot.get("title")!! as String
+            model.type = snapshot.get("type")!! as String
+            model.genre = snapshot.get("genre")!! as String
+            return model
         }
 
-        private fun convertQuerySnapshotToUserRef(snapshot: QuerySnapshot): DocumentReference {
-            return snapshot.documents[0].reference
+        private fun convertToComment(snapshot: DocumentSnapshot): CommentModel {
+            val model = CommentModel()
+            model.content = snapshot.get("content")!! as String
+            model.parent = snapshot.get("parent")!! as DocumentReference
+            model.poster = snapshot.get("poster")!! as DocumentReference
+            return model
         }
 
-        private fun reportError(error: java.lang.Exception) {
-            println(error.message)
+        fun resolveUserReference(reference: DocumentReference): Task<UserModel> {
+            return reference.get().continueWith(convertResult(::convertToUser))
+        }
+
+        fun resolveProfileReference(reference: DocumentReference): Task<ProfileModel> {
+            return reference.get().continueWith(convertResult(::convertToProfile))
+        }
+
+        fun resolvePostReference(reference: DocumentReference): Task<PostModel> {
+            return reference.get().continueWith(convertResult(::convertToPost))
+        }
+
+        fun resolveCommentReference(reference: DocumentReference): Task<CommentModel> {
+            return reference.get().continueWith(convertResult(::convertToComment))
+        }
+
+        fun userRefByUID(uid: String): DocumentReference {
+            return firestore.collection("users")
+                .document(uid)
+        }
+
+        fun queryForUserByUID(
+            uid: String,
+            successCallback: ((UserModel) -> Unit)? = null,
+            failureCallback: ((Exception) -> Unit) = ::reportError
+        ): Task<UserModel> {
+            return userRefByUID(uid)
+                .get()
+                .continueWith(convertResult(::convertToUser))
+                .addOnSuccessListener { successCallback?.invoke(it) }
+                .addOnFailureListener { failureCallback(it) }
+        }
+
+        fun queryForUserRefByName(username: String): Task<DocumentReference> {
+            return queryForUserLookup(username)
+                .continueWith {
+                    userRefByUID(it.result!!.uid)
+                }
+        }
+
+        fun queryForUserLookup(username: String): Task<UserLookupModel> {
+            return firestore.collection("userLookup")
+                .document(username)
+                .get()
+                .continueWith(convertResult(::convertToUserLookup))
+                .addOnFailureListener(::reportError)
+        }
+
+        fun queryForUserByName(
+            username: String
+        ): Task<UserModel> {
+            return queryForUserLookup(username)
+                .continueWithTask {
+                    queryForUserByUID(it.result!!.uid)
+                }
         }
 
         fun updateUserProfile(
@@ -189,16 +241,6 @@ class FirestoreUtility {
                 .get()
                 .addOnSuccessListener { successCallback?.invoke(it) }
                 .addOnFailureListener { failureCallback?.invoke(it) }
-        }
-
-        fun resolveReference(
-            reference: DocumentReference,
-            successCallback: ((DocumentSnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit) = ::reportError
-        ): Task<DocumentSnapshot> {
-            return reference.get()
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback(it) }
         }
 
         fun followUser(

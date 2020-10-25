@@ -38,7 +38,7 @@ class FirestoreUtility {
         private fun convertToUserLookup(snapshot: DocumentSnapshot): UserLookupModel {
             val model = UserLookupModel()
             model.email = snapshot.get("email")!! as String
-            model.uid = snapshot.get("username")!! as String
+            model.uid = snapshot.get("uid")!! as String
             return model
         }
 

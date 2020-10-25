@@ -125,5 +125,38 @@ class AuthUtility {
                 .delete()
             return Tasks.whenAll(deleteUser, deleteUserLookup)
         }
+
+        fun addNewUser(uid: String, username: String, email: String): Task<Void> {
+            return Tasks.whenAll(
+                createNewUserLookup(uid, username, email),
+                createNewUser(username, email)
+            )
+        }
+
+        private fun createNewUserLookup(uid: String, username: String, email: String): Task<Void> {
+            val model = UserLookupModel()
+            model.email = email
+            model.uid = uid
+            return firestore.collection("userLookup").document(username).set(model)
+        }
+
+        // Called after a new user has registered
+        private fun createNewUser(username: String, email: String): Task<Void> {
+            val userModel = UserModel()
+            userModel.username = username
+            userModel.email = email
+            val user = firestore.collection("users").document(auth.uid!!)
+
+            val profileModel = ProfileModel()
+            profileModel.biography = "No bio yet!"
+            profileModel.profileImage = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
+            profileModel.user = user
+
+            return firestore.collection("profiles").add(profileModel)
+                .continueWithTask {
+                    userModel.profile = it.result!!
+                    return@continueWithTask user.set(userModel)
+                }
+        }
     }
 }

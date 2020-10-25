@@ -135,4 +135,14 @@
         android:layout_marginTop="227dp"
         android:layout_marginEnd="71dp"
         android:text="Find User" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="9dp"
+        android:text="Delete?" />
 </RelativeLayout>

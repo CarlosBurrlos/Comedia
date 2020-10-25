@@ -20,16 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class SignUp : AppCompatActivity() {
-
     private lateinit var auth: FirebaseAuth
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private var signingUp = true
-    private val ref = FirebaseDatabase.getInstance().getReference("username")
-
-    // Required for interacting with realtime database
-    class LoginUser(val id: String, val username: String, val email: String) {
-        constructor() : this("", "", "") {}
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,36 +54,15 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun loginUser() {
-        var email = ""
+        val email: String
 
         if (!Patterns.EMAIL_ADDRESS.matcher(registerUsername.text).matches()) {
-            // Get username's corresponding email from firebase database
-            ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()) {
-                        for (aUser in p0.children) {
-                            val userObject = aUser.getValue(LoginUser::class.java)
-                            if (userObject!!.username == registerUsername.text.toString()
-                                    .toLowerCase()
-                            ) {
-                                email = userObject.email
-                                break
-                            }
-                        }
-                    }
-                    if (email.isEmpty()) {
-                        signInLoader.isVisible = false
-                        snack("Username does not exist. Please sign up for an account.")
-                        return
-                    }
-                    performFirebaseLogin(email) // Sign In
-                }
-
-                override fun onCancelled(p0: DatabaseError) {
+            FirestoreUtility.queryForEmailByName(registerUsername.text.toString())
+                .addOnSuccessListener { performFirebaseLogin(it) }
+                .addOnFailureListener {
                     signInLoader.isVisible = false
-                    snack("Unable to create account. Err Code: *READ_ERR")
+                    snack("Username does not exist. Please sign up for an account.")
                 }
-            })
 
         } else {
             // Else was email entered
@@ -103,55 +74,35 @@ class SignUp : AppCompatActivity() {
 
     private fun performFirebaseLogin(email: String) {
         auth.signInWithEmailAndPassword(email, registerPassword.text.toString())
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                    val user = auth.currentUser
-                    signInLoader.isVisible = false
-                    if (user!!.isEmailVerified) {
-                        updateUI(true, user)
-                    } else {
-                        auth.signOut()
-                        snack("Please verify your email address")
-                    }
+            .addOnSuccessListener {
+                // Sign in success, update UI with the signed-in user's information
+                val user = auth.currentUser
+                signInLoader.isVisible = false
+                if (user!!.isEmailVerified) {
+                    updateUI(true, user)
                 } else {
-                    // If sign in fails, display why to the user.
-                    Log.w("*Fail", "createUserWithEmail:failure", task.exception)
-                    signInLoader.isVisible = false
-                    snack(task.exception?.message.toString())
+                    auth.signOut()
+                    snack("Please verify your email address")
                 }
+            }
+            .addOnFailureListener {
+                // If sign in fails, display why to the user.
+                Log.w("*Fail", "createUserWithEmail:failure", it)
+                signInLoader.isVisible = false
+                snack(it.message.toString())
             }
     }
 
     private fun signUpUser() {
-        // Check for unique username
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(p0: DataSnapshot) {
-                var isUnique = true
-                if (p0.exists()) {
-                    for (aUser in p0.children) {
-                        val userObject = aUser.getValue(LoginUser::class.java)
-                        if (userObject!!.username == registerUsername.text.toString()) {
-                            isUnique = false
-                            break
-                        }
-                    }
-                }
-
-                if (isUnique) {
-                    createFirebaseUserAccount() // Username is unique. Continue with account creation.
-                } else {
-                    signInLoader.isVisible = false
-                    snack("Username already exists. Please select a new username.")
-                }
-
-            }
-
-            override fun onCancelled(p0: DatabaseError) {
+        val username = registerUsername.text.toString()
+        FirestoreUtility.queryForUserByName(username)
+            .addOnSuccessListener {
                 signInLoader.isVisible = false
-                snack("Unable to create account. Err Code: *READ_ERR")
+                snack("Username already exists. Please select a new username.")
             }
-        })
+            .addOnFailureListener {
+                createFirebaseUserAccount()
+            }
     }
 
     private fun createFirebaseUserAccount() {
@@ -160,60 +111,31 @@ class SignUp : AppCompatActivity() {
             registerEmail.text.toString(),
             registerPassword.text.toString()
         )
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Save username and email pair to Firebase database
-                    val userID = ref.push().key // Creates key inside username
-                    val theUsername = registerUsername.text.toString()
-                    val theEmail = registerEmail.text.toString()
-                    if (userID != null) {
-                        ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
-                    } else {
-                        signInLoader.isVisible = false
-                        snack("Unable to create account. Err Code: *WRITE_ERR")
-                        return@addOnCompleteListener
+            .addOnSuccessListener {
+                val userID = auth.uid!!
+                val username = registerUsername.text.toString()
+                val email = registerEmail.text.toString()
+
+                AuthUtility.addNewUser(userID, username, email)
+                    .continueWithTask {
+                        auth.currentUser!!.sendEmailVerification()
                     }
-
-                    createNewFirebaseUser()
-                        .addOnSuccessListener {
-                            // Send email verification
-                            auth.currentUser!!.sendEmailVerification()
-                                .addOnSuccessListener {
-                                    auth.signOut()
-                                    signInLoader.isVisible = false
-                                    snack("Email Sent. Verify email and login.")
-                                    toggleSignInAndSignUp()
-                                }
-                                .addOnFailureListener {
-                                    signInLoader.isVisible = false
-                                    snack(it.message.toString())
-                                }
-                        }
-                } else {
-                    // If sign in fails, display why to the user.
-                    signInLoader.isVisible = false
-                    snack(task.exception?.message.toString())
-                }
+                    .addOnSuccessListener {
+                        auth.signOut()
+                        signInLoader.isVisible = false
+                        snack("Email Sent. Verify email and login.")
+                        toggleSignInAndSignUp()
+                    }
+                    .addOnFailureListener {
+                        signInLoader.isVisible = false
+                        snack("Unable to create account. Err: $it")
+                    }
             }
-    }
-
-    // Called after a new user has registered
-    private fun createNewFirebaseUser(): Task<Void> {
-        val userModel = UserModel()
-        userModel.username = registerUsername.text.toString()
-        userModel.email = registerEmail.text.toString()
-        val user = firestore.collection("users").document(auth.uid!!)
-
-        val profileModel = ProfileModel()
-        profileModel.biography = "No bio yet!"
-        profileModel.profileImage = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
-        profileModel.user = user
-
-        return firestore.collection("profiles").add(profileModel)
-            .continueWithTask(Continuation {
-                userModel.profile = it.result
-                return@Continuation user.set(userModel)
-            })
+            .addOnFailureListener {
+                // If sign in fails, display why to the user.
+                signInLoader.isVisible = false
+                snack(it.message.toString())
+            }
     }
 
     private fun checkInputFields(signingUp: Boolean): Boolean {

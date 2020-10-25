@@ -85,13 +85,13 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/myRecyclerView"
-        android:layout_width="376dp"
-        android:layout_height="447dp"
+        android:layout_width="377dp"
+        android:layout_height="390dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="235dp"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="292dp"
         android:layout_marginBottom="49dp" />
 
     <Button
@@ -113,4 +113,26 @@
         android:layout_marginStart="136dp"
         android:layout_marginTop="169dp"
         android:text="Following" />
+
+    <Button
+        android:id="@+id/btnBrowseGenre"
+        android:layout_width="148dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="227dp"
+        android:layout_marginEnd="247dp"
+        android:text="Browse Genre" />
+
+    <Button
+        android:id="@+id/btnBrowseUser"
+        android:layout_width="143dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="227dp"
+        android:layout_marginEnd="71dp"
+        android:text="Find User" />
 </RelativeLayout>

@@ -70,68 +70,6 @@ class ProfileTab : Fragment() {
 
     }
 
-    // Called when the profile page loads or when the profile has been edited
-    private fun updateProfile() {
-        loadUserProfile(auth.uid)
-    }
-
-    private fun loadUserProfile(uid: String?) {
-        if (uid == null) return
-        FirestoreUtility.queryForUserByUID(uid, ::loadProfileTabView) { e -> println(e) }
-    }
-
-    private fun loadProfileTabView(user: UserModel) {
-        val profile = user.profile!!
-        FirestoreUtility.resolveReference(profile, ::loadProfileFields)
-        profileUsername.text = user.username
-    }
-
-    private fun loadProfileFields(snapshot: DocumentSnapshot) {
-        val url = (snapshot.get("profileImage") as String?) ?: ""
-        savedProfileUrl = url
-        RetrieveImageTask(::setProfileImage).execute(url)
-        val newBio = snapshot.get("biography") as String? ?: ""
-        bioTextProfilePage.text = newBio
-        if (url == "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png" && newBio == "No bio yet!" && !promptedForProfile) {
-            textInputAlert()
-            promptedForProfile = true
-        }
-    }
-
-    private class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
-        AsyncTask<String, Void, Bitmap?>() {
-        val setImageView: (Bitmap?) -> Unit = imageCallback
-
-        override fun doInBackground(vararg urlArgs: String?): Bitmap? {
-            return downloadImage(urlArgs[0] ?: "")
-        }
-
-        private fun downloadImage(url: String): Bitmap? {
-            return try {
-                val avatarUrl = URL(url)
-                val connection = avatarUrl.openConnection()
-                connection.connect()
-                val stream = BufferedInputStream(connection.getInputStream())
-                BitmapFactory.decodeStream(stream)
-            } catch (e: Exception) {
-                println(e)
-                null
-            }
-        }
-
-        override fun onPostExecute(result: Bitmap?) {
-            super.onPostExecute(result)
-            this.setImageView(result)
-        }
-    }
-
-    private fun setProfileImage(image: Bitmap?) {
-        val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
-        drawable.isCircular = true
-        profileImage.setImageBitmap(image)
-        profileImage.setImageDrawable(drawable)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -168,6 +106,7 @@ class ProfileTab : Fragment() {
             startActivity(Intent(view!!.context, SignUp::class.java))
         }
 
+        // Edit Profile Button Functionality
         val btnEditProfile: Button = root.findViewById(R.id.btnEditProfile)
         btnEditProfile.setOnClickListener {
             if (auth.currentUser != null) {
@@ -182,7 +121,18 @@ class ProfileTab : Fragment() {
                         startActivity(Intent(view!!.context, SignUp::class.java))
                     }.show()
             }
+        }
 
+        // Browse Genre Button Functionality
+        val btnBrowseGenre: Button = root.findViewById(R.id.btnBrowseGenre)
+        btnBrowseGenre.setOnClickListener {
+            handleBrowse(browsingGenre = true)
+        }
+
+        // Browse User Button Functionality
+        val btnBrowseUser: Button = root.findViewById(R.id.btnBrowseUser)
+        btnBrowseUser.setOnClickListener {
+            handleBrowse(browsingGenre = false)
         }
 
         // Genre Button functionality
@@ -207,6 +157,123 @@ class ProfileTab : Fragment() {
         recyclerView.adapter = MainAdapter() // Setup table logic
 
         return root
+    }
+
+    // Called when the profile page loads or when the profile has been edited
+    private fun updateProfile() {
+        loadUserProfile(auth.uid)
+    }
+
+    private fun loadUserProfile(uid: String?) {
+        if (uid == null) return
+        FirestoreUtility.queryForUserByUID(uid, ::loadProfileTabView) { e -> println(e) }
+    }
+
+    private fun loadProfileTabView(user: UserModel) {
+        val profile = user.profile!!
+        FirestoreUtility.resolveReference(profile, ::loadProfileFields)
+        profileUsername.text = user.username
+    }
+
+    private fun loadProfileFields(snapshot: DocumentSnapshot) {
+        val url = (snapshot.get("profileImage") as String?) ?: ""
+        savedProfileUrl = url
+        RetrieveImageTask(::setProfileImage).execute(url)
+        val newBio = snapshot.get("biography") as String? ?: ""
+        bioTextProfilePage.text = newBio
+        if (url == "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png" && newBio == "No bio yet!" && !promptedForProfile) {
+            textInputAlert()
+            promptedForProfile = true
+        }
+    }
+
+    private fun handleBrowse(browsingGenre: Boolean) {
+        var hint = "Genre: Eg. Pun"
+        var type = "Genre"
+
+        if (!browsingGenre) {
+            hint = "Username"
+            type = "User"
+        }
+
+        val inputText = EditText(context)
+        inputText.hint = hint
+
+        val textInputLayout = TextInputLayout(context)
+        textInputLayout.setPadding(
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0,
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0
+        )
+
+        textInputLayout.addView(inputText)
+
+        val alert = AlertDialog.Builder(context)
+            .setTitle("Browse $type")
+            .setView(textInputLayout)
+            .setMessage("Enter a $type you wish to view")
+            .setPositiveButton("Confirm") { dialog, _ ->
+                // Handle new profile information
+                val textVal = inputText.text.toString()
+                if (textVal.isEmpty()) dialog.cancel()
+                else performBrowse(isGenre = browsingGenre, textVal.trim())
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }.create()
+
+        alert.show()
+    }
+
+    private fun performBrowse(isGenre: Boolean, inputText: String) {
+        if (isGenre) {
+            viewGenre(inputText)
+        } else {
+            viewProfile(inputText)
+        }
+    }
+
+    private fun viewGenre(genre: String) {
+        // Todo: Go to feed based on the genre string
+        toast("Go to $genre's Feed")
+    }
+
+    private fun viewProfile(username: String) {
+        // Todo: Go to profile page based on username string
+        toast("Go to $username's profile")
+    }
+
+    private class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
+        AsyncTask<String, Void, Bitmap?>() {
+        val setImageView: (Bitmap?) -> Unit = imageCallback
+
+        override fun doInBackground(vararg urlArgs: String?): Bitmap? {
+            return downloadImage(urlArgs[0] ?: "")
+        }
+
+        private fun downloadImage(url: String): Bitmap? {
+            return try {
+                val avatarUrl = URL(url)
+                val connection = avatarUrl.openConnection()
+                connection.connect()
+                val stream = BufferedInputStream(connection.getInputStream())
+                BitmapFactory.decodeStream(stream)
+            } catch (e: Exception) {
+                println(e)
+                null
+            }
+        }
+
+        override fun onPostExecute(result: Bitmap?) {
+            super.onPostExecute(result)
+            this.setImageView(result)
+        }
+    }
+
+    private fun setProfileImage(image: Bitmap?) {
+        val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
+        drawable.isCircular = true
+        profileImage.setImageBitmap(image)
+        profileImage.setImageDrawable(drawable)
     }
 
     private fun textInputAlert() {

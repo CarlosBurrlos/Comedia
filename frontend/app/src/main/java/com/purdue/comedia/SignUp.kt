@@ -65,33 +65,39 @@ class SignUp : AppCompatActivity() {
         var email = ""
 
         if (!Patterns.EMAIL_ADDRESS.matcher(registerUsername.text).matches()) {
-            // Get username's corresponding email from firebase database
-            ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()) {
-                        for (aUser in p0.children) {
-                            val userObject = aUser.getValue(LoginUser::class.java)
-                            if (userObject!!.username == registerUsername.text.toString()
-                                    .toLowerCase()
-                            ) {
-                                email = userObject.email
-                                break
-                            }
-                        }
-                    }
-                    if (email.isEmpty()) {
-                        signInLoader.isVisible = false
-                        snack("Username does not exist. Please sign up for an account.")
-                        return
-                    }
-                    performFirebaseLogin(email) // Sign In
-                }
-
-                override fun onCancelled(p0: DatabaseError) {
+            FirestoreUtility.queryForEmailByName(registerUsername.text.toString())
+                .addOnSuccessListener { performFirebaseLogin(it) }
+                .addOnFailureListener {
                     signInLoader.isVisible = false
-                    snack("Unable to create account. Err Code: *READ_ERR")
+                    snack("Username does not exist. Please sign up for an account.")
                 }
-            })
+            // Get username's corresponding email from firebase database
+//            ref.addListenerForSingleValueEvent(object : ValueEventListener {
+//                override fun onDataChange(p0: DataSnapshot) {
+//                    if (p0.exists()) {
+//                        for (aUser in p0.children) {
+//                            val userObject = aUser.getValue(LoginUser::class.java)
+//                            if (userObject!!.username == registerUsername.text.toString()
+//                                    .toLowerCase()
+//                            ) {
+//                                email = userObject.email
+//                                break
+//                            }
+//                        }
+//                    }
+//                    if (email.isEmpty()) {
+//                        signInLoader.isVisible = false
+//                        snack("Username does not exist. Please sign up for an account.")
+//                        return
+//                    }
+//                    performFirebaseLogin(email) // Sign In
+//                }
+//
+//                override fun onCancelled(p0: DatabaseError) {
+//                    signInLoader.isVisible = false
+//                    snack("Unable to create account. Err Code: *READ_ERR")
+//                }
+//            })
 
         } else {
             // Else was email entered
@@ -160,40 +166,39 @@ class SignUp : AppCompatActivity() {
             registerEmail.text.toString(),
             registerPassword.text.toString()
         )
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Save username and email pair to Firebase database
-                    val userID = ref.push().key // Creates key inside username
-                    val theUsername = registerUsername.text.toString()
-                    val theEmail = registerEmail.text.toString()
-                    if (userID != null) {
-                        ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
-                    } else {
-                        signInLoader.isVisible = false
-                        snack("Unable to create account. Err Code: *WRITE_ERR")
-                        return@addOnCompleteListener
-                    }
-
-                    createNewFirebaseUser()
-                        .addOnSuccessListener {
-                            // Send email verification
-                            auth.currentUser!!.sendEmailVerification()
-                                .addOnSuccessListener {
-                                    auth.signOut()
-                                    signInLoader.isVisible = false
-                                    snack("Email Sent. Verify email and login.")
-                                    toggleSignInAndSignUp()
-                                }
-                                .addOnFailureListener {
-                                    signInLoader.isVisible = false
-                                    snack(it.message.toString())
-                                }
-                        }
+            .addOnSuccessListener {
+                // Save username and email pair to Firebase database
+                val userID = ref.push().key // Creates key inside username
+                val theUsername = registerUsername.text.toString()
+                val theEmail = registerEmail.text.toString()
+                if (userID != null) {
+                    ref.child(userID).setValue(LoginUser(userID, theUsername, theEmail))
                 } else {
-                    // If sign in fails, display why to the user.
                     signInLoader.isVisible = false
-                    snack(task.exception?.message.toString())
+                    snack("Unable to create account. Err Code: *WRITE_ERR")
+                    return@addOnSuccessListener
                 }
+
+                createNewFirebaseUser()
+                    .addOnSuccessListener {
+                        // Send email verification
+                        auth.currentUser!!.sendEmailVerification()
+                            .addOnSuccessListener {
+                                auth.signOut()
+                                signInLoader.isVisible = false
+                                snack("Email Sent. Verify email and login.")
+                                toggleSignInAndSignUp()
+                            }
+                            .addOnFailureListener {
+                                signInLoader.isVisible = false
+                                snack(it.message.toString())
+                            }
+                    }
+            }
+            .addOnFailureListener {
+                // If sign in fails, display why to the user.
+                signInLoader.isVisible = false
+                snack(it.message.toString())
             }
     }
 

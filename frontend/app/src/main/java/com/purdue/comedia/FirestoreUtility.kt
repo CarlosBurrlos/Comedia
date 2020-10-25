@@ -137,16 +137,18 @@ class FirestoreUtility {
                 .document(username)
                 .get()
                 .continueWith(convertResult(::convertToUserLookup))
-                .addOnFailureListener(::reportError)
         }
 
-        fun queryForUserByName(
-            username: String
-        ): Task<UserModel> {
+        fun queryForUserByName(username: String): Task<UserModel> {
             return queryForUserLookup(username)
                 .continueWithTask {
                     queryForUserByUID(it.result!!.uid)
                 }
+        }
+
+        fun queryForEmailByName(username: String): Task<String> {
+            return queryForUserLookup(username)
+                .continueWith { it.result!!.email }
         }
 
         fun updateUserProfile(

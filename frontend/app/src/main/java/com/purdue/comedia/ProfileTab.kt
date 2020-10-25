@@ -190,10 +190,14 @@ class ProfileTab : Fragment() {
     private fun handleBrowse(browsingGenre: Boolean) {
         var hint = "Genre: Eg. Pun"
         var type = "Genre"
+        var title = "Follow Genre"
+        var message = "Enter the genre you wish to follow"
 
         if (!browsingGenre) {
             hint = "Username"
             type = "User"
+            title = "Go to User"
+            message = "Enter the username whose profile you wish to view"
         }
 
         val inputText = EditText(context)
@@ -208,9 +212,9 @@ class ProfileTab : Fragment() {
         textInputLayout.addView(inputText)
 
         val alert = AlertDialog.Builder(context)
-            .setTitle("Browse $type")
+            .setTitle(title)
             .setView(textInputLayout)
-            .setMessage("Enter a $type you wish to view")
+            .setMessage(message)
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
                 val textVal = inputText.text.toString()
@@ -226,15 +230,15 @@ class ProfileTab : Fragment() {
 
     private fun performBrowse(isGenre: Boolean, inputText: String) {
         if (isGenre) {
-            viewGenre(inputText)
+            followGenre(inputText)
         } else {
             viewProfile(inputText)
         }
     }
 
-    private fun viewGenre(genre: String) {
-        // Todo: Go to feed based on the genre string
-        toast("Go to $genre's Feed")
+    private fun followGenre(genre: String) {
+        // Todo: Follow the specified genre
+        toast("Follow $genre's Feed")
     }
 
     private fun viewProfile(username: String) {

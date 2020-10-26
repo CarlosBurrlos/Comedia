@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firestore.v1.FirestoreGrpc
 
 /**
  * A Fragment representing the Feed Tab

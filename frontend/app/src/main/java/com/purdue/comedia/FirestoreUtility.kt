@@ -195,7 +195,21 @@ class FirestoreUtility {
         fun compileMainFeed(
             uid: String
         ): List<PostModelClient> {
+
             return emptyList()
+        }
+
+        // Converts a returned query snapshot to a list of PostModelClients
+        fun convertQueryToPosts(
+            qs: QuerySnapshot
+        ): List<PostModelClient> {
+            var list : MutableList<PostModelClient> = mutableListOf()
+            qs.iterator().forEachRemaining {
+                var post: PostModelClient = convertToPost(it) as PostModelClient
+                post.postID = it.id
+                list.add(post)
+            }
+            return list
         }
 
         // Queries a group of posts posted by the given user id (sorted by time)
@@ -220,11 +234,8 @@ class FirestoreUtility {
             users: List<DocumentReference>,
             successCallback: ((QuerySnapshot) -> Unit)? = null,
             failureCallback: ((Exception) -> Unit)? = null
-        ) {
-            if (users.size > 10) {
-                return
-            }
-            firestore.collection("posts")
+        ): Task<QuerySnapshot> {
+            return firestore.collection("posts")
                 .whereIn("poster", users)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
@@ -238,11 +249,8 @@ class FirestoreUtility {
             genres: List<String>,
             successCallback: ((QuerySnapshot) -> Unit)? = null,
             failureCallback: ((Exception) -> Unit)? = null
-        ) {
-            if (genres.size > 10) {
-                return
-            }
-            firestore.collection("posts")
+        ): Task<QuerySnapshot> {
+            return firestore.collection("posts")
                 .whereIn("genre", genres)
                 .orderBy("created")
                 .limit(feedLimit.toLong())

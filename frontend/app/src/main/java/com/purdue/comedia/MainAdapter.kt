@@ -9,6 +9,8 @@ import kotlinx.android.synthetic.main.post_row.view.*
 
 // Recycler View Manager
 class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
+    lateinit var postArray: List<PostModelClient>
+
     override fun getItemCount(): Int {
         return 3 // Arbitrary placeholder
     }
@@ -43,7 +45,11 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
             intent.putExtra(NAV_TITLE, view.feedPostGenre.text.toString())
             view.context.startActivity(intent)
         }
+    }
 
+    fun updateTable(posts: List<PostModelClient>) {
+        postArray = posts
+        notifyDataSetChanged()
     }
 
 }

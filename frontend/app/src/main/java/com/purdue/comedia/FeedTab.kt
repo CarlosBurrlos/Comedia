@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,9 +39,14 @@ class FeedTab : Fragment() {
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.feedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
-        recyclerView.adapter = MainAdapter() // Setup table logic
+        val adapter = MainAdapter()
+        recyclerView.adapter = adapter // Setup table logic
 
         return root
+    }
+
+    fun updateTableData(adapter: MainAdapter, posts: List<PostModelClient>) {
+        adapter.updateTable(posts)
     }
 
     companion object {

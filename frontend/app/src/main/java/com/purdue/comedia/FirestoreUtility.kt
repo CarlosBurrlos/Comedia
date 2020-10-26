@@ -1,5 +1,6 @@
 package com.purdue.comedia
 
+import android.widget.Toast
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -72,11 +73,11 @@ class FirestoreUtility {
             val model = PostModel()
             model.comments = snapshot.get("comments")!! as ArrayList<DocumentReference>
             model.content = snapshot.get("content")!! as String
-            model.downvoteCount = snapshot.get("downvoteCount")!! as Int
+            model.downvoteCount = snapshot.get("downvoteCount")!! as Long
             model.downvoteList = snapshot.get("downvoteList")!! as ArrayList<DocumentReference>
-            model.upvoteCount = snapshot.get("upvoteCount")!! as Int
+            model.upvoteCount = snapshot.get("upvoteCount")!! as Long
             model.upvoteList = snapshot.get("upvoteList")!! as ArrayList<DocumentReference>
-            model.isAnon = snapshot.get("isAnon")!! as Boolean
+            model.isAnon = snapshot.get("anon")!! as Boolean
             model.poster = snapshot.get("poster")!! as DocumentReference
             model.title = snapshot.get("title")!! as String
             model.type = snapshot.get("type")!! as String
@@ -205,7 +206,19 @@ class FirestoreUtility {
         ): List<PostModelClient> {
             var list : MutableList<PostModelClient> = mutableListOf()
             qs.iterator().forEachRemaining {
-                var post: PostModelClient = convertToPost(it) as PostModelClient
+                //var post: PostModelClient = convertToPost(it) as PostModelClient
+                val post = PostModelClient()
+                post.comments = it.get("comments")!! as ArrayList<DocumentReference>
+                post.content = it.get("content")!! as String
+                post.downvoteCount = it.get("downvoteCount")!! as Long
+                post.downvoteList = it.get("downvoteList")!! as ArrayList<DocumentReference>
+                post.upvoteCount = it.get("upvoteCount")!! as Long
+                post.upvoteList = it.get("upvoteList")!! as ArrayList<DocumentReference>
+                post.isAnon = it.get("anon")!! as Boolean
+                post.poster = it.get("poster")!! as DocumentReference
+                post.title = it.get("title")!! as String
+                post.type = it.get("type")!! as String
+                post.genre = it.get("genre")!! as String
                 post.postID = it.id
                 list.add(post)
             }

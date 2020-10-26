@@ -4,15 +4,18 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.post_row.view.*
+import kotlinx.android.synthetic.main.profile_tab.view.*
 
 // Recycler View Manager
-class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
+class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     lateinit var postArray: List<PostModelClient>
 
     override fun getItemCount(): Int {
-        return 3 // Arbitrary placeholder
+        return if (this::postArray.isInitialized) postArray.size
+        else 0
     }
 
     // Initialize Row View
@@ -32,7 +35,22 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
         val view = holder.view
         val context = holder.view.context
 
-        view.feedPostTitle.text = "Joke Title. Row: $rowIndex"
+        val post = postArray[rowIndex]
+
+        view.feedPostTitle.text = post.title
+        view.feedPostBody.text = post.content
+        view.feedPostGenre.text = post.genre
+
+        if (post.isAnon) view.feedProfileAuthor.text = "Anonymous"
+        else {
+            FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
+                view.feedProfileAuthor.text = it.username
+            }
+        }
+
+        view.feedBtnUpvote.text = "Upvote (" + post.upvoteCount + ")"
+        view.feedBtnDownvote.text = "Downvote (" + post.downvoteCount + ")"
+        view.feedBtnComment.text = "Comments (" + post.comments.size + ")"
 
         // Setup Profile Page
         view.feedProfileImage.setOnClickListener {
@@ -54,4 +72,4 @@ class MainAdapter: RecyclerView.Adapter<CustomViewHolder>() {
 
 }
 
-class CustomViewHolder(val view: View): RecyclerView.ViewHolder(view) { }
+class CustomViewHolder(val view: View) : RecyclerView.ViewHolder(view) {}

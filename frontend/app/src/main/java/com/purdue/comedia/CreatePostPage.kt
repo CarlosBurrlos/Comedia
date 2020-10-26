@@ -43,7 +43,7 @@ class CreatePostPage : AppCompatActivity() {
         new_post.title = postTitleField.text.toString()
         new_post.content = postBodyField.text.toString()
         new_post.genre = postGenreField.text.toString()
-        new_post.isAnon = postAnonymousSwitch.isActivated
+        new_post.isAnon = postAnonymousSwitch.isChecked
 
         if (auth.uid == null) {
             postTitleField.error = "You must be logged in"

@@ -20,6 +20,7 @@ import com.google.firestore.v1.FirestoreGrpc
 class FeedTab : Fragment() {
     // 3. Declare Parameters here
     private var sampleVar1: String? = null
+    private lateinit var adapter: MainAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,11 @@ class FeedTab : Fragment() {
             // 4. Initialize Parameters here from newInstance
             sampleVar1 = it.getString(ARG_PARAM1)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateTableData()
     }
 
     override fun onCreateView(
@@ -43,17 +49,18 @@ class FeedTab : Fragment() {
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.feedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
-        val adapter = MainAdapter()
-        FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!,{
-            updateTableData(adapter,FirestoreUtility.convertQueryToPosts(it))
-        })
+        adapter = MainAdapter()
+        updateTableData()
         recyclerView.adapter = adapter // Setup table logic
 
         return root
     }
 
-    fun updateTableData(adapter: MainAdapter, posts: List<PostModelClient>) {
-        adapter.updateTable(posts)
+    private fun updateTableData() {
+        if (!this::adapter.isInitialized) return
+        FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!,{
+            adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
+        })
     }
 
     companion object {

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firestore.v1.FirestoreGrpc
 
 /**
@@ -41,6 +42,9 @@ class FeedTab : Fragment() {
         val recyclerView: RecyclerView = root.findViewById(R.id.feedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
         val adapter = MainAdapter()
+        FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!,{
+            updateTableData(adapter,FirestoreUtility.convertQueryToPosts(it))
+        })
         recyclerView.adapter = adapter // Setup table logic
 
         return root

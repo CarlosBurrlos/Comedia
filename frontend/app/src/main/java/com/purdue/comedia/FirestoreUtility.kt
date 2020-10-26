@@ -191,6 +191,12 @@ class FirestoreUtility {
             }
         }
 
+        // Returns a series of PostModelClient objects representing a user's main feed
+        fun compileMainFeed(
+            uid: String
+        ): List<PostModelClient> {
+            return emptyList()
+        }
 
         // Queries a group of posts posted by the given user id (sorted by time)
         fun queryProfileFeed(

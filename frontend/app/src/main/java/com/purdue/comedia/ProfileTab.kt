@@ -31,7 +31,6 @@ import java.net.URL
  * A Fragment representing the profile Tab
  */
 class ProfileTab : Fragment() {
-
     // 3. Declare Parameters here
     private var sampleVar2: String? = null
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()

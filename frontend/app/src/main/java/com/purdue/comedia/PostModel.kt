@@ -2,7 +2,7 @@ package com.purdue.comedia
 
 import com.google.firebase.firestore.DocumentReference
 
-class PostModel {
+open class PostModel {
     lateinit var content: String
     lateinit var title: String
     lateinit var genre: String
@@ -15,3 +15,4 @@ class PostModel {
     var upvoteList = ArrayList<DocumentReference>()
     var downvoteList = ArrayList<DocumentReference>()
 }
+

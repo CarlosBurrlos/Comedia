@@ -226,20 +226,54 @@ class FirestoreUtility {
         }
 
         // Queries a group of posts posted by the given user id (sorted by time)
-        fun queryProfileFeed(
-            uid: String,
-            successCallback: ((QuerySnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit)? = null
-        ): Task<QuerySnapshot> {
+        fun queryProfileFeed(uid: String): Task<QuerySnapshot> {
             return firestore.collection("posts")
                 .whereEqualTo(
                     "poster", firestore.collection("users").document(uid)
                 )
-                .orderBy("created")
+                .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback?.invoke(it) }
+        }
+
+        // Queries a group of posts posted by the given genre
+        fun queryGenreFeed(genre: String): Task<QuerySnapshot> {
+            return firestore.collection("posts")
+                .whereEqualTo(
+                    "genre", genre.toLowerCase()
+                )
+                .orderBy("created", Query.Direction.DESCENDING)
+                .limit(feedLimit.toLong())
+                .get()
+        }
+
+        // Queries posts saved by the current user
+        fun querySavedPostsFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<QuerySnapshot> {
+            // Todo: @TOM
+            return firestore.collection("posts")
+                //.whereEqualTo()
+                .orderBy("created", Query.Direction.DESCENDING)
+                .limit(feedLimit.toLong())
+                .get()
+        }
+
+        // Queries posts saved by the current user
+        fun queryMainFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<QuerySnapshot> {
+            // Todo: @TOM (Currently returns all posts)
+            return firestore.collection("posts")
+                //.whereEqualTo()
+                .orderBy("created", Query.Direction.DESCENDING)
+                .limit(feedLimit.toLong())
+                .get()
+        }
+
+        // Queries posts by a given user's username
+        fun queryUserFeed(username: String): Task<QuerySnapshot> {
+            return queryForUserLookup(username).continueWithTask {
+                return@continueWithTask queryProfileFeed(it.result!!.uid).continueWithTask {
+                    return@continueWithTask it
+                }
+            }
         }
 
         // Queries posts posted by a given set of users (up to 10)

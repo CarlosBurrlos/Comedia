@@ -19,16 +19,7 @@ import com.google.firestore.v1.FirestoreGrpc
  */
 class FeedTab : Fragment() {
     // 3. Declare Parameters here
-    private var sampleVar1: String? = null
     private lateinit var adapter: MainAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            // 4. Initialize Parameters here from newInstance
-            sampleVar1 = it.getString(ARG_PARAM1)
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -43,39 +34,23 @@ class FeedTab : Fragment() {
         val root = inflater.inflate(R.layout.feed_tab, container, false)
 
         // Setup the elements of the view here
-        val textView: TextView = root.findViewById(R.id.fragment_one_text)
-        textView.text = "User Feed"
 
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.feedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
         adapter = MainAdapter()
-        updateTableData()
         recyclerView.adapter = adapter // Setup table logic
+        updateTableData()
 
         return root
     }
 
+    // Called when screen is loaded to populate feed
     private fun updateTableData() {
         if (!this::adapter.isInitialized) return
-        FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!,{
+        FirestoreUtility.queryMainFeed().addOnSuccessListener {
             adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
-        })
+        }
     }
 
-    companion object {
-
-        // 1. Create Arguments Here
-        private const val ARG_PARAM1 = "sampleVar1"
-
-        // Return a new instance of the feedTab
-        @JvmStatic
-        fun newInstance(sampleVar1: String) =
-            FeedTab().apply {
-                arguments = Bundle().apply {
-                    // 2. Put parameters into arguments from step 1
-                    putString(ARG_PARAM1, sampleVar1)
-                }
-            }
-    }
 }

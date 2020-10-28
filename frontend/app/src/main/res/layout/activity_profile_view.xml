@@ -39,7 +39,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="64dp"
-        android:text="BIO"
         android:textSize="16sp" />
 
     <RadioGroup
@@ -77,7 +76,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="26dp"
+        android:layout_marginStart="27dp"
         android:layout_marginTop="110dp"
         android:text="Follow" />
 

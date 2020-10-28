@@ -22,28 +22,21 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
 
 
 /**
- * A Fragment representing the profile Tab
+ * A Fragment representing the Profile Tab
  */
 class ProfileTab : Fragment() {
     // 3. Declare Parameters here
-    private var sampleVar2: String? = null
+    private lateinit var adapter: MainAdapter
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var savedProfileUrl = ""
     private var promptedForProfile = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            // 4. Initialize Parameters here from newInstance
-            sampleVar2 = it.getString(ARG_PARAM1)
-        }
-    }
 
     private var theLoginBtn: Button? = null
 
@@ -64,8 +57,8 @@ class ProfileTab : Fragment() {
             theLoginBtn!!.text = "Sign In"
         }
 
-        // Reload data from firebase each time profile page loads
-        updateProfile()
+        updateProfile() // Reload data from firebase each time profile page loads
+        updateTableData() // Reload feed of posts by current user
 
     }
 
@@ -153,9 +146,18 @@ class ProfileTab : Fragment() {
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
-        recyclerView.adapter = MainAdapter() // Setup table logic
+        adapter = MainAdapter()
+        recyclerView.adapter = adapter // Setup table logic
+        updateTableData()
 
         return root
+    }
+
+    private fun updateTableData() {
+        if (!this::adapter.isInitialized) return
+        FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!).addOnSuccessListener {
+            adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
+        }
     }
 
     // Called when the profile page loads or when the profile has been edited
@@ -188,13 +190,11 @@ class ProfileTab : Fragment() {
 
     private fun handleBrowse(browsingGenre: Boolean) {
         var hint = "Genre: Eg. Pun"
-        var type = "Genre"
         var title = "Follow Genre"
         var message = "Enter the genre you wish to follow"
 
         if (!browsingGenre) {
             hint = "Username"
-            type = "User"
             title = "Go to User"
             message = "Enter the username whose profile you wish to view"
         }
@@ -219,6 +219,7 @@ class ProfileTab : Fragment() {
                 val textVal = inputText.text.toString()
                 if (textVal.isEmpty()) dialog.cancel()
                 else performBrowse(isGenre = browsingGenre, textVal.trim())
+                dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()
@@ -228,24 +229,22 @@ class ProfileTab : Fragment() {
     }
 
     private fun performBrowse(isGenre: Boolean, inputText: String) {
-        if (isGenre) {
-            followGenre(inputText)
-        } else {
-            viewProfile(inputText)
-        }
+        if (isGenre) followGenre(inputText)
+        else viewProfile(inputText)
     }
 
     private fun followGenre(genre: String) {
         // Todo: Follow the specified genre
-        toast("Follow $genre's Feed")
+        toast("Todo: Follow $genre's Feed")
     }
 
     private fun viewProfile(username: String) {
-        // Todo: Go to profile page based on username string
-        toast("Go to $username's profile")
+        val intent = Intent(context, ProfileView::class.java)
+        intent.putExtra(MainAdapter.USERNAME, username)
+        startActivity(intent)
     }
 
-    private class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
+    class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
         AsyncTask<String, Void, Bitmap?>() {
         val setImageView: (Bitmap?) -> Unit = imageCallback
 
@@ -330,23 +329,6 @@ class ProfileTab : Fragment() {
         profileModel.profileImage = profileImageUrl
         profileModel.biography = bioText
         FirestoreUtility.updateUserProfile(auth.uid as String, profileModel)
-    }
-
-    // Skeleton code to setup class
-    companion object {
-
-        // 1. Create Arguments Here
-        private const val ARG_PARAM1 = "sampleVar2"
-
-        // Return a new instance of the feedTab
-        @JvmStatic
-        fun newInstance(sampleVar2: String) =
-            ProfileTab().apply {
-                arguments = Bundle().apply {
-                    // 2. Put parameters into arguments from step 1
-                    putString(ARG_PARAM1, sampleVar2)
-                }
-            }
     }
 
     private fun toast(str: String) {

@@ -181,7 +181,7 @@ class ProfileTab : Fragment() {
     }
 
     private fun performAccountDeletion() {
-        // Todo: Delete the current user's account and log out
+        AuthUtility.deleteAccount()
         toast("Todo: Delete Account")
     }
 

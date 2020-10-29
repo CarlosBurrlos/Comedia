@@ -2,6 +2,7 @@ package com.purdue.comedia
 
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
@@ -11,6 +12,20 @@ class AuthUtility {
     companion object {
         private val auth = FirebaseAuth.getInstance()
         private val firestore = FirebaseFirestore.getInstance()
+
+        fun createAccount(email: String, password: String): Task<AuthResult> {
+            return auth.createUserWithEmailAndPassword(email, password)
+        }
+
+        fun signIn(email: String, password: String): Task<AuthResult> {
+            return auth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener { FirestoreUtility.addListenerForCurrentUser() }
+        }
+
+        fun signOut() {
+            auth.signOut()
+            FirestoreUtility.clearCurrentUserListener()
+        }
 
         fun deleteAccount(): Task<Unit> {
             return FirestoreUtility.queryForUserByUID(auth.uid!!)

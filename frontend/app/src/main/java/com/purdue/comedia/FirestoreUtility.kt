@@ -230,21 +230,7 @@ class FirestoreUtility {
         ): List<PostModelClient> {
             var list : MutableList<PostModelClient> = mutableListOf()
             qs.iterator().forEachRemaining {
-                //var post: PostModelClient = convertToPost(it) as PostModelClient
-                val post = PostModelClient()
-                post.comments = it.get("comments")!! as ArrayList<DocumentReference>
-                post.content = it.get("content")!! as String
-                post.downvoteCount = it.get("downvoteCount")!! as Long
-                post.downvoteList = it.get("downvoteList")!! as ArrayList<DocumentReference>
-                post.upvoteCount = it.get("upvoteCount")!! as Long
-                post.upvoteList = it.get("upvoteList")!! as ArrayList<DocumentReference>
-                post.isAnon = it.get("anon")!! as Boolean
-                post.poster = it.get("poster")!! as DocumentReference
-                post.title = it.get("title")!! as String
-                post.type = it.get("type")!! as String
-                post.genre = it.get("genre")!! as String
-                post.postID = it.id
-                list.add(post)
+                list.add(convertToPostClient(it))
             }
             return list
         }
@@ -292,16 +278,6 @@ class FirestoreUtility {
                 }
         }
 
-        // Queries posts saved by the current user
-        fun queryMainFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<QuerySnapshot> {
-            // Todo: @TOM (Currently returns all posts)
-            return firestore.collection("posts")
-                //.whereEqualTo()
-                .orderBy("created", Query.Direction.DESCENDING)
-                .limit(feedLimit.toLong())
-                .get()
-        }
-
         // Queries posts by a given user's username
         fun queryUserFeed(username: String): Task<QuerySnapshot> {
             return queryForUserLookup(username).continueWithTask {
@@ -311,34 +287,103 @@ class FirestoreUtility {
             }
         }
 
-        // Queries posts posted by a given set of users (up to 10)
+        // Queries the posts posted by the genres and users that a user is following
+        // If they follow no users their own posts are shown
+        fun queryMainFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<List<PostModelClient>> {
+            return queryForUserByUID(uid)
+                .continueWithTask { user ->
+                    val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                    val followedUsers = user.result!!.usersFollowing
+                    val followedGenres = user.result!!.genresFollowing
+                    if (followedUsers.isNotEmpty()) {
+                        taskList.add(queryMultiUserFeed(followedUsers))
+                    }
+                    if (followedGenres.isNotEmpty()) {
+                        taskList.add(queryMultiGenreFeed(followedGenres))
+                    }
+                    return@continueWithTask Tasks.whenAllComplete(taskList)
+                }
+                .continueWith{
+                    val postListList: MutableList<List<PostModelClient>> = mutableListOf()
+                    it.result!!.forEach {
+                        postListList.add(it.result!! as List<PostModelClient>)
+                    }
+                    return@continueWith postListList.flatten()
+                }
+        }
+
+        // Queries multiple users, making multiple tasks for more than 10 users
         fun queryMultiUserFeed(
-            users: List<DocumentReference>,
-            successCallback: ((QuerySnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit)? = null
-        ): Task<QuerySnapshot> {
+            users: List<DocumentReference>
+        ): Task<List<PostModelClient>> {
+            if (users.size > 10) {
+                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                for (x in users.indices step 10) {
+                    val max = (x + 9).coerceAtMost(users.size)  // Kotlin's way of doing Math.min
+                    taskList.add(queryMultiUserFeedSimple(users.subList(x,max)))
+                }
+                return Tasks.whenAllComplete(taskList)
+                    .continueWith{
+                        val postListList: MutableList<List<PostModelClient>> = mutableListOf()
+                        it.result!!.forEach{
+                            postListList.add(it.result!! as List<PostModelClient>)
+                        }
+                        return@continueWith postListList.flatten()
+                    }
+            } else {
+                return queryMultiUserFeedSimple(users);
+            }
+        }
+
+        // Queries posts posted by a given set of users (up to 10)
+        fun queryMultiUserFeedSimple(
+            users: List<DocumentReference>
+        ): Task<List<PostModelClient>> {
             return firestore.collection("posts")
                 .whereIn("poster", users)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback?.invoke(it) }
+                .continueWith{
+                    return@continueWith convertQueryToPosts(it.result!!)
+                }
+        }
+
+        // Queries multiple genres, making multiple tasks for more than 10 genres
+        fun queryMultiGenreFeed(
+            genres: List<String>
+        ): Task<List<PostModelClient>> {
+            if (genres.size > 10) {
+                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                for (x in genres.indices step 10) {
+                    val max = (x + 9).coerceAtMost(genres.size)   // Kotlin's way of doing Math.min
+                    taskList.add(queryMultiGenreFeedSimple(genres.subList(x,max)))
+                }
+                return Tasks.whenAllComplete(taskList)
+                    .continueWith{
+                        val postListList: MutableList<List<PostModelClient>> = mutableListOf()
+                        it.result!!.forEach{
+                            postListList.add(it.result!! as List<PostModelClient>)
+                        }
+                        return@continueWith postListList.flatten()
+                    }
+            } else {
+                return queryMultiGenreFeedSimple(genres);
+            }
         }
 
         // Queries posts posted with a given set of genres (up to 10)
-        fun queryMultiGenreFeed(
-            genres: List<String>,
-            successCallback: ((QuerySnapshot) -> Unit)? = null,
-            failureCallback: ((Exception) -> Unit)? = null
-        ): Task<QuerySnapshot> {
+        fun queryMultiGenreFeedSimple(
+            genres: List<String>
+        ): Task<List<PostModelClient>> {
             return firestore.collection("posts")
                 .whereIn("genre", genres)
-                .orderBy("created")
+                .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
-                .addOnSuccessListener { successCallback?.invoke(it) }
-                .addOnFailureListener { failureCallback?.invoke(it) }
+                .continueWith{
+                    return@continueWith convertQueryToPosts(it.result!!)
+                }
         }
 
         fun followUser(

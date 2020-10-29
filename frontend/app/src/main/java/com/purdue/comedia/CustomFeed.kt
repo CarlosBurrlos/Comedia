@@ -46,7 +46,7 @@ class CustomFeed : AppCompatActivity() {
     private fun updateTableDataWithSavedPosts() {
         if (!this::adapter.isInitialized) return
         FirestoreUtility.querySavedPostsFeed().addOnSuccessListener {
-            adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
+            adapter.updateTable(it)
         }
     }
 

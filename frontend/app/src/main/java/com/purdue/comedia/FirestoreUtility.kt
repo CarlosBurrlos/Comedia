@@ -6,6 +6,8 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class FirestoreUtility {
     companion object {
@@ -85,6 +87,24 @@ class FirestoreUtility {
             return model
         }
 
+        @Suppress("UNCHECKED_CAST")
+        private fun convertToPostClient(snapshot: DocumentSnapshot): PostModelClient {
+            val model = PostModelClient()
+            model.comments = snapshot.get("comments")!! as ArrayList<DocumentReference>
+            model.content = snapshot.get("content")!! as String
+            model.downvoteCount = snapshot.get("downvoteCount")!! as Long
+            model.downvoteList = snapshot.get("downvoteList")!! as ArrayList<DocumentReference>
+            model.upvoteCount = snapshot.get("upvoteCount")!! as Long
+            model.upvoteList = snapshot.get("upvoteList")!! as ArrayList<DocumentReference>
+            model.isAnon = snapshot.get("anon")!! as Boolean
+            model.poster = snapshot.get("poster")!! as DocumentReference
+            model.title = snapshot.get("title")!! as String
+            model.type = snapshot.get("type")!! as String
+            model.genre = snapshot.get("genre")!! as String
+            model.postID = snapshot.id
+            return model
+        }
+
         private fun convertToComment(snapshot: DocumentSnapshot): CommentModel {
             val model = CommentModel()
             model.content = snapshot.get("content")!! as String
@@ -103,6 +123,10 @@ class FirestoreUtility {
 
         fun resolvePostReference(reference: DocumentReference): Task<PostModel> {
             return reference.get().continueWith(convertResult(::convertToPost))
+        }
+
+        fun resolvePostClientReference(reference: DocumentReference): Task<PostModelClient> {
+            return reference.get().continueWith(convertResult(::convertToPostClient))
         }
 
         fun resolveCommentReference(reference: DocumentReference): Task<CommentModel> {
@@ -248,13 +272,29 @@ class FirestoreUtility {
         }
 
         // Queries posts saved by the current user
-        fun querySavedPostsFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<QuerySnapshot> {
+        fun querySavedPostsFeed(uid: String = FirebaseAuth.getInstance().uid!!)
+                : Task<List<PostModelClient>> {
             // Todo: @TOM
-            return firestore.collection("posts")
-                //.whereEqualTo()
-                .orderBy("created", Query.Direction.DESCENDING)
-                .limit(feedLimit.toLong())
-                .get()
+            return queryForUserByUID(uid)
+                .continueWithTask { user ->
+                    val taskList: MutableList<Task<PostModelClient>> = mutableListOf()
+                    user.result!!.savedPosts.forEach {
+                        taskList.add(resolvePostClientReference(it))
+                    }
+                    val finalList: List<Task<PostModelClient>> = Collections.unmodifiableList(taskList)
+                    return@continueWithTask Tasks.whenAllComplete(finalList)
+                }
+                .continueWith{
+                    val postList: MutableList<PostModelClient> = mutableListOf()
+                    it.result!!.forEach {
+                        postList.add(it.result!! as PostModelClient)
+                    }
+                    return@continueWith postList
+                }
+        }
+
+        fun foo(bar: Number): Number {
+            return bar
         }
 
         // Queries posts saved by the current user

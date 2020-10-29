@@ -12,11 +12,11 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.post_row.view.*
+import kotlinx.android.synthetic.main.profile_tab.view.*
 
 // Recycler View Manager
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     lateinit var postArray: List<PostModelClient>
-    lateinit var profileImg: ImageView
     lateinit var contextVar: Context
 
     override fun getItemCount(): Int {
@@ -53,13 +53,12 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedPostBody.text = post.content
         view.feedPostGenre.text = post.genre
         contextVar = context
-        profileImg = view.feedProfileImage
 
         if (post.isAnon) view.feedProfileAuthor.text = "Anonymous"
         else {
             FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
                 view.feedProfileAuthor.text = it.username
-                updateProfilePicture(view.feedProfileAuthor.text.toString())
+                updateProfilePicture(view.feedProfileAuthor.text.toString(), view.feedProfileImage)
             }
         }
 
@@ -112,21 +111,22 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.context.startActivity(intent)
     }
 
-    private fun updateProfilePicture(username: String) {
+    private fun updateProfilePicture(username: String, profileImage: ImageView) {
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
             FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
-                // Todo: Update Profile Picture (Or Remove?)
-                ProfileTab.RetrieveImageTask(::setProfileImage).execute(it.profileImage)
+                ProfileTab.RetrieveImageTask(::setProfileImage, profileImage).execute(it.profileImage)
             }
         }
     }
 
-    private fun setProfileImage(image: Bitmap?) {
+    private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         val drawable: RoundedBitmapDrawable =
             RoundedBitmapDrawableFactory.create(contextVar.resources, image)
         drawable.isCircular = true
-        profileImg.setImageBitmap(image)
-        profileImg.setImageDrawable(drawable)
+        if (toSetProfileImg != null) {
+            toSetProfileImg.setImageBitmap(image)
+            toSetProfileImg.setImageDrawable(drawable)
+        }
     }
 
     fun updateTable(posts: List<PostModelClient>) {

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ImageView
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import kotlinx.android.synthetic.main.activity_new_post_page_ui.*
@@ -44,7 +45,7 @@ class NewPostPageUI : AppCompatActivity() {
         }
     }
 
-    private fun setProfileImage(image: Bitmap?) {
+    private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView? = null) {
         val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
         drawable.isCircular = true
         postPageImage.setImageBitmap(image)

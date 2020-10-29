@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.webkit.URLUtil
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
@@ -22,7 +23,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
-import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -244,9 +244,13 @@ class ProfileTab : Fragment() {
         startActivity(intent)
     }
 
-    class RetrieveImageTask(imageCallback: (Bitmap?) -> Unit) :
+    class RetrieveImageTask(
+        imageCallback: (Bitmap?, ImageView?) -> Unit,
+        imageToChange: ImageView? = null
+    ) :
         AsyncTask<String, Void, Bitmap?>() {
-        val setImageView: (Bitmap?) -> Unit = imageCallback
+        val setImageView: (Bitmap?, ImageView?) -> Unit = imageCallback
+        private val img = imageToChange
 
         override fun doInBackground(vararg urlArgs: String?): Bitmap? {
             return downloadImage(urlArgs[0] ?: "")
@@ -267,11 +271,11 @@ class ProfileTab : Fragment() {
 
         override fun onPostExecute(result: Bitmap?) {
             super.onPostExecute(result)
-            this.setImageView(result)
+            this.setImageView(result, img)
         }
     }
 
-    private fun setProfileImage(image: Bitmap?) {
+    private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
         drawable.isCircular = true
         profileImage.setImageBitmap(image)

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.ImageView
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -54,7 +55,7 @@ class ProfileView : AppCompatActivity() {
 
     }
 
-    private fun setProfileImage(image: Bitmap?) {
+    private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
         drawable.isCircular = true
         userProfileImage.setImageBitmap(image)

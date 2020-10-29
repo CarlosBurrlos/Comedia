@@ -34,7 +34,7 @@ import java.net.URL
  */
 class ProfileTab : Fragment() {
     // 3. Declare Parameters here
-    private lateinit var adapter: MainAdapter
+    //private lateinit var adapter: MainAdapter
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var savedProfileUrl = ""
     private var promptedForProfile = false
@@ -164,12 +164,12 @@ class ProfileTab : Fragment() {
             goToProfile()
         }
 
-        // Setup Recycler View
+        /* Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
         adapter = MainAdapter()
         recyclerView.adapter = adapter // Setup table logic
-        updateTableData()
+        updateTableData()*/
 
         return root
     }
@@ -186,10 +186,10 @@ class ProfileTab : Fragment() {
     }
 
     private fun updateTableData() {
-        if (!this::adapter.isInitialized) return
+        /*if (!this::adapter.isInitialized) return
         FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!).addOnSuccessListener {
             adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
-        }
+        }*/
     }
 
     // Called when the profile page loads or when the profile has been edited

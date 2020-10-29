@@ -1,12 +1,15 @@
 package com.purdue.comedia
 
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.activity_new_post_page_ui.*
 import kotlinx.android.synthetic.main.post_row.view.*
 
@@ -15,11 +18,15 @@ class NewPostPageUI : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_post_page_ui)
 
-        supportActionBar?.title = ""
+        supportActionBar?.title = "View Post"
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
         val postID = intent.getStringExtra(MainAdapter.POST_ID)
         val post: PostModel = grabPostObject(postID)
+
+        postPageBtnComment.setOnClickListener {
+            postComment()
+        }
 
 //        FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
 //            postPageUsername.text = it.username
@@ -30,6 +37,39 @@ class NewPostPageUI : AppCompatActivity() {
 //        postPageTitle.text = post.title
 //        postPageGenre.text = post.genre
 
+    }
+
+    private fun postComment() {
+        val inputText = EditText(this)
+        inputText.hint = "Enter your comment"
+
+        val textInputLayout = TextInputLayout(this)
+        textInputLayout.setPadding(
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0,
+            resources.getDimensionPixelOffset(R.dimen.dp_19), 0
+        )
+
+        textInputLayout.addView(inputText)
+
+        val alert = AlertDialog.Builder(this)
+            .setTitle("Post Comment")
+            .setView(textInputLayout)
+            .setPositiveButton("Comment") { dialog, _ ->
+                // Handle new profile information
+                val commentStr = inputText.text.toString()
+                if (commentStr.isEmpty()) dialog.cancel()
+                else makeComment(commentStr)
+                dialog.cancel()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }.create()
+
+        alert.show()
+    }
+
+    private fun makeComment(commentStr: String) {
+        // Todo: Make comment (Add to post and to user's interactions etc.)
     }
 
     private fun grabPostObject(postID: String?): PostModel {

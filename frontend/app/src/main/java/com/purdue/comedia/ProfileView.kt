@@ -33,8 +33,7 @@ class ProfileView : AppCompatActivity() {
             }
         }
 
-        // Todo: Set button based on if the current user is following this user or not
-        userbtnFollow.text = "Follow"
+        userbtnFollow.text = checkFollowStatus(username)
 
         userbtnFollow.setOnClickListener {
             followOrUnfollowUser(username, userbtnFollow)
@@ -55,6 +54,11 @@ class ProfileView : AppCompatActivity() {
 
     }
 
+    private fun checkFollowStatus(username: String): String {
+        // Todo: Return 'Follow' or 'Unfollow' based on whether the current user follows the user with the specified username above
+        return "Follow"
+    }
+
     private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
         drawable.isCircular = true
@@ -72,11 +76,16 @@ class ProfileView : AppCompatActivity() {
 
     private fun followOrUnfollowUser(username: String, followBtn: Button) {
         // Toggle button text
+        val beginFollowing = (followBtn.text.toString().toLowerCase() == "follow")
         if (followBtn.text.toString().toLowerCase() == "follow") followBtn.text = "Unfollow"
         else followBtn.text = "Follow"
 
         // Todo: follow or unfollow the user with the specified username
-
+        if (beginFollowing) {
+            // Follow the specified user
+        } else {
+            // Unfollow the specified user
+        }
     }
 
     // Allow back button to work

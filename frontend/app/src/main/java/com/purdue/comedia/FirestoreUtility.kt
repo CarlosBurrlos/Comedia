@@ -274,7 +274,6 @@ class FirestoreUtility {
         // Queries posts saved by the current user
         fun querySavedPostsFeed(uid: String = FirebaseAuth.getInstance().uid!!)
                 : Task<List<PostModelClient>> {
-            // Todo: @TOM
             return queryForUserByUID(uid)
                 .continueWithTask { user ->
                     val taskList: MutableList<Task<PostModelClient>> = mutableListOf()
@@ -291,10 +290,6 @@ class FirestoreUtility {
                     }
                     return@continueWith postList
                 }
-        }
-
-        fun foo(bar: Number): Number {
-            return bar
         }
 
         // Queries posts saved by the current user

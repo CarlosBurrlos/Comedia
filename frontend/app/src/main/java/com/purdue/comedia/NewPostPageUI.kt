@@ -58,7 +58,7 @@ class NewPostPageUI : AppCompatActivity() {
                 // Handle new profile information
                 val commentStr = inputText.text.toString()
                 if (commentStr.isEmpty()) dialog.cancel()
-                else makeComment(commentStr)
+                else makeComment(commentStr,intent.getStringExtra(MainAdapter.POST_ID)!!)
                 dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -68,8 +68,8 @@ class NewPostPageUI : AppCompatActivity() {
         alert.show()
     }
 
-    private fun makeComment(commentStr: String) {
-        // Todo: Make comment (Add to post and to user's interactions etc.)
+    private fun makeComment(commentStr: String, postID: String) {
+        FirestoreUtility.createComment(commentStr, postID)
     }
 
     private fun grabPostObject(postID: String?): PostModel {

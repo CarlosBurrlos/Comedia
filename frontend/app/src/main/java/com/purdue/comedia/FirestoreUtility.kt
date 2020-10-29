@@ -232,7 +232,7 @@ class FirestoreUtility {
             firestore.collection("posts").add(new_post).addOnSuccessListener {
                 // On a newly created post, get the post reference (for references)
                     newPost ->
-                val timestamp = com.google.firebase.firestore.FieldValue.serverTimestamp()
+                val timestamp = FieldValue.serverTimestamp()
                 // Callback not needed
                 newPost.update("created", timestamp)
 
@@ -241,8 +241,25 @@ class FirestoreUtility {
                     .document(uid)
                     .update(
                         "createdPosts",
-                        com.google.firebase.firestore.FieldValue.arrayUnion(newPost)
+                        FieldValue.arrayUnion(newPost)
                     )
+            }
+        }
+
+        // Creates a comment on a post
+        fun createComment(
+            newComment: String,
+            postid: String
+        ): Task<Void> {
+            var commentModel = CommentModel()
+            val uid: String = FirebaseAuth.getInstance().uid!!
+            commentModel.poster = firestore.collection("users").document(uid)
+            commentModel.parent = firestore.collection("posts").document(postid)
+            commentModel.content = newComment
+            return firestore.collection("comments").add(newComment).continueWithTask{
+                val postTask = firestore.collection("posts").document(postid).update("comments",FieldValue.arrayUnion(it.result!!))
+                val userTask = firestore.collection("users").document(uid).update("comments",FieldValue.arrayUnion(it.result!!))
+                return@continueWithTask Tasks.whenAll(postTask, userTask)
             }
         }
 
@@ -416,7 +433,7 @@ class FirestoreUtility {
                 .document(uid)
                 .update(
                     "genresFollowing",
-                    com.google.firebase.firestore.FieldValue.arrayUnion(genre)
+                    FieldValue.arrayUnion(genre)
                 )
         }
 

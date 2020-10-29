@@ -6,8 +6,8 @@ import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
@@ -66,16 +66,20 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedBtnDownvote.text = "Downvote (" + post.downvoteCount + ")"
         view.feedBtnComment.text = "Comments (" + post.comments.size + ")"
 
-        // Setup tapping on title to go to Post Page
-        view.feedPostTitle.setOnClickListener {
-            val intent = Intent(context, NewPostPageUI::class.java)
-            intent.putExtra(POST_ID, post.postID)
-            view.context.startActivity(intent)
-        }
+        // Setup tapping on title and comments button to go to Post Page
+        view.feedPostTitle.setOnClickListener { goToPost(post, view) }
+        view.feedBtnComment.setOnClickListener { goToPost(post, view) }
 
         // Setup tapping on Profile and username to go to Profile Page
         view.feedProfileImage.setOnClickListener { goToProfile(view) }
         view.feedProfileAuthor.setOnClickListener { goToProfile(view) }
+
+        view.feedBtnSave.text = getSavedStatus(post.postID)
+
+        // Setup Tapping on save post button
+        view.feedBtnSave.setOnClickListener {
+            handlePostSave(post.postID, view.feedBtnSave)
+        }
 
         // Setup Tapping on Genre
         view.feedPostGenre.setOnClickListener {
@@ -95,6 +99,28 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             performUpvote(post.postID)
         }
 
+    }
+
+    private fun goToPost(post: PostModelClient, view: View) {
+        val intent = Intent(contextVar, NewPostPageUI::class.java)
+        intent.putExtra(POST_ID, post.postID)
+        view.context.startActivity(intent)
+    }
+
+    private fun getSavedStatus(postID: String): String {
+        // Todo: Return 'Save' or 'Unsave' based on whether the user has already saved the post or not
+        return "Save"
+    }
+
+    private fun handlePostSave(postID: String, saveBtn: Button) {
+        val beginSave = (saveBtn.text.toString().toLowerCase() == "save")
+
+        // Todo: Save or Unsave the post
+        if (beginSave) {
+            // Save the post
+        } else {
+            // Unsave the post
+        }
     }
 
     private fun performDownvote(postID: String) {

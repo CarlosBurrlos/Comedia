@@ -48,11 +48,8 @@ class FeedTab : Fragment() {
     // Called when screen is loaded to populate feed
     private fun updateTableData() {
         if (!this::adapter.isInitialized) return
-        Log.w("MAINFEED","beginning mainfeed update")
         FirestoreUtility.queryMainFeed().addOnSuccessListener {
             adapter.updateTable(it)
-        }.addOnFailureListener {
-            Log.w("MAINFEED",it.message)
         }
     }
 

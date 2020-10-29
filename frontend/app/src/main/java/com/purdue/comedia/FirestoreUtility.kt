@@ -14,8 +14,9 @@ class FirestoreUtility {
 
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
-        private var currentUser: UserModelClient? = null
+        var currentUser: UserModelClient? = null
             get() = field
+            private set(value) { field = value }
         private var userListener: ListenerRegistration? = null
 
         fun addListenerForCurrentUser() {
@@ -134,6 +135,12 @@ class FirestoreUtility {
             model.parent = snapshot.get("parent")!! as DocumentReference
             model.poster = snapshot.get("poster")!! as DocumentReference
             return model
+        }
+
+        fun resolveUserReferences(references: Collection<DocumentReference>): Task<List<UserModel>> {
+            val resolutionTasks = references.map { resolveUserReference(it) }
+            return Tasks.whenAll(resolutionTasks)
+                .continueWith { resolutionTasks.map { it.result!! } }
         }
 
         fun resolveUserReference(reference: DocumentReference): Task<UserModel> {

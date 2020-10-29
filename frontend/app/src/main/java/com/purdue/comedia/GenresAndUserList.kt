@@ -33,19 +33,22 @@ class GenresAndUserList : AppCompatActivity() {
         // Setup Recycler View
         val recyclerView: RecyclerView = findViewById(R.id.genresAndUsersRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this) // Position to absolute pos.
-        val stringArray = grabGenresFollowing(isGenre)
-        recyclerView.adapter = GenresUsersAdapter(isGenre, stringArray) // Setup table logic
-
+        if (isGenre) {
+            val stringArray = grabGenresFollowing()
+            recyclerView.adapter = GenresUsersAdapter(isGenre, stringArray) // Setup table logic
+        } else {
+            FirestoreUtility.resolveUserReferences(
+                FirestoreUtility.currentUser!!.model.usersFollowing
+            )
+                .addOnSuccessListener { resolvedUsers ->
+                    val usersFollowing = resolvedUsers.map { it.username }
+                    recyclerView.adapter = GenresUsersAdapter(isGenre, usersFollowing)
+                }
+        }
     }
 
-    private fun grabGenresFollowing(isGenre: Boolean): Array<String> {
-        if (isGenre) {
-            // ToDo: Return string array of genres the current user follows
-        } else {
-            // ToDo: Return string array of users the current user is following
-        }
-
-        return Array(3) { i -> "$i" } // Remove
+    private fun grabGenresFollowing(): List<String> {
+        return FirestoreUtility.currentUser!!.model.genresFollowing
     }
 
     // Allow back button to work
@@ -57,7 +60,7 @@ class GenresAndUserList : AppCompatActivity() {
 }
 
 // Recycler View Manager
-class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: Array<String>) :
+class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: List<String>) :
     RecyclerView.Adapter<CustomViewHolder>() {
 
     override fun getItemCount(): Int {
@@ -76,14 +79,14 @@ class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: Array<String>) :
         val view = holder.view
         val context = holder.view.context
 
-        view.listGenreTextView.text = itemStrings.get(rowIndex)
+        view.listGenreTextView.text = itemStrings[rowIndex]
 
         // Setup unfollow button
         view.btnUnfollowGenreOrUser.setOnClickListener {
             if (isGenre) {
-                unfollowGenre(itemStrings.get(rowIndex))
+                unfollowGenre(itemStrings[rowIndex])
             } else {
-                unfollowUser(itemStrings.get(rowIndex))
+                unfollowUser(itemStrings[rowIndex])
             }
             Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
         }

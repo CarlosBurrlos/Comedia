@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.genres_and_users_row.view.*
 import kotlinx.android.synthetic.main.post_row.view.*
 
@@ -32,15 +33,19 @@ class GenresAndUserList : AppCompatActivity() {
         // Setup Recycler View
         val recyclerView: RecyclerView = findViewById(R.id.genresAndUsersRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this) // Position to absolute pos.
-        var stringArray = grabGenresFollowing(isGenre)
-        stringArray = Array(3) { i -> "$anStr $i" } // Remove once array has been populated
+        val stringArray = grabGenresFollowing(isGenre)
         recyclerView.adapter = GenresUsersAdapter(isGenre, stringArray) // Setup table logic
 
     }
 
-    // ToDo: Return string array of genres or users following
-    fun grabGenresFollowing(isGenre: Boolean): Array<String> {
-        return Array(3) { i -> "$i" }
+    private fun grabGenresFollowing(isGenre: Boolean): Array<String> {
+        if (isGenre) {
+            // ToDo: Return string array of genres the current user follows
+        } else {
+            // ToDo: Return string array of users the current user is following
+        }
+
+        return Array(3) { i -> "$i" } // Remove
     }
 
     // Allow back button to work
@@ -73,26 +78,24 @@ class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: Array<String>) :
 
         view.listGenreTextView.text = itemStrings.get(rowIndex)
 
-        // Setup Profile Page
+        // Setup unfollow button
         view.btnUnfollowGenreOrUser.setOnClickListener {
             if (isGenre) {
                 unfollowGenre(itemStrings.get(rowIndex))
             } else {
                 unfollowUser(itemStrings.get(rowIndex))
             }
-            Toast.makeText(context, "Unfollowed from row $rowIndex", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
         }
 
     }
 
-    // ToDo: Unfollow genre by specified string
     fun unfollowGenre(genre: String) {
-
+        // ToDo: Unfollow genre by specified string
     }
 
-    // ToDo: Unfollow user by specified username string
     fun unfollowUser(username: String) {
-
+        // ToDo: Unfollow user by specified username string
     }
 
 }

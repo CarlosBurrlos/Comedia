@@ -99,6 +99,7 @@ class FirestoreUtility {
             model.downvoteList = snapshot.get("downvoteList")!! as ArrayList<DocumentReference>
             model.upvoteCount = snapshot.get("upvoteCount")!! as Long
             model.upvoteList = snapshot.get("upvoteList")!! as ArrayList<DocumentReference>
+            model.saveList = snapshot.get("saveList")!! as ArrayList<DocumentReference>
             model.isAnon = snapshot.get("anon")!! as Boolean
             model.poster = snapshot.get("poster")!! as DocumentReference
             model.title = snapshot.get("title")!! as String
@@ -116,12 +117,14 @@ class FirestoreUtility {
             model.downvoteList = snapshot.get("downvoteList")!! as ArrayList<DocumentReference>
             model.upvoteCount = snapshot.get("upvoteCount")!! as Long
             model.upvoteList = snapshot.get("upvoteList")!! as ArrayList<DocumentReference>
+            model.saveList = snapshot.get("saveList")!! as ArrayList<DocumentReference>
             model.isAnon = snapshot.get("anon")!! as Boolean
             model.poster = snapshot.get("poster")!! as DocumentReference
             model.title = snapshot.get("title")!! as String
             model.type = snapshot.get("type")!! as String
             model.genre = snapshot.get("genre")!! as String
             model.postID = snapshot.id
+            model.reference = snapshot.reference
             return model
         }
 
@@ -234,14 +237,6 @@ class FirestoreUtility {
                         com.google.firebase.firestore.FieldValue.arrayUnion(newPost)
                     )
             }
-        }
-
-        // Returns a series of PostModelClient objects representing a user's main feed
-        fun compileMainFeed(
-            uid: String
-        ): List<PostModelClient> {
-
-            return emptyList()
         }
 
         // Converts a returned query snapshot to a list of PostModelClients
@@ -404,6 +399,30 @@ class FirestoreUtility {
                 .continueWith{
                     return@continueWith convertQueryToPosts(it.result!!)
                 }
+        }
+
+        fun followGenre(
+            genre: String
+        ): Task<Void> {
+            val uid: String = FirebaseAuth.getInstance().uid!!
+            return firestore.collection("users")
+                .document(uid)
+                .update(
+                    "genresFollowing",
+                    com.google.firebase.firestore.FieldValue.arrayUnion(genre)
+                )
+        }
+
+        fun unfollowGenre(
+            genre: String
+        ): Task<Void> {
+            val uid: String = FirebaseAuth.getInstance().uid!!
+            return firestore.collection("users")
+                .document(uid)
+                .update(
+                    "genresFollowing",
+                    com.google.firebase.firestore.FieldValue.arrayRemove(genre)
+                )
         }
 
         fun followUser(

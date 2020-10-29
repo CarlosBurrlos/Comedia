@@ -14,5 +14,6 @@ open class PostModel {
     var comments = ArrayList<DocumentReference>()
     var upvoteList = ArrayList<DocumentReference>()
     var downvoteList = ArrayList<DocumentReference>()
+    var saveList = ArrayList<DocumentReference>()
 }
 

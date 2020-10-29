@@ -143,6 +143,21 @@ class ProfileTab : Fragment() {
             startActivity(intent)
         }
 
+        // Delete Button Functionality
+        val btnDeleteAccount: Button = root.findViewById(R.id.btnDeleteAccount)
+        btnDeleteAccount.setOnClickListener {
+            val alert = AlertDialog.Builder(context)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account and all its data?")
+                .setPositiveButton("Confirm") { dialog, _ ->
+                    performAccountDeletion()
+                    dialog.cancel()
+                }.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.cancel()
+                }.create()
+            alert.show()
+        }
+
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
@@ -151,6 +166,11 @@ class ProfileTab : Fragment() {
         updateTableData()
 
         return root
+    }
+
+    private fun performAccountDeletion() {
+        // Todo: Delete the current user's account and log out
+        toast("Todo: Delete Account")
     }
 
     private fun updateTableData() {

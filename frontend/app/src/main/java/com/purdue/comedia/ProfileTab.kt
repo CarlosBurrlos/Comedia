@@ -266,8 +266,7 @@ class ProfileTab : Fragment() {
     }
 
     private fun followGenre(genre: String) {
-        // Todo: Follow the specified genre
-        toast("Todo: Follow $genre's Feed")
+        FirestoreUtility.followGenre(genre)
     }
 
     private fun viewProfile(username: String) {

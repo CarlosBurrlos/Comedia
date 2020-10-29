@@ -23,6 +23,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -158,6 +159,11 @@ class ProfileTab : Fragment() {
             alert.show()
         }
 
+        val btnViewSelfProfile: Button = root.findViewById(R.id.btnViewSelfProfile)
+        btnViewSelfProfile.setOnClickListener {
+            goToProfile()
+        }
+
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.myRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
@@ -166,6 +172,12 @@ class ProfileTab : Fragment() {
         updateTableData()
 
         return root
+    }
+
+    private fun goToProfile() {
+        val intent = Intent(context, ProfileView::class.java)
+        intent.putExtra(MainAdapter.USERNAME, profileUsername.text.toString())
+        startActivity(intent)
     }
 
     private fun performAccountDeletion() {

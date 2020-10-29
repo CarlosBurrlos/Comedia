@@ -10,8 +10,8 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_profile_view.*
-import kotlinx.android.synthetic.main.profile_tab.*
 
 /** To view profile of another user */
 class ProfileView : AppCompatActivity() {
@@ -27,6 +27,10 @@ class ProfileView : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
         userProfileUsername.text = username
+
+        // Hide follow button if viewing your own profile
+        hideFollowButtonIfSelf(username, userbtnFollow)
+
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
             FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
                 userProfileBio.text = it.biography
@@ -52,6 +56,16 @@ class ProfileView : AppCompatActivity() {
         recyclerView.adapter = adapter // Setup table logic
         updateTableData(username)
 
+    }
+
+    private fun hideFollowButtonIfSelf(username: String, followButton: Button) {
+        FirestoreUtility.queryForUserByUID(FirebaseAuth.getInstance().uid!!, {
+            if (it.username == username) {
+                followButton.alpha = 0F
+                followButton.isClickable = false
+                followButton.isFocusable = false
+            }
+        })
     }
 
     private fun checkFollowStatus(username: String): String {

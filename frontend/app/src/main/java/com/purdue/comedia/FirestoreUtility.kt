@@ -1,6 +1,5 @@
 package com.purdue.comedia
 
-import android.widget.Toast
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -12,8 +11,29 @@ import kotlin.collections.ArrayList
 class FirestoreUtility {
     companion object {
         private val firestore = FirebaseFirestore.getInstance()
+
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
+        private var currentUser: UserModelClient? = null
+            get() = field
+        private var userListener: ListenerRegistration? = null
+
+        fun addListenerForCurrentUser() {
+            currentUser = UserModelClient()
+            userListener = userRefByUID(auth.uid!!)
+                .addSnapshotListener {
+                        value, _ ->
+                    if (value == null) return@addSnapshotListener
+                    currentUser?.reference = value.reference
+                    currentUser?.model = convertToUser(value)
+                }
+        }
+
+        fun clearCurrentUserListener() {
+            userListener?.remove()
+            userListener = null
+            currentUser = null
+        }
 
         fun resolveReference(
             reference: DocumentReference,
@@ -204,7 +224,7 @@ class FirestoreUtility {
                     newPost ->
                 val timestamp = com.google.firebase.firestore.FieldValue.serverTimestamp()
                 // Callback not needed
-                newPost.update("created", timestamp);
+                newPost.update("created", timestamp)
 
                 // Update the user object's createdPosts
                 firestore.collection("users")
@@ -331,7 +351,7 @@ class FirestoreUtility {
                         return@continueWith postListList.flatten()
                     }
             } else {
-                return queryMultiUserFeedSimple(users);
+                return queryMultiUserFeedSimple(users)
             }
         }
 
@@ -368,7 +388,7 @@ class FirestoreUtility {
                         return@continueWith postListList.flatten()
                     }
             } else {
-                return queryMultiGenreFeedSimple(genres);
+                return queryMultiGenreFeedSimple(genres)
             }
         }
 

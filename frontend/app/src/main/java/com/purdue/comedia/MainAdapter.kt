@@ -73,7 +73,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Setup tapping on Profile and username to go to Profile Page
         view.feedProfileImage.setOnClickListener { goToProfile(view) }
         view.feedProfileAuthor.setOnClickListener { goToProfile(view) }
-
+        
         view.feedBtnSave.text = getSavedStatus(post.postID)
 
         // Setup Tapping on save post button
@@ -109,6 +109,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
     private fun getSavedStatus(postID: String): String {
         // Todo: Return 'Save' or 'Unsave' based on whether the user has already saved the post or not
+
         return "Save"
     }
 

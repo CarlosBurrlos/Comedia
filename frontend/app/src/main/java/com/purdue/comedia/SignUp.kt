@@ -10,13 +10,9 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isVisible
-import com.google.android.gms.tasks.Continuation
-import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_sign_up.*
 
 class SignUp : AppCompatActivity() {
@@ -73,7 +69,7 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun performFirebaseLogin(email: String) {
-        auth.signInWithEmailAndPassword(email, registerPassword.text.toString())
+        AuthUtility.signIn(email, registerPassword.text.toString())
             .addOnSuccessListener {
                 // Sign in success, update UI with the signed-in user's information
                 val user = auth.currentUser
@@ -81,7 +77,7 @@ class SignUp : AppCompatActivity() {
                 if (user!!.isEmailVerified) {
                     updateUI(true, user)
                 } else {
-                    auth.signOut()
+                    AuthUtility.signOut()
                     snack("Please verify your email address")
                 }
             }
@@ -107,7 +103,8 @@ class SignUp : AppCompatActivity() {
 
     private fun createFirebaseUserAccount() {
         // Checks completed. Continue with sign up. Create new account.
-        auth.createUserWithEmailAndPassword(
+
+        AuthUtility.createAccount(
             registerEmail.text.toString(),
             registerPassword.text.toString()
         )
@@ -121,7 +118,7 @@ class SignUp : AppCompatActivity() {
                         auth.currentUser!!.sendEmailVerification()
                     }
                     .addOnSuccessListener {
-                        auth.signOut()
+                        AuthUtility.signOut()
                         signInLoader.isVisible = false
                         snack("Email Sent. Verify email and login.")
                         toggleSignInAndSignUp()

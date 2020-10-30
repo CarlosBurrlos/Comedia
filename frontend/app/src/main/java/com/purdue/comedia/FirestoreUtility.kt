@@ -160,6 +160,12 @@ class FirestoreUtility {
             return reference.get().continueWith(convertResult(::convertToPostClient))
         }
 
+        fun resolveCommentReferences(references: Collection<DocumentReference>): Task<List<CommentModel>> {
+            val resolutionTasks = references.map { resolveCommentReference(it) }
+            return Tasks.whenAll(resolutionTasks)
+                .continueWith { resolutionTasks.map { it.result!! } }
+        }
+
         fun resolveCommentReference(reference: DocumentReference): Task<CommentModel> {
             return reference.get().continueWith(convertResult(::convertToComment))
         }

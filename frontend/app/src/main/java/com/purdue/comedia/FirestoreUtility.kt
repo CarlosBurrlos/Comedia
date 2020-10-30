@@ -14,26 +14,26 @@ class FirestoreUtility {
 
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
-        var currentUser: UserModelClient? = null
+        var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
             get() = field
             private set(value) { field = value }
         private var userListener: ListenerRegistration? = null
 
         fun addListenerForCurrentUser() {
-            currentUser = UserModelClient()
+            if (auth.uid == null) return
             userListener = userRefByUID(auth.uid!!)
                 .addSnapshotListener {
                         value, _ ->
                     if (value == null) return@addSnapshotListener
-                    currentUser?.reference = value.reference
-                    currentUser?.model = convertToUser(value)
+                    currentUser.reference = value.reference
+                    currentUser.model = convertToUser(value)
                 }
         }
 
         fun clearCurrentUserListener() {
             userListener?.remove()
             userListener = null
-            currentUser = null
+            currentUser = UserModelClient()
         }
 
         fun resolveReference(

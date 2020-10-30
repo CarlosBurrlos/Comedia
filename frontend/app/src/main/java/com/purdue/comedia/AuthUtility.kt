@@ -96,21 +96,20 @@ class AuthUtility {
         }
 
         private fun deletePost(post: DocumentReference, postModel: PostModel): Task<Void> {
-            val postRemovalTasks = ArrayList<Task<Void>>()
-            for (userRef in postModel.upvoteList) {
-                postRemovalTasks.add(
-                    userRef.update("upvotedPosts", FieldValue.arrayRemove(post))
-                )
-            }
-            for (userRef in postModel.downvoteList) {
-                postRemovalTasks.add(
-                    userRef.update("downvotedPosts", FieldValue.arrayRemove(post))
-                )
-            }
-            postRemovalTasks.add(deleteComments(postModel.comments))
-            postRemovalTasks.add(post.delete())
+            val downvoteTasks = postModel.downvoteList
+                .map { it.update("downvotedPosts", FieldValue.arrayRemove(post)) }
+            val upvoteTasks = postModel.upvoteList
+                .map { it.update("upvotedPosts", FieldValue.arrayRemove(post)) }
+            val savedPostTasks = postModel.saveList
+                .map { it.update("savedPosts", FieldValue.arrayRemove(post)) }
 
-            return Tasks.whenAll(postRemovalTasks)
+            return Tasks.whenAll(
+                Tasks.whenAll(downvoteTasks),
+                Tasks.whenAll(upvoteTasks),
+                Tasks.whenAll(savedPostTasks),
+                deleteComments(postModel.comments),
+                post.delete()
+            )
         }
 
         private fun removeFromFollowLists(user: UserModel): Task<UserModel> {
@@ -164,7 +163,8 @@ class AuthUtility {
 
             val profileModel = ProfileModel()
             profileModel.biography = "No bio yet!"
-            profileModel.profileImage = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
+            profileModel.profileImage =
+                "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
             profileModel.user = user
 
             return firestore.collection("profiles").add(profileModel)

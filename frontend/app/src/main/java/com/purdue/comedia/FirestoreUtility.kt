@@ -202,13 +202,13 @@ class FirestoreUtility {
                 }
         }
 
-        fun postRefByUID(postId: String): DocumentReference {
+        fun postRefById(postId: String): DocumentReference {
             return firestore.collection("posts")
                 .document(postId)
         }
 
         fun queryForPostById(postId: String): Task<PostModel> {
-            return postRefByUID(postId)
+            return postRefById(postId)
                 .get()
                 .continueWith(convertResult(::convertToPost))
         }

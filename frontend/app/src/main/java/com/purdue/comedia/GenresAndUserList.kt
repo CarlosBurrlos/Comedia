@@ -1,18 +1,18 @@
 package com.purdue.comedia
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent.getIntent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.genres_and_users_row.view.*
-import kotlinx.android.synthetic.main.post_row.view.*
+
 
 class GenresAndUserList : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +47,7 @@ class GenresAndUserList : AppCompatActivity() {
         }
     }
 
-    private fun grabGenresFollowing(): List<String> {
+    fun grabGenresFollowing(): List<String> {
         return FirestoreUtility.currentUser!!.model.genresFollowing
     }
 
@@ -60,7 +60,7 @@ class GenresAndUserList : AppCompatActivity() {
 }
 
 // Recycler View Manager
-class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: List<String>) :
+class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
     RecyclerView.Adapter<CustomViewHolder>() {
 
     override fun getItemCount(): Int {
@@ -98,22 +98,27 @@ class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: List<String>) :
 
         // Setup unfollow button
         view.btnUnfollowGenreOrUser.setOnClickListener {
+            val str = itemStrings[rowIndex]
             if (isGenre) {
-                unfollowGenre(itemStrings[rowIndex])
+                FirestoreUtility.unfollowGenre(str).addOnSuccessListener {
+                    itemStrings = FirestoreUtility.currentUser.model.genresFollowing
+                    notifyDataSetChanged()
+                    Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                unfollowUser(itemStrings[rowIndex])
+                FirestoreUtility.unfollowUser(str).continueWithTask {
+                    FirestoreUtility.resolveUserReferences(
+                        FirestoreUtility.currentUser.model.usersFollowing
+                    )
+                        .addOnSuccessListener { resolvedUsers ->
+                            itemStrings = resolvedUsers.map { it.username }
+                            notifyDataSetChanged()
+                            Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
-            Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
         }
 
-    }
-
-    fun unfollowGenre(genre: String) {
-        FirestoreUtility.unfollowGenre(genre)
-    }
-
-    fun unfollowUser(username: String) {
-        FirestoreUtility.unfollowUser(username)
     }
 
 }

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.textfield.TextInputLayout
@@ -27,8 +28,21 @@ class NewPostPageUI : AppCompatActivity() {
                 displayPost(it)
             }
 
+        updateComments(postID)
+
         postPageBtnComment.setOnClickListener {
             postComment()
+        }
+    }
+
+    private fun updateComments(postID: String) {
+        commentsString.text = ""
+        FirestoreUtility.queryForPostById(postID).continueWithTask {
+            FirestoreUtility.resolveCommentReferences(it.result!!.comments)
+        }.addOnSuccessListener {
+            for (comment in it) {
+                commentsString.text = commentsString.text.toString() + comment.content + "\n"
+            }
         }
     }
 
@@ -73,7 +87,9 @@ class NewPostPageUI : AppCompatActivity() {
     }
 
     private fun makeComment(commentStr: String, postID: String) {
-        FirestoreUtility.createComment(commentStr, postID)
+        FirestoreUtility.createComment(commentStr, postID).addOnSuccessListener {
+            updateComments(postID)
+        }
     }
 
     private fun updateProfilePicture(username: String) {

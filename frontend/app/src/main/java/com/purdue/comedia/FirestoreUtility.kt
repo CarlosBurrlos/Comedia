@@ -268,7 +268,7 @@ class FirestoreUtility {
             commentModel.poster = firestore.collection("users").document(uid)
             commentModel.parent = firestore.collection("posts").document(postid)
             commentModel.content = newComment
-            return firestore.collection("comments").add(newComment).continueWithTask {
+            return firestore.collection("comments").add(commentModel).continueWithTask {
                 val postTask = firestore.collection("posts").document(postid)
                     .update("comments", FieldValue.arrayUnion(it.result!!))
                 val userTask = firestore.collection("users").document(uid)

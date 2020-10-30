@@ -73,8 +73,10 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Setup tapping on Profile and username to go to Profile Page
         view.feedProfileImage.setOnClickListener { goToProfile(view) }
         view.feedProfileAuthor.setOnClickListener { goToProfile(view) }
-        
-        view.feedBtnSave.text = getSavedStatus(post.postID)
+
+        FirestoreUtility.queryForPostById(post.postID)
+            .addOnSuccessListener { view.feedBtnSave.text = "Unsave" }
+            .addOnFailureListener { view.feedBtnSave.text = "Save" }
 
         // Setup Tapping on save post button
         view.feedBtnSave.setOnClickListener {
@@ -105,12 +107,6 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         val intent = Intent(contextVar, NewPostPageUI::class.java)
         intent.putExtra(POST_ID, post.postID)
         view.context.startActivity(intent)
-    }
-
-    private fun getSavedStatus(postID: String): String {
-        // Todo: Return 'Save' or 'Unsave' based on whether the user has already saved the post or not
-
-        return "Save"
     }
 
     private fun handlePostSave(postID: String, saveBtn: Button) {

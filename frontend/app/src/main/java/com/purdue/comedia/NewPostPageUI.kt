@@ -21,22 +21,26 @@ class NewPostPageUI : AppCompatActivity() {
         supportActionBar?.title = "View Post"
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
-        val postID = intent.getStringExtra(MainAdapter.POST_ID)
-        val post: PostModel = grabPostObject(postID)
+        val postID = intent.getStringExtra(MainAdapter.POST_ID) ?: ""
+        FirestoreUtility.queryForPostById(postID)
+            .addOnSuccessListener {
+                displayPost(it)
+            }
 
         postPageBtnComment.setOnClickListener {
             postComment()
         }
+    }
 
-//        FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
-//            postPageUsername.text = it.username
-//            updateProfilePicture(it.username)
-//        }
-//
-//        postPageBody.text = post.content
-//        postPageTitle.text = post.title
-//        postPageGenre.text = post.genre
+    private fun displayPost(post: PostModel) {
+        FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
+            postPageUsername.text = it.username
+            updateProfilePicture(it.username)
+        }
 
+        postPageBody.text = post.content
+        postPageTitle.text = post.title
+        postPageGenre.text = post.genre
     }
 
     private fun postComment() {
@@ -70,11 +74,6 @@ class NewPostPageUI : AppCompatActivity() {
 
     private fun makeComment(commentStr: String, postID: String) {
         FirestoreUtility.createComment(commentStr, postID)
-    }
-
-    private fun grabPostObject(postID: String?): PostModel {
-        // Todo: return post model with all the information from postID then uncomment lines above
-        return PostModel()
     }
 
     private fun updateProfilePicture(username: String) {

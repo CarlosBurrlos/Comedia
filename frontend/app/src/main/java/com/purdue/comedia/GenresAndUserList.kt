@@ -94,11 +94,11 @@ class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: List<String>) :
     }
 
     fun unfollowGenre(genre: String) {
-        // ToDo: Unfollow genre by specified string
+        FirestoreUtility.unfollowGenre(genre)
     }
 
     fun unfollowUser(username: String) {
-        // ToDo: Unfollow user by specified username string
+        FirestoreUtility.unfollowUser(username)
     }
 
 }

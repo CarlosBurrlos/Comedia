@@ -201,6 +201,17 @@ class FirestoreUtility {
                 }
         }
 
+        fun postRefByUID(postId: String): DocumentReference {
+            return firestore.collection("posts")
+                .document(postId)
+        }
+
+        fun queryForPostById(postId: String): Task<PostModel> {
+            return postRefByUID(postId)
+                .get()
+                .continueWith(convertResult(::convertToPost))
+        }
+
         fun queryForEmailByName(username: String): Task<String> {
             return queryForUserLookup(username)
                 .continueWith { it.result!!.email }

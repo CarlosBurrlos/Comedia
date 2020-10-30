@@ -81,6 +81,21 @@ class GenresUsersAdapter(val isGenre: Boolean, val itemStrings: List<String>) :
 
         view.listGenreTextView.text = itemStrings[rowIndex]
 
+        if (isGenre) {
+            view.listGenreTextView.setOnClickListener {
+                val intent = Intent(context, CustomFeed::class.java)
+                intent.putExtra(MainAdapter.NAV_TITLE, view.listGenreTextView.text.toString())
+                intent.putExtra(MainAdapter.GENRE, view.listGenreTextView.text.toString())
+                view.context.startActivity(intent)
+            }
+        } else {
+            view.listGenreTextView.setOnClickListener {
+                val intent = Intent(context, ProfileView::class.java)
+                intent.putExtra(MainAdapter.USERNAME, view.listGenreTextView.text.toString())
+                view.context.startActivity(intent)
+            }
+        }
+
         // Setup unfollow button
         view.btnUnfollowGenreOrUser.setOnClickListener {
             if (isGenre) {

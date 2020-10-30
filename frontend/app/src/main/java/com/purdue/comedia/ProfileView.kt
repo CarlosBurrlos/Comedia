@@ -39,7 +39,7 @@ class ProfileView : AppCompatActivity() {
 
         FirestoreUtility.queryForUserRefByName(username)
             .addOnSuccessListener {
-                if (it in FirestoreUtility.currentUser!!.model.usersFollowing) {
+                if (it in FirestoreUtility.currentUser.model.usersFollowing) {
                     userbtnFollow.text =  "Unfollow"
                 } else {
                     userbtnFollow.text = "Follow"

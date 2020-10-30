@@ -16,14 +16,15 @@ class FirestoreUtility {
         private const val feedLimit = 100
         var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
             get() = field
-            private set(value) { field = value }
+            private set(value) {
+                field = value
+            }
         private var userListener: ListenerRegistration? = null
 
         fun addListenerForCurrentUser() {
             if (auth.uid == null) return
             userListener = userRefByUID(auth.uid!!)
-                .addSnapshotListener {
-                        value, _ ->
+                .addSnapshotListener { value, _ ->
                     if (value == null) return@addSnapshotListener
                     currentUser.reference = value.reference
                     currentUser.model = convertToUser(value)
@@ -201,13 +202,13 @@ class FirestoreUtility {
                 }
         }
 
-        fun postRefByUID(postId: String): DocumentReference {
+        fun postRefById(postId: String): DocumentReference {
             return firestore.collection("posts")
                 .document(postId)
         }
 
         fun queryForPostById(postId: String): Task<PostModel> {
-            return postRefByUID(postId)
+            return postRefById(postId)
                 .get()
                 .continueWith(convertResult(::convertToPost))
         }
@@ -267,9 +268,11 @@ class FirestoreUtility {
             commentModel.poster = firestore.collection("users").document(uid)
             commentModel.parent = firestore.collection("posts").document(postid)
             commentModel.content = newComment
-            return firestore.collection("comments").add(newComment).continueWithTask{
-                val postTask = firestore.collection("posts").document(postid).update("comments",FieldValue.arrayUnion(it.result!!))
-                val userTask = firestore.collection("users").document(uid).update("comments",FieldValue.arrayUnion(it.result!!))
+            return firestore.collection("comments").add(newComment).continueWithTask {
+                val postTask = firestore.collection("posts").document(postid)
+                    .update("comments", FieldValue.arrayUnion(it.result!!))
+                val userTask = firestore.collection("users").document(uid)
+                    .update("comments", FieldValue.arrayUnion(it.result!!))
                 return@continueWithTask Tasks.whenAll(postTask, userTask)
             }
         }
@@ -278,7 +281,7 @@ class FirestoreUtility {
         fun convertQueryToPosts(
             qs: QuerySnapshot
         ): List<PostModelClient> {
-            var list : MutableList<PostModelClient> = mutableListOf()
+            var list: MutableList<PostModelClient> = mutableListOf()
             qs.iterator().forEachRemaining {
                 list.add(convertToPostClient(it))
             }
@@ -316,10 +319,11 @@ class FirestoreUtility {
                     user.result!!.savedPosts.forEach {
                         taskList.add(resolvePostClientReference(it))
                     }
-                    val finalList: List<Task<PostModelClient>> = Collections.unmodifiableList(taskList)
+                    val finalList: List<Task<PostModelClient>> =
+                        Collections.unmodifiableList(taskList)
                     return@continueWithTask Tasks.whenAllComplete(finalList)
                 }
-                .continueWith{
+                .continueWith {
                     val postList: MutableList<PostModelClient> = mutableListOf()
                     it.result!!.forEach {
                         postList.add(it.result!! as PostModelClient)
@@ -354,7 +358,7 @@ class FirestoreUtility {
                         }
                         return@continueWithTask Tasks.whenAllComplete(taskList)
                     }
-                    .continueWith{
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
                         it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
@@ -367,7 +371,7 @@ class FirestoreUtility {
                     .orderBy("created", Query.Direction.DESCENDING)
                     .limit(feedLimit.toLong())
                     .get()
-                    .continueWith{
+                    .continueWith {
                         return@continueWith convertQueryToPosts(it.result!!)
                     }
             }
@@ -381,12 +385,12 @@ class FirestoreUtility {
                 var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in users.indices step 10) {
                     val max = (x + 9).coerceAtMost(users.size)  // Kotlin's way of doing Math.min
-                    taskList.add(queryMultiUserFeedSimple(users.subList(x,max)))
+                    taskList.add(queryMultiUserFeedSimple(users.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith{
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        it.result!!.forEach{
+                        it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()
@@ -405,7 +409,7 @@ class FirestoreUtility {
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()
-                .continueWith{
+                .continueWith {
                     return@continueWith convertQueryToPosts(it.result!!)
                 }
         }
@@ -418,12 +422,12 @@ class FirestoreUtility {
                 var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in genres.indices step 10) {
                     val max = (x + 9).coerceAtMost(genres.size)   // Kotlin's way of doing Math.min
-                    taskList.add(queryMultiGenreFeedSimple(genres.subList(x,max)))
+                    taskList.add(queryMultiGenreFeedSimple(genres.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith{
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        it.result!!.forEach{
+                        it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()
@@ -442,7 +446,7 @@ class FirestoreUtility {
                 .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
-                .continueWith{
+                .continueWith {
                     return@continueWith convertQueryToPosts(it.result!!)
                 }
         }
@@ -467,34 +471,40 @@ class FirestoreUtility {
                 .document(uid)
                 .update(
                     "genresFollowing",
-                    com.google.firebase.firestore.FieldValue.arrayRemove(genre)
+                    FieldValue.arrayRemove(genre)
                 )
         }
 
-        fun followUser(
-            username: String
-        ): Task<Void> {
-            val currentUser = userRefByUID(auth.uid!!)
+        fun followUser(username: String): Task<Void> {
             return queryForUserRefByName(username)
                 .continueWithTask {
                     val addAsFollower =
-                        it.result!!.update("followers", FieldValue.arrayUnion(currentUser))
+                        it.result!!.update(
+                            "followers",
+                            FieldValue.arrayUnion(currentUser.reference)
+                        )
                     val addToFollowing =
-                        currentUser.update("usersFollowing", FieldValue.arrayUnion(it.result!!))
+                        currentUser.reference.update(
+                            "usersFollowing",
+                            FieldValue.arrayUnion(it.result!!)
+                        )
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
         }
 
-        fun unfollowUser(
-            username: String
-        ): Task<Void> {
-            val currentUser = userRefByUID(auth.uid!!)
+        fun unfollowUser(username: String): Task<Void> {
             return queryForUserRefByName(username)
                 .continueWithTask {
                     val addAsFollower =
-                        it.result!!.update("followers", FieldValue.arrayRemove(currentUser))
+                        it.result!!.update(
+                            "followers",
+                            FieldValue.arrayRemove(currentUser.reference)
+                        )
                     val addToFollowing =
-                        currentUser.update("usersFollowing", FieldValue.arrayRemove(it.result!!))
+                        currentUser.reference.update(
+                            "usersFollowing",
+                            FieldValue.arrayRemove(it.result!!)
+                        )
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
         }

@@ -12,7 +12,6 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.post_row.view.*
-import kotlinx.android.synthetic.main.profile_tab.view.*
 
 // Recycler View Manager
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
@@ -74,9 +73,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedProfileImage.setOnClickListener { goToProfile(view) }
         view.feedProfileAuthor.setOnClickListener { goToProfile(view) }
 
-        FirestoreUtility.queryForPostById(post.postID)
-            .addOnSuccessListener { view.feedBtnSave.text = "Unsave" }
-            .addOnFailureListener { view.feedBtnSave.text = "Save" }
+        if (FirestoreUtility.postRefById(post.postID) in FirestoreUtility.currentUser.model.savedPosts) {
+            view.feedBtnSave.text = "Unsave"
+        } else {
+            view.feedBtnSave.text = "Save"
+        }
 
         // Setup Tapping on save post button
         view.feedBtnSave.setOnClickListener {

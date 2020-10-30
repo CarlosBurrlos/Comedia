@@ -37,7 +37,15 @@ class ProfileView : AppCompatActivity() {
             }
         }
 
-        userbtnFollow.text = checkFollowStatus(username)
+        FirestoreUtility.queryForUserRefByName(username)
+            .addOnSuccessListener {
+                if (it in FirestoreUtility.currentUser!!.model.usersFollowing) {
+                    userbtnFollow.text =  "Unfollow"
+                } else {
+                    userbtnFollow.text = "Follow"
+                }
+            }
+
 
         userbtnFollow.setOnClickListener {
             followOrUnfollowUser(username, userbtnFollow)
@@ -68,11 +76,6 @@ class ProfileView : AppCompatActivity() {
         })
     }
 
-    private fun checkFollowStatus(username: String): String {
-        // Todo: Return 'Follow' or 'Unfollow' based on whether the current user follows the user with the specified username above
-        return "Follow"
-    }
-
     private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
         drawable.isCircular = true
@@ -94,11 +97,10 @@ class ProfileView : AppCompatActivity() {
         if (followBtn.text.toString().toLowerCase() == "follow") followBtn.text = "Unfollow"
         else followBtn.text = "Follow"
 
-        // Todo: follow or unfollow the user with the specified username
         if (beginFollowing) {
-            // Follow the specified user
+            FirestoreUtility.followUser(username)
         } else {
-            // Unfollow the specified user
+            FirestoreUtility.unfollowUser(username)
         }
     }
 

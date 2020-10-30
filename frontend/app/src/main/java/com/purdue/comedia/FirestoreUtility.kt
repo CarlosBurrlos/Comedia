@@ -15,10 +15,7 @@ class FirestoreUtility {
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
         var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
-            get() = field
-            private set(value) {
-                field = value
-            }
+            private set
         private var userListener: ListenerRegistration? = null
 
         fun addListenerForCurrentUser() {

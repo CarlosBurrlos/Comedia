@@ -480,7 +480,7 @@ class FirestoreUtility {
                     val addAsFollower =
                         it.result!!.update("followers", FieldValue.arrayUnion(currentUser))
                     val addToFollowing =
-                        currentUser.update("followers", FieldValue.arrayUnion(it.result!!))
+                        currentUser.update("usersFollowing", FieldValue.arrayUnion(it.result!!))
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
         }
@@ -494,7 +494,7 @@ class FirestoreUtility {
                     val addAsFollower =
                         it.result!!.update("followers", FieldValue.arrayRemove(currentUser))
                     val addToFollowing =
-                        currentUser.update("followers", FieldValue.arrayRemove(it.result!!))
+                        currentUser.update("usersFollowing", FieldValue.arrayRemove(it.result!!))
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
         }

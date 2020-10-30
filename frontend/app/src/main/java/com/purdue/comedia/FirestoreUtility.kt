@@ -339,27 +339,38 @@ class FirestoreUtility {
 
         // Queries the posts posted by the genres and users that a user is following
         // If they follow no users their own posts are shown
-        fun queryMainFeed(uid: String = FirebaseAuth.getInstance().uid!!): Task<List<PostModelClient>> {
-            return queryForUserByUID(uid)
-                .continueWithTask { user ->
-                    val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
-                    val followedUsers = user.result!!.usersFollowing
-                    val followedGenres = user.result!!.genresFollowing
-                    if (followedUsers.isNotEmpty()) {
-                        taskList.add(queryMultiUserFeed(followedUsers))
+        fun queryMainFeed(uid: String? = FirebaseAuth.getInstance().uid): Task<List<PostModelClient>> {
+            if (uid != null) {
+                return queryForUserByUID(uid)
+                    .continueWithTask { user ->
+                        val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                        val followedUsers = user.result!!.usersFollowing
+                        val followedGenres = user.result!!.genresFollowing
+                        if (followedUsers.isNotEmpty()) {
+                            taskList.add(queryMultiUserFeed(followedUsers))
+                        }
+                        if (followedGenres.isNotEmpty()) {
+                            taskList.add(queryMultiGenreFeed(followedGenres))
+                        }
+                        return@continueWithTask Tasks.whenAllComplete(taskList)
                     }
-                    if (followedGenres.isNotEmpty()) {
-                        taskList.add(queryMultiGenreFeed(followedGenres))
+                    .continueWith{
+                        val postListList: MutableList<List<PostModelClient>> = mutableListOf()
+                        it.result!!.forEach {
+                            postListList.add(it.result!! as List<PostModelClient>)
+                        }
+                        return@continueWith postListList.flatten()
                     }
-                    return@continueWithTask Tasks.whenAllComplete(taskList)
-                }
-                .continueWith{
-                    val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                    it.result!!.forEach {
-                        postListList.add(it.result!! as List<PostModelClient>)
+            } else {
+                // Return r/all
+                return firestore.collection("posts")
+                    .orderBy("created", Query.Direction.DESCENDING)
+                    .limit(feedLimit.toLong())
+                    .get()
+                    .continueWith{
+                        return@continueWith convertQueryToPosts(it.result!!)
                     }
-                    return@continueWith postListList.flatten()
-                }
+            }
         }
 
         // Queries multiple users, making multiple tasks for more than 10 users

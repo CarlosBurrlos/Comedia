@@ -3,6 +3,7 @@ package com.purdue.comedia
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import java.util.*
@@ -124,6 +125,7 @@ class FirestoreUtility {
             model.genre = snapshot.get("genre")!! as String
             model.postID = snapshot.id
             model.reference = snapshot.reference
+            model.created = snapshot.get("created")!! as Timestamp
             return model
         }
 
@@ -297,6 +299,7 @@ class FirestoreUtility {
                 .whereEqualTo(
                     "poster", firestore.collection("users").document(uid)
                 )
+                .whereEqualTo("anon",false)
                 .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
@@ -366,7 +369,7 @@ class FirestoreUtility {
                         it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
-                        return@continueWith postListList.flatten()
+                        return@continueWith mergePostList(postListList)
                     }
             } else {
                 // Return r/all
@@ -380,7 +383,12 @@ class FirestoreUtility {
             }
         }
 
-        // Queries multiple users, making multiple tasks for more than 10 users
+        // Utility method for flattening and merging a multi-layer list
+        fun mergePostList(posts: List<List<PostModelClient>>): List<PostModelClient> {
+            return posts.flatten().distinctBy { it.postID }.sortedByDescending { it.created }
+        }
+
+        // Queries multiple users' non-anon posts, making multiple tasks for more than 10 users
         fun queryMultiUserFeed(
             users: List<DocumentReference>
         ): Task<List<PostModelClient>> {
@@ -403,12 +411,13 @@ class FirestoreUtility {
             }
         }
 
-        // Queries posts posted by a given set of users (up to 10)
+        // Queries non-anon posts posted by a given set of users (up to 10)
         fun queryMultiUserFeedSimple(
             users: List<DocumentReference>
         ): Task<List<PostModelClient>> {
             return firestore.collection("posts")
                 .whereIn("poster", users)
+                .whereEqualTo("anon",false)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()

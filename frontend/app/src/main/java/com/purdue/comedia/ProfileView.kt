@@ -1,5 +1,6 @@
 package com.purdue.comedia
 
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,6 +12,7 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_profile_view.*
 
@@ -49,7 +51,16 @@ class ProfileView : AppCompatActivity() {
 
 
         userbtnFollow.setOnClickListener {
-            followOrUnfollowUser(username, userbtnFollow)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                followOrUnfollowUser(username, userbtnFollow)
+            } else {
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "You must be signed in to follow a user", Snackbar.LENGTH_LONG
+                ).setAction("Login") {
+                    startActivity(Intent(baseContext, SignUp::class.java))
+                }.show()
+            }
         }
 
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {

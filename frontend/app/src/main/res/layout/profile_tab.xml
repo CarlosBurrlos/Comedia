@@ -51,7 +51,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="90dp"
-        android:text="FOLLOWERS" />
+        android:text="" />
 
     <Button
         android:id="@+id/btnEditProfile"

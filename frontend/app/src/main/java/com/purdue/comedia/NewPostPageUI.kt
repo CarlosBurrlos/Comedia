@@ -1,6 +1,7 @@
 package com.purdue.comedia
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,7 +12,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_new_post_page_ui.*
 import kotlinx.android.synthetic.main.post_row.view.*
 
@@ -32,7 +35,16 @@ class NewPostPageUI : AppCompatActivity() {
         updateComments(postID)
 
         postPageBtnComment.setOnClickListener {
-            postComment()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                postComment()
+            } else {
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "You must be signed in to post a comment", Snackbar.LENGTH_LONG
+                ).setAction("Login") {
+                    startActivity(Intent(baseContext, SignUp::class.java))
+                }.show()
+            }
         }
     }
 

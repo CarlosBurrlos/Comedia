@@ -75,9 +75,13 @@ class ProfileTab : Fragment() {
         // View saved posts
         val btnViewSavedPosts: Button = root.findViewById(R.id.btnViewSavedPosts)
         btnViewSavedPosts.setOnClickListener {
-            val intent = Intent(view!!.context, CustomFeed::class.java)
-            intent.putExtra(MainAdapter.NAV_TITLE, "Saved Posts")
-            startActivity(intent)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val intent = Intent(view!!.context, CustomFeed::class.java)
+                intent.putExtra(MainAdapter.NAV_TITLE, "Saved Posts")
+                startActivity(intent)
+            } else {
+                snack("Sign in to view your saved posts.", root)
+            }
         }
 
         // Login Button Functionality
@@ -106,20 +110,18 @@ class ProfileTab : Fragment() {
                 textInputAlert() // Present alert to input the new text
             } else {
                 // User not signed in, present alert
-                Snackbar.make(
-                    root.findViewById(R.id.profileScreen),
-                    "You must be signed in to edit your profile", Snackbar.LENGTH_LONG
-                )
-                    .setAction("Login") {
-                        startActivity(Intent(view!!.context, SignUp::class.java))
-                    }.show()
+                snack("You must be signed in to edit your profile", root)
             }
         }
 
         // Browse Genre Button Functionality
         val btnBrowseGenre: Button = root.findViewById(R.id.btnBrowseGenre)
         btnBrowseGenre.setOnClickListener {
-            handleBrowse(browsingGenre = true)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                handleBrowse(browsingGenre = true)
+            } else {
+                snack("Sign in to follow a genre.", root)
+            }
         }
 
         // Browse User Button Functionality
@@ -131,37 +133,53 @@ class ProfileTab : Fragment() {
         // Genre Button functionality
         val btnViewSavedGenres: Button = root.findViewById(R.id.btnViewSavedGenres)
         btnViewSavedGenres.setOnClickListener {
-            val intent = Intent(view!!.context, GenresAndUserList::class.java)
-            intent.putExtra(MainAdapter.IS_GENRE, true)
-            startActivity(intent)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val intent = Intent(view!!.context, GenresAndUserList::class.java)
+                intent.putExtra(MainAdapter.IS_GENRE, true)
+                startActivity(intent)
+            } else {
+                snack("Sign in to view genres you follow.", root)
+            }
         }
 
         // Following Button functionality
         val btnViewFollowing: Button = root.findViewById(R.id.btnViewFollowing)
         btnViewFollowing.setOnClickListener {
-            val intent = Intent(view!!.context, GenresAndUserList::class.java)
-            intent.putExtra(MainAdapter.IS_GENRE, false)
-            startActivity(intent)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val intent = Intent(view!!.context, GenresAndUserList::class.java)
+                intent.putExtra(MainAdapter.IS_GENRE, false)
+                startActivity(intent)
+            } else {
+                snack("Sign in to view users you follow.", root)
+            }
         }
 
         // Delete Button Functionality
         val btnDeleteAccount: Button = root.findViewById(R.id.btnDeleteAccount)
         btnDeleteAccount.setOnClickListener {
-            val alert = AlertDialog.Builder(context)
-                .setTitle("Delete Account")
-                .setMessage("Are you sure you want to delete your account and all its data?")
-                .setPositiveButton("Confirm") { dialog, _ ->
-                    performAccountDeletion()
-                    dialog.cancel()
-                }.setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.cancel()
-                }.create()
-            alert.show()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val alert = AlertDialog.Builder(context)
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account and all its data?")
+                    .setPositiveButton("Confirm") { dialog, _ ->
+                        performAccountDeletion()
+                        dialog.cancel()
+                    }.setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.cancel()
+                    }.create()
+                alert.show()
+            } else {
+                snack("Sign in to delete your account.", root)
+            }
         }
 
         val btnViewSelfProfile: Button = root.findViewById(R.id.btnViewSelfProfile)
         btnViewSelfProfile.setOnClickListener {
-            goToProfile()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                goToProfile()
+            } else {
+                snack("Sign in to view your profile.", root)
+            }
         }
 
         /* Setup Recycler View
@@ -182,7 +200,6 @@ class ProfileTab : Fragment() {
 
     private fun performAccountDeletion() {
         AuthUtility.deleteAccount()
-        toast("Todo: Delete Account")
     }
 
     private fun updateTableData() {
@@ -370,6 +387,15 @@ class ProfileTab : Fragment() {
 
     private fun toast(str: String) {
         Toast.makeText(context, str, Toast.LENGTH_LONG).show()
+    }
+
+    private fun snack(str: String, root: View) {
+        Snackbar.make(
+            root.findViewById(R.id.profileScreen), str, Snackbar.LENGTH_LONG
+        )
+            .setAction("Login") {
+                startActivity(Intent(view!!.context, SignUp::class.java))
+            }.show()
     }
 
 }

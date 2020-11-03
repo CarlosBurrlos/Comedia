@@ -66,6 +66,13 @@ class NewPostPageUI : AppCompatActivity() {
             FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
                 postPageUsername.text = it.username
                 updateProfilePicture(it.username)
+
+                postPageUsername.setOnClickListener {
+                    val intent = Intent(baseContext, ProfileView::class.java)
+                    intent.putExtra(MainAdapter.USERNAME, postPageUsername.text)
+                    startActivity(intent)
+                }
+
             }
         }
 

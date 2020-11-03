@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.post_row.view.*
 
 // Recycler View Manager
@@ -85,7 +87,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Setup Tapping on save post button
         view.feedBtnSave.setOnClickListener {
-            handlePostSave(post.postID, view.feedBtnSave)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                handlePostSave(post.postID, view.feedBtnSave)
+            } else {
+                Toast.makeText(context, "Sign in to save this post", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Setup Tapping on Genre
@@ -98,12 +104,20 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Setup Downvote functionality
         view.feedBtnDownvote.setOnClickListener {
-            performDownvote(post.postID)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                performDownvote(post.postID)
+            } else {
+                Toast.makeText(context, "Sign in to downvote post", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Setup Upvote functionality
         view.feedBtnUpvote.setOnClickListener {
-            performUpvote(post.postID)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                performUpvote(post.postID)
+            } else {
+                Toast.makeText(context, "Sign in to upvote post", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }

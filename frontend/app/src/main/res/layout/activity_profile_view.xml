@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#8A8A8A"
     tools:context=".ProfileView">
 
     <TextView
@@ -14,6 +15,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="19dp"
+        android:fontFamily="casual"
         android:text="USERNAME"
         android:textSize="32sp" />
 
@@ -58,6 +60,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:checked="true"
+            android:fontFamily="casual"
             android:text="User Posts" />
 
         <RadioButton
@@ -66,6 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:fontFamily="casual"
             android:text="User Interactions" />
 
     </RadioGroup>
@@ -78,6 +82,8 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="27dp"
         android:layout_marginTop="110dp"
+        android:background="@color/common_google_signin_btn_text_dark_pressed"
+        android:fontFamily="casual"
         android:text="Follow" />
 
     <androidx.recyclerview.widget.RecyclerView

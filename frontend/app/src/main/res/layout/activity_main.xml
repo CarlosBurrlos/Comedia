@@ -40,6 +40,7 @@
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#8A8A8A"
         android:contentDescription="view_descriptor"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

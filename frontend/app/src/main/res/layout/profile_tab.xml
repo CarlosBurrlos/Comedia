@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profileScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileTab"
-    android:id="@+id/profileScreen">
+    android:background="#8A8A8A"
+    tools:context=".ProfileTab">
 
     <TextView
         android:id="@+id/profileUsername"
@@ -15,6 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="19dp"
+        android:fontFamily="casual"
         android:text="USERNAME"
         android:textSize="32sp" />
 
@@ -40,6 +42,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="64dp"
+        android:fontFamily="casual"
         android:text="BIO"
         android:textSize="16sp" />
 
@@ -61,18 +64,19 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="16dp"
         android:layout_marginTop="116dp"
+        android:fontFamily="casual"
         android:text="Edit Profile" />
 
     <!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/myRecyclerView"-->
-<!--        android:layout_width="377dp"-->
-<!--        android:layout_height="390dp"-->
-<!--        android:layout_alignParentStart="true"-->
-<!--        android:layout_alignParentTop="true"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:layout_marginStart="13dp"-->
-<!--        android:layout_marginTop="292dp"-->
-<!--        android:layout_marginBottom="49dp" />-->
+    <!--        android:id="@+id/myRecyclerView"-->
+    <!--        android:layout_width="377dp"-->
+    <!--        android:layout_height="390dp"-->
+    <!--        android:layout_alignParentStart="true"-->
+    <!--        android:layout_alignParentTop="true"-->
+    <!--        android:layout_alignParentBottom="true"-->
+    <!--        android:layout_marginStart="13dp"-->
+    <!--        android:layout_marginTop="292dp"-->
+    <!--        android:layout_marginBottom="49dp" />-->
 
     <Button
         android:id="@+id/btnViewSavedPosts"
@@ -83,6 +87,7 @@
         android:layout_centerInParent="true"
         android:layout_marginStart="114dp"
         android:layout_marginTop="338dp"
+        android:fontFamily="casual"
         android:text="View Saved Posts" />
 
     <Button
@@ -96,6 +101,7 @@
         android:layout_marginStart="124dp"
         android:layout_marginTop="389dp"
         android:layout_marginEnd="137dp"
+        android:fontFamily="casual"
         android:text="Follow Genre" />
 
     <Button
@@ -107,6 +113,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="440dp"
         android:layout_marginEnd="131dp"
+        android:fontFamily="casual"
         android:text="Find User" />
 
     <Button
@@ -118,6 +125,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginStart="110dp"
         android:layout_marginTop="228dp"
+        android:fontFamily="casual"
         android:text="Genres Following" />
 
     <Button
@@ -129,6 +137,7 @@
         android:layout_centerInParent="true"
         android:layout_marginStart="116dp"
         android:layout_marginTop="281dp"
+        android:fontFamily="casual"
         android:text="Users Following" />
 
     <Button
@@ -140,6 +149,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="504dp"
         android:layout_marginEnd="82dp"
+        android:fontFamily="casual"
         android:text="Delete" />
 
     <Button
@@ -150,7 +160,9 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="506dp"
         android:layout_marginEnd="239dp"
-        android:text="Login" />
+        android:fontFamily="casual"
+        android:text="Login"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/btnViewSelfProfile"
@@ -161,6 +173,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="175dp"
         android:layout_marginEnd="117dp"
+        android:fontFamily="casual"
         android:text="View Full Profile"
         android:textSize="16sp"
         android:textStyle="bold" />

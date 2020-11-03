@@ -266,7 +266,9 @@ class ProfileTab : Fragment() {
     }
 
     private fun followGenre(genre: String) {
-        FirestoreUtility.followGenre(genre)
+        FirestoreUtility.followGenre(genre).addOnSuccessListener {
+            Toast.makeText(context, "Successfully Followed \"$genre\"", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun viewProfile(username: String) {

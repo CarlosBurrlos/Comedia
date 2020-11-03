@@ -71,6 +71,7 @@ class CreatePostPage : AppCompatActivity() {
         }
 
         FirestoreUtility.createPost(auth.uid, new_post)
+        Toast.makeText(baseContext, "Post Created.", Toast.LENGTH_SHORT).show()
         finish()
     }
 

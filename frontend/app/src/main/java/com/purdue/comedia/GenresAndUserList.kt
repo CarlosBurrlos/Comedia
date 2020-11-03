@@ -103,7 +103,7 @@ class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
                 FirestoreUtility.unfollowGenre(str).addOnSuccessListener {
                     itemStrings = FirestoreUtility.currentUser.model.genresFollowing
                     notifyDataSetChanged()
-                    Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 FirestoreUtility.unfollowUser(str).continueWithTask {
@@ -113,7 +113,7 @@ class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
                         .addOnSuccessListener { resolvedUsers ->
                             itemStrings = resolvedUsers.map { it.username }
                             notifyDataSetChanged()
-                            Toast.makeText(context, "Unfollowed.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT).show()
                         }
                 }
             }

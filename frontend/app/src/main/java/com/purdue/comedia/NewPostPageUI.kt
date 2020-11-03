@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.textfield.TextInputLayout
@@ -92,6 +93,7 @@ class NewPostPageUI : AppCompatActivity() {
 
     private fun makeComment(commentStr: String, postID: String) {
         FirestoreUtility.createComment(commentStr, postID).addOnSuccessListener {
+            Toast.makeText(baseContext, "Comment posted.", Toast.LENGTH_SHORT).show()
             updateComments(postID)
         }
     }

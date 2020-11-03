@@ -17,13 +17,9 @@ import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import kotlinx.android.synthetic.main.post_row.view.*
 import kotlinx.android.synthetic.main.profile_tab.*
 import java.io.BufferedInputStream
 import java.net.URL
@@ -39,11 +35,12 @@ class ProfileTab : Fragment() {
     private var savedProfileUrl = ""
     private var promptedForProfile = false
 
+    private val defaultAvatar = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
     private var theLoginBtn: Button? = null
 
     override fun onStart() {
         super.onStart()
-        updateProfile()
+        updateView(FirestoreUtility.currentUser)
     }
 
     // Gets run everytime the screen is presented
@@ -53,14 +50,22 @@ class ProfileTab : Fragment() {
         // Change Sign In Button Text
         if (theLoginBtn != null && auth.currentUser != null) {
             theLoginBtn!!.text = "Sign Out"
-
         } else if (theLoginBtn != null) {
             theLoginBtn!!.text = "Sign In"
         }
 
-        updateProfile() // Reload data from firebase each time profile page loads
-        updateTableData() // Reload feed of posts by current user
+        updateView(FirestoreUtility.currentUser)
+    }
 
+    private fun updateView(user: UserModelClient) {
+        loadProfileTabView(user.model)
+        updateTableData()
+        println("********************************************SET")
+        if (theLoginBtn != null && auth.currentUser != null) {
+            theLoginBtn!!.text = "Sign Out"
+        } else if (theLoginBtn != null) {
+            theLoginBtn!!.text = "Sign In"
+        }
     }
 
     override fun onCreateView(
@@ -69,6 +74,8 @@ class ProfileTab : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.profile_tab, container, false)
+
+        FirestoreUtility.subscribeToUserChange { updateView(it) }
 
         /** Setup the elements of the view here **/
 
@@ -162,7 +169,8 @@ class ProfileTab : Fragment() {
                     .setTitle("Delete Account")
                     .setMessage("Are you sure you want to delete your account and all its data?")
                     .setPositiveButton("Confirm") { dialog, _ ->
-                        performAccountDeletion()
+                        AuthUtility.deleteAccount()
+                            .addOnSuccessListener { snack("Successfully deleted account.", root) }
                         dialog.cancel()
                     }.setNegativeButton("Cancel") { dialog, _ ->
                         dialog.cancel()
@@ -198,10 +206,6 @@ class ProfileTab : Fragment() {
         startActivity(intent)
     }
 
-    private fun performAccountDeletion() {
-        AuthUtility.deleteAccount()
-    }
-
     private fun updateTableData() {
         /*if (!this::adapter.isInitialized) return
         FirestoreUtility.queryProfileFeed(FirebaseAuth.getInstance().uid!!).addOnSuccessListener {
@@ -209,29 +213,26 @@ class ProfileTab : Fragment() {
         }*/
     }
 
-    // Called when the profile page loads or when the profile has been edited
-    private fun updateProfile() {
-        loadUserProfile(auth.uid)
-    }
-
-    private fun loadUserProfile(uid: String?) {
-        if (uid == null) return
-        FirestoreUtility.queryForUserByUID(uid, ::loadProfileTabView) { e -> println(e) }
-    }
-
     private fun loadProfileTabView(user: UserModel) {
-        val profile = user.profile!!
-        FirestoreUtility.resolveReference(profile, ::loadProfileFields)
-        profileUsername.text = user.username
+        val profile = user.profile
+        if (profile == null) {
+            bioTextProfilePage.text = "BIO"
+            RetrieveImageTask(::setProfileImage).execute(defaultAvatar)
+        }
+        else FirestoreUtility.resolveProfileReference(profile)
+            .addOnSuccessListener { loadProfileFields(it) }
+
+        if (user.username.isEmpty()) profileUsername.text = "USERNAME"
+        else profileUsername.text = user.username
     }
 
-    private fun loadProfileFields(snapshot: DocumentSnapshot) {
-        val url = (snapshot.get("profileImage") as String?) ?: ""
-        savedProfileUrl = url
-        RetrieveImageTask(::setProfileImage).execute(url)
-        val newBio = snapshot.get("biography") as String? ?: ""
-        bioTextProfilePage.text = newBio
-        if (url == "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png" && newBio == "No bio yet!" && !promptedForProfile) {
+    private fun loadProfileFields(profile: ProfileModel) {
+        RetrieveImageTask(::setProfileImage).execute(profile.profileImage)
+        bioTextProfilePage.text = profile.biography
+        if (savedProfileUrl == defaultAvatar &&
+            profile.biography == "No bio yet!" &&
+            !promptedForProfile
+        ) {
             textInputAlert()
             promptedForProfile = true
         }
@@ -362,7 +363,6 @@ class ProfileTab : Fragment() {
                 if (bioText.text.isEmpty()) bioText.setText(bioTextProfilePage.text)
                 if (profileUrl.text.isEmpty()) profileUrl.setText(savedProfileUrl)
                 editProfileOntoFirebase(profileUrl.text.toString(), bioText.text.toString())
-                updateProfile()
                 toast("Profile Updated")
                 dialog.cancel()
 
@@ -372,7 +372,6 @@ class ProfileTab : Fragment() {
             }.create()
 
         alert.show()
-
     }
 
     // Called once a user edits the profile. New strings are passed to this function.

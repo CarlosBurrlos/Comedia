@@ -17,7 +17,11 @@ class FirestoreUtility {
         private const val feedLimit = 100
         var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
             private set
+        var currentProfile: ProfileModel = ProfileModel()
+            private set
         private var userListener: ListenerRegistration? = null
+        private var profileListener: ListenerRegistration? = null
+        private val currentUserSubscribers = mutableListOf<(UserModelClient) -> Unit>()
 
         fun addListenerForCurrentUser() {
             if (auth.uid == null) return
@@ -26,13 +30,38 @@ class FirestoreUtility {
                     if (value == null) return@addSnapshotListener
                     currentUser.reference = value.reference
                     currentUser.model = convertToUser(value)
+                    if (profileListener == null) addListenerForCurrentUserProfile(currentUser.model)
+                    notifySubscribers()
                 }
         }
 
+        private fun addListenerForCurrentUserProfile(user: UserModel) {
+            profileListener = user.profile?.addSnapshotListener { value, _ ->
+                if (value == null) return@addSnapshotListener
+                currentProfile = convertToProfile(value)
+                notifySubscribers()
+            }
+        }
+
+        private fun notifySubscribers() {
+            currentUserSubscribers.forEach { it(currentUser) }
+        }
+
         fun clearCurrentUserListener() {
-            userListener?.remove()
-            userListener = null
+            if (userListener == null && profileListener == null) return
+            userListener?.remove().also { userListener = null }
+            profileListener?.remove().also { profileListener = null }
             currentUser = UserModelClient()
+            currentProfile = ProfileModel()
+            notifySubscribers()
+        }
+
+        fun subscribeToUserChange(callback: (UserModelClient) -> Unit) {
+            currentUserSubscribers.add(callback)
+        }
+
+        fun unsubscribeToUserChange(callback: (UserModelClient) -> Unit) {
+            currentUserSubscribers.remove(callback)
         }
 
         fun resolveReference(
@@ -225,18 +254,14 @@ class FirestoreUtility {
 
         fun updateUserProfile(
             uid: String,
-            profileModel: PartialProfileModel,
-            successCallback: (() -> Unit)? = null,
-            failureCallback: (Exception) -> Unit = ::reportError
+            profileModel: PartialProfileModel
         ): Task<Void> {
             return queryForUserByUID(uid)
                 .continueWithTask {
-                    val profileReference = it.result!!.profile!!
+                    val profileReference = it.result!!.profile
                     val setOptions = SetOptions.merge()
-                    return@continueWithTask profileReference.set(profileModel, setOptions)
+                    return@continueWithTask profileReference!!.set(profileModel, setOptions)
                 }
-                .addOnSuccessListener { successCallback?.invoke() }
-                .addOnFailureListener(failureCallback)
         }
 
         fun createPost(
@@ -266,15 +291,15 @@ class FirestoreUtility {
         // Creates a comment on a post
         fun createComment(
             newComment: String,
-            postid: String
+            postId: String
         ): Task<Void> {
-            var commentModel = CommentModel()
+            val commentModel = CommentModel()
             val uid: String = FirebaseAuth.getInstance().uid!!
             commentModel.poster = firestore.collection("users").document(uid)
-            commentModel.parent = firestore.collection("posts").document(postid)
+            commentModel.parent = firestore.collection("posts").document(postId)
             commentModel.content = newComment
             return firestore.collection("comments").add(commentModel).continueWithTask {
-                val postTask = firestore.collection("posts").document(postid)
+                val postTask = firestore.collection("posts").document(postId)
                     .update("comments", FieldValue.arrayUnion(it.result!!))
                 val userTask = firestore.collection("users").document(uid)
                     .update("comments", FieldValue.arrayUnion(it.result!!))
@@ -286,7 +311,7 @@ class FirestoreUtility {
         fun convertQueryToPosts(
             qs: QuerySnapshot
         ): List<PostModelClient> {
-            var list: MutableList<PostModelClient> = mutableListOf()
+            val list: MutableList<PostModelClient> = mutableListOf()
             qs.iterator().forEachRemaining {
                 list.add(convertToPostClient(it))
             }
@@ -299,7 +324,7 @@ class FirestoreUtility {
                 .whereEqualTo(
                     "poster", firestore.collection("users").document(uid)
                 )
-                .whereEqualTo("anon",false)
+                .whereEqualTo("anon", false)
                 .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
@@ -329,9 +354,9 @@ class FirestoreUtility {
                         Collections.unmodifiableList(taskList)
                     return@continueWithTask Tasks.whenAllComplete(finalList)
                 }
-                .continueWith {
+                .continueWith { finished ->
                     val postList: MutableList<PostModelClient> = mutableListOf()
-                    it.result!!.forEach {
+                    finished.result!!.forEach {
                         postList.add(it.result!! as PostModelClient)
                     }
                     return@continueWith postList
@@ -340,11 +365,10 @@ class FirestoreUtility {
 
         // Queries posts by a given user's username
         fun queryUserFeed(username: String): Task<QuerySnapshot> {
-            return queryForUserLookup(username).continueWithTask {
-                return@continueWithTask queryProfileFeed(it.result!!.uid).continueWithTask {
-                    return@continueWithTask it
+            return queryForUserLookup(username)
+                .continueWithTask { user ->
+                    queryProfileFeed(user.result!!.uid).continueWithTask { it }
                 }
-            }
         }
 
         // Queries the posts posted by the genres and users that a user is following
@@ -364,9 +388,10 @@ class FirestoreUtility {
                         }
                         return@continueWithTask Tasks.whenAllComplete(taskList)
                     }
-                    .continueWith {
+                    .continueWith { finished ->
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        it.result!!.forEach {
+                        finished.result!!.forEach {
+                            @Suppress("UNCHECKED_CAST")
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith mergePostList(postListList)
@@ -393,15 +418,16 @@ class FirestoreUtility {
             users: List<DocumentReference>
         ): Task<List<PostModelClient>> {
             if (users.size > 10) {
-                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in users.indices step 10) {
                     val max = (x + 9).coerceAtMost(users.size)  // Kotlin's way of doing Math.min
                     taskList.add(queryMultiUserFeedSimple(users.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith {
+                    .continueWith { finished ->
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        it.result!!.forEach {
+                        finished.result!!.forEach {
+                            @Suppress("UNCHECKED_CAST")
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()
@@ -417,7 +443,7 @@ class FirestoreUtility {
         ): Task<List<PostModelClient>> {
             return firestore.collection("posts")
                 .whereIn("poster", users)
-                .whereEqualTo("anon",false)
+                .whereEqualTo("anon", false)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()
@@ -431,15 +457,16 @@ class FirestoreUtility {
             genres: List<String>
         ): Task<List<PostModelClient>> {
             if (genres.size > 10) {
-                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in genres.indices step 10) {
                     val max = (x + 9).coerceAtMost(genres.size)   // Kotlin's way of doing Math.min
                     taskList.add(queryMultiGenreFeedSimple(genres.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith {
+                    .continueWith { finished ->
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        it.result!!.forEach {
+                        finished.result!!.forEach {
+                            @Suppress("UNCHECKED_CAST")
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()

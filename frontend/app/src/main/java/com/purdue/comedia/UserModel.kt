@@ -3,8 +3,8 @@ package com.purdue.comedia
 import com.google.firebase.firestore.DocumentReference
 
 class UserModel {
-    lateinit var username: String
-    lateinit var email: String
+    var username: String = ""
+    var email: String = ""
     var comments = ArrayList<DocumentReference>()
     var followers = ArrayList<DocumentReference>()
     var usersFollowing = ArrayList<DocumentReference>()

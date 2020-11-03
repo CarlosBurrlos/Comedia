@@ -28,20 +28,22 @@ class AuthUtility {
         }
 
         fun deleteAccount(): Task<Unit> {
-            return FirestoreUtility.queryForUserByUID(auth.uid!!)
-                .continueWithTask { removeInteractions(it.result!!) }
-                .continueWithTask { deletePosts(it.result!!) }
-                .continueWithTask { removeFromFollowLists(it.result!!) }
-                .continueWithTask { deleteUser(it.result!!) }
+            if (auth.uid == null) return Tasks.call { throw Exception("No user logged in.") }
+            val user = FirestoreUtility.currentUser
+            FirestoreUtility.clearCurrentUserListener()
+            return removeInteractions(user.model)
+                .continueWithTask { deletePosts(user.model) }
+                .continueWithTask { removeFromFollowLists(user.model) }
+                .continueWithTask { deleteUser(user.model) }
                 .continueWithTask { auth.currentUser!!.delete() }
                 .continueWith { auth.signOut() }
         }
 
-        private fun removeInteractions(user: UserModel): Task<UserModel> {
+        private fun removeInteractions(user: UserModel): Task<Void> {
             return Tasks.whenAll(
                 deleteComments(user.comments),
                 revertVoteCounts(user)
-            ).continueWith { user }
+            )
         }
 
         private fun deleteComments(comments: List<DocumentReference>): Task<Void> {
@@ -83,7 +85,7 @@ class AuthUtility {
             return Tasks.whenAll(reversionTasks)
         }
 
-        private fun deletePosts(user: UserModel): Task<UserModel> {
+        private fun deletePosts(user: UserModel): Task<Void> {
             val deleteTasks = ArrayList<Task<Void>>()
             for (post in user.createdPosts) {
                 deleteTasks.add(
@@ -93,7 +95,7 @@ class AuthUtility {
                         }
                 )
             }
-            return Tasks.whenAll(deleteTasks).continueWith { user }
+            return Tasks.whenAll(deleteTasks)
         }
 
         private fun deletePost(post: DocumentReference, postModel: PostModel): Task<Void> {
@@ -113,7 +115,7 @@ class AuthUtility {
             )
         }
 
-        private fun removeFromFollowLists(user: UserModel): Task<UserModel> {
+        private fun removeFromFollowLists(user: UserModel): Task<Void> {
             val removalTasks = ArrayList<Task<Void>>()
             val userRef = FirestoreUtility.userRefByUID(auth.uid!!)
 
@@ -128,17 +130,18 @@ class AuthUtility {
                 )
             }
 
-            return Tasks.whenAll(removalTasks).continueWith { user }
+            return Tasks.whenAll(removalTasks)
         }
 
         private fun deleteUser(userModel: UserModel): Task<Void> {
+            val deleteProfile = userModel.profile!!.delete()
             val deleteUser = firestore.collection("users")
                 .document(auth.uid!!)
                 .delete()
             val deleteUserLookup = firestore.collection("userLookup")
                 .document(userModel.username)
                 .delete()
-            return Tasks.whenAll(deleteUser, deleteUserLookup)
+            return Tasks.whenAll(deleteUser, deleteUserLookup, deleteProfile)
         }
 
         fun addNewUser(uid: String, username: String, email: String): Task<Void> {

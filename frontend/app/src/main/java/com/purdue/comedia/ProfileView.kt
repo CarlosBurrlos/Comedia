@@ -68,13 +68,16 @@ class ProfileView : AppCompatActivity() {
     }
 
     private fun hideFollowButtonIfSelf(username: String, followButton: Button) {
-        FirestoreUtility.queryForUserByUID(FirebaseAuth.getInstance().uid!!, {
-            if (it.username == username) {
-                followButton.alpha = 0F
-                followButton.isClickable = false
-                followButton.isFocusable = false
-            }
-        })
+        val currUID = FirebaseAuth.getInstance().uid
+        if (currUID != null) {
+            FirestoreUtility.queryForUserByUID(currUID, {
+                if (it.username == username) {
+                    followButton.alpha = 0F
+                    followButton.isClickable = false
+                    followButton.isFocusable = false
+                }
+            })
+        }
     }
 
     private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {

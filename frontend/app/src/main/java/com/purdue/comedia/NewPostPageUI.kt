@@ -47,9 +47,13 @@ class NewPostPageUI : AppCompatActivity() {
     }
 
     private fun displayPost(post: PostModel) {
-        FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
-            postPageUsername.text = it.username
-            updateProfilePicture(it.username)
+        if (post.isAnon) {
+            postPageUsername.text = "Anonymous"
+        } else {
+            FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
+                postPageUsername.text = it.username
+                updateProfilePicture(it.username)
+            }
         }
 
         postPageBody.text = post.content

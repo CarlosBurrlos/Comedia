@@ -27,9 +27,9 @@
         android:layout_marginTop="18dp"
         android:background="#80FFFFFF"
         android:contentDescription="imageDesc"
-        app:srcCompat="@drawable/profile_placeholder"
-        tools:src="@drawable/profile_placeholder"
-        tools:srcCompat="@drawable/profile_placeholder" />
+        app:srcCompat="@drawable/blank_profile"
+        tools:src="@drawable/blank_profile"
+        tools:srcCompat="@drawable/blank_profile" />
 
     <TextView
         android:id="@+id/userProfileBio"

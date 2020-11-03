@@ -17,6 +17,7 @@ import kotlinx.android.synthetic.main.post_row.view.*
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     lateinit var postArray: List<PostModelClient>
     lateinit var contextVar: Context
+    private val anonImages = hashSetOf<ImageView>()
 
     override fun getItemCount(): Int {
         return if (this::postArray.isInitialized) postArray.size
@@ -53,8 +54,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedPostGenre.text = post.genre
         contextVar = context
 
-        if (post.isAnon) view.feedProfileAuthor.text = "Anonymous"
-        else {
+        if (post.isAnon) {
+            view.feedProfileAuthor.text = "Anonymous"
+            view.feedProfileImage.setImageResource(R.drawable.anon_pic)
+            anonImages.add(view.feedProfileImage)
+        } else {
             FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
                 view.feedProfileAuthor.text = it.username
                 updateProfilePicture(view.feedProfileAuthor.text.toString(), view.feedProfileImage)
@@ -136,6 +140,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     }
 
     private fun updateProfilePicture(username: String, profileImage: ImageView) {
+        if (username.toLowerCase() == "anonymous") return
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
             FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
                 ProfileTab.RetrieveImageTask(::setProfileImage, profileImage).execute(it.profileImage)
@@ -147,7 +152,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         val drawable: RoundedBitmapDrawable =
             RoundedBitmapDrawableFactory.create(contextVar.resources, image)
         drawable.isCircular = true
-        if (toSetProfileImg != null) {
+        if (toSetProfileImg != null && !anonImages.contains(toSetProfileImg)) {
             toSetProfileImg.setImageBitmap(image)
             toSetProfileImg.setImageDrawable(drawable)
         }
@@ -155,6 +160,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
     fun updateTable(posts: List<PostModelClient>) {
         postArray = posts
+        anonImages.clear()
         notifyDataSetChanged()
     }
 

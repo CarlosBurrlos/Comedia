@@ -81,7 +81,7 @@
         android:contentDescription="ProfilePicture"
         app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/profile_placeholder" />
+        app:srcCompat="@drawable/blank_profile" />
 
     <TextView
         android:id="@+id/feedProfileAuthor"

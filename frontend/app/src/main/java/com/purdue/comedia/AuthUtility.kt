@@ -33,6 +33,7 @@ class AuthUtility {
                 .continueWithTask { deletePosts(it.result!!) }
                 .continueWithTask { removeFromFollowLists(it.result!!) }
                 .continueWithTask { deleteUser(it.result!!) }
+                .continueWithTask { auth.currentUser!!.delete() }
                 .continueWith { auth.signOut() }
         }
 

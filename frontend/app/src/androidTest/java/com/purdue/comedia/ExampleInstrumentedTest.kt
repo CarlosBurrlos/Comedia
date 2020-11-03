@@ -113,5 +113,4 @@ class ExampleInstrumentedTest {
         onView(withId(R.id.radioBtnUrl)).perform(click())
         onView(withId(R.id.postBodyField)).check(matches(withHint("Enter a joke website URL")))
     }
-
 }

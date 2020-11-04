@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#8A8A8A">
 
     <TextView
         android:id="@+id/feedPostTitle"
@@ -12,6 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="16dp"
+        android:fontFamily="casual"
         android:text="Joke Title"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -26,6 +28,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
+        android:fontFamily="casual"
         android:text="Joke Body"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,6 +40,7 @@
         android:id="@+id/feedPostGenre"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:text="Genre"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/feedPostTitle"
@@ -50,6 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:fontFamily="casual"
         android:text="Upvote"
         app:layout_constraintStart_toStartOf="@+id/feedPostBody"
         app:layout_constraintTop_toBottomOf="@+id/feedPostBody" />
@@ -59,6 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:fontFamily="casual"
         android:text="Downvote"
         app:layout_constraintStart_toEndOf="@+id/feedBtnUpvote"
         app:layout_constraintTop_toTopOf="@+id/feedBtnUpvote" />
@@ -67,7 +73,9 @@
         android:id="@+id/feedBtnComment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:text="Comment"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.301"
         app:layout_constraintStart_toEndOf="@+id/feedBtnDownvote"
@@ -88,7 +96,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:fontFamily="casual"
         android:text="Author"
+        android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="@+id/feedProfileImage"
         app:layout_constraintStart_toEndOf="@+id/feedProfileImage"
         app:layout_constraintTop_toTopOf="@+id/feedProfileImage" />
@@ -107,7 +117,9 @@
         android:id="@+id/feedBtnSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="casual"
         android:text="Save"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/feedProfileImage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.953"

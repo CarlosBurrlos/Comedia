@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#8A8A8A"
     tools:context=".CreatePostPage">
 
     <TextView
@@ -29,13 +30,14 @@
         android:layout_height="43dp"
         android:layout_marginBottom="12dp"
         android:ems="10"
+        android:fontFamily="casual"
         android:hint="Title"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/postBodyField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
-        app:layout_constraintStart_toStartOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/postBodyField"
@@ -43,14 +45,15 @@
         android:layout_height="59dp"
         android:layout_marginBottom="20dp"
         android:ems="10"
+        android:fontFamily="casual"
         android:gravity="start|top"
         android:hint="Joke Body"
+        android:importantForAutofill="no"
         android:inputType="textMultiLine"
         app:layout_constraintBottom_toTopOf="@+id/postGenreField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.485"
-        app:layout_constraintStart_toStartOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <RadioGroup
         android:id="@+id/postRadioGroup"
@@ -71,6 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:fontFamily="casual"
             android:text="Text" />
 
         <RadioButton
@@ -78,6 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:fontFamily="casual"
             android:text="Image" />
 
         <RadioButton
@@ -85,6 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:fontFamily="casual"
             android:text="URL" />
 
     </RadioGroup>
@@ -95,19 +101,21 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:ems="10"
+        android:fontFamily="casual"
         android:hint="Genre (Optional)"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/postAnonymousSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.169"
-        app:layout_constraintStart_toStartOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Switch
         android:id="@+id/postAnonymousSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="88dp"
+        android:fontFamily="casual"
         android:text="Post Anonymously"
         app:layout_constraintBottom_toTopOf="@+id/btnSubmitPost"
         app:layout_constraintEnd_toEndOf="parent"
@@ -120,8 +128,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="148dp"
         android:backgroundTint="#03A9F4"
-        android:fontFamily="sans-serif-black"
-        android:text="POST"
+        android:fontFamily="casual"
+        android:text="POST!"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

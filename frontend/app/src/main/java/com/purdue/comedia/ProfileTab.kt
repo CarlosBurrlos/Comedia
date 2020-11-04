@@ -214,8 +214,7 @@ class ProfileTab : Fragment() {
         if (profile == null) {
             bioTextProfilePage.text = "BIO"
             RetrieveImageTask(::setProfileImage).execute(defaultAvatar)
-        }
-        else FirestoreUtility.resolveProfileReference(profile)
+        } else FirestoreUtility.resolveProfileReference(profile)
             .addOnSuccessListener { loadProfileFields(it) }
 
         if (user.username.isEmpty()) profileUsername.text = "USERNAME"
@@ -223,7 +222,8 @@ class ProfileTab : Fragment() {
     }
 
     private fun loadProfileFields(profile: ProfileModel) {
-        RetrieveImageTask(::setProfileImage).execute(profile.profileImage)
+        savedProfileUrl = profile.profileImage
+        RetrieveImageTask(::setProfileImage).execute(savedProfileUrl)
         bioTextProfilePage.text = profile.biography
         if (savedProfileUrl == defaultAvatar &&
             profile.biography == "No bio yet!" &&

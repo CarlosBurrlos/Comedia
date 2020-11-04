@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#8A8A8A"
+    android:background="#FFFFFF"
     tools:context=".CreatePostPage">
 
     <TextView
@@ -34,6 +34,7 @@
         android:hint="Title"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
+        android:textColor="#EDE5E5"
         app:layout_constraintBottom_toTopOf="@+id/postBodyField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
@@ -50,6 +51,7 @@
         android:hint="Joke Body"
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
+        android:textColor="@color/cardview_light_background"
         app:layout_constraintBottom_toTopOf="@+id/postGenreField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.485"

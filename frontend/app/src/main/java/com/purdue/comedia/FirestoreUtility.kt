@@ -3,7 +3,6 @@ package com.purdue.comedia
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import java.util.*
@@ -17,11 +16,7 @@ class FirestoreUtility {
         private const val feedLimit = 100
         var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
             private set
-        var currentProfile: ProfileModel = ProfileModel()
-            private set
         private var userListener: ListenerRegistration? = null
-        private var profileListener: ListenerRegistration? = null
-        private val currentUserSubscribers = mutableListOf<(UserModelClient) -> Unit>()
 
         fun addListenerForCurrentUser() {
             if (auth.uid == null) return
@@ -30,38 +25,13 @@ class FirestoreUtility {
                     if (value == null) return@addSnapshotListener
                     currentUser.reference = value.reference
                     currentUser.model = convertToUser(value)
-                    if (profileListener == null) addListenerForCurrentUserProfile(currentUser.model)
-                    notifySubscribers()
                 }
         }
 
-        private fun addListenerForCurrentUserProfile(user: UserModel) {
-            profileListener = user.profile?.addSnapshotListener { value, _ ->
-                if (value == null) return@addSnapshotListener
-                currentProfile = convertToProfile(value)
-                notifySubscribers()
-            }
-        }
-
-        private fun notifySubscribers() {
-            currentUserSubscribers.forEach { it(currentUser) }
-        }
-
         fun clearCurrentUserListener() {
-            if (userListener == null && profileListener == null) return
-            userListener?.remove().also { userListener = null }
-            profileListener?.remove().also { profileListener = null }
+            userListener?.remove()
+            userListener = null
             currentUser = UserModelClient()
-            currentProfile = ProfileModel()
-            notifySubscribers()
-        }
-
-        fun subscribeToUserChange(callback: (UserModelClient) -> Unit) {
-            currentUserSubscribers.add(callback)
-        }
-
-        fun unsubscribeToUserChange(callback: (UserModelClient) -> Unit) {
-            currentUserSubscribers.remove(callback)
         }
 
         fun resolveReference(
@@ -154,7 +124,6 @@ class FirestoreUtility {
             model.genre = snapshot.get("genre")!! as String
             model.postID = snapshot.id
             model.reference = snapshot.reference
-            model.created = snapshot.get("created")!! as Timestamp
             return model
         }
 
@@ -254,14 +223,18 @@ class FirestoreUtility {
 
         fun updateUserProfile(
             uid: String,
-            profileModel: PartialProfileModel
+            profileModel: PartialProfileModel,
+            successCallback: (() -> Unit)? = null,
+            failureCallback: (Exception) -> Unit = ::reportError
         ): Task<Void> {
             return queryForUserByUID(uid)
                 .continueWithTask {
-                    val profileReference = it.result!!.profile
+                    val profileReference = it.result!!.profile!!
                     val setOptions = SetOptions.merge()
-                    return@continueWithTask profileReference!!.set(profileModel, setOptions)
+                    return@continueWithTask profileReference.set(profileModel, setOptions)
                 }
+                .addOnSuccessListener { successCallback?.invoke() }
+                .addOnFailureListener(failureCallback)
         }
 
         fun createPost(
@@ -291,15 +264,15 @@ class FirestoreUtility {
         // Creates a comment on a post
         fun createComment(
             newComment: String,
-            postId: String
+            postid: String
         ): Task<Void> {
-            val commentModel = CommentModel()
+            var commentModel = CommentModel()
             val uid: String = FirebaseAuth.getInstance().uid!!
             commentModel.poster = firestore.collection("users").document(uid)
-            commentModel.parent = firestore.collection("posts").document(postId)
+            commentModel.parent = firestore.collection("posts").document(postid)
             commentModel.content = newComment
             return firestore.collection("comments").add(commentModel).continueWithTask {
-                val postTask = firestore.collection("posts").document(postId)
+                val postTask = firestore.collection("posts").document(postid)
                     .update("comments", FieldValue.arrayUnion(it.result!!))
                 val userTask = firestore.collection("users").document(uid)
                     .update("comments", FieldValue.arrayUnion(it.result!!))
@@ -311,7 +284,7 @@ class FirestoreUtility {
         fun convertQueryToPosts(
             qs: QuerySnapshot
         ): List<PostModelClient> {
-            val list: MutableList<PostModelClient> = mutableListOf()
+            var list: MutableList<PostModelClient> = mutableListOf()
             qs.iterator().forEachRemaining {
                 list.add(convertToPostClient(it))
             }
@@ -324,7 +297,6 @@ class FirestoreUtility {
                 .whereEqualTo(
                     "poster", firestore.collection("users").document(uid)
                 )
-                .whereEqualTo("anon", false)
                 .orderBy("created", Query.Direction.DESCENDING)
                 .limit(feedLimit.toLong())
                 .get()
@@ -354,9 +326,9 @@ class FirestoreUtility {
                         Collections.unmodifiableList(taskList)
                     return@continueWithTask Tasks.whenAllComplete(finalList)
                 }
-                .continueWith { finished ->
+                .continueWith {
                     val postList: MutableList<PostModelClient> = mutableListOf()
-                    finished.result!!.forEach {
+                    it.result!!.forEach {
                         postList.add(it.result!! as PostModelClient)
                     }
                     return@continueWith postList
@@ -365,10 +337,11 @@ class FirestoreUtility {
 
         // Queries posts by a given user's username
         fun queryUserFeed(username: String): Task<QuerySnapshot> {
-            return queryForUserLookup(username)
-                .continueWithTask { user ->
-                    queryProfileFeed(user.result!!.uid).continueWithTask { it }
+            return queryForUserLookup(username).continueWithTask {
+                return@continueWithTask queryProfileFeed(it.result!!.uid).continueWithTask {
+                    return@continueWithTask it
                 }
+            }
         }
 
         // Queries the posts posted by the genres and users that a user is following
@@ -388,13 +361,12 @@ class FirestoreUtility {
                         }
                         return@continueWithTask Tasks.whenAllComplete(taskList)
                     }
-                    .continueWith { finished ->
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        finished.result!!.forEach {
-                            @Suppress("UNCHECKED_CAST")
+                        it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
-                        return@continueWith mergePostList(postListList)
+                        return@continueWith postListList.flatten()
                     }
             } else {
                 // Return r/all
@@ -408,26 +380,20 @@ class FirestoreUtility {
             }
         }
 
-        // Utility method for flattening and merging a multi-layer list
-        fun mergePostList(posts: List<List<PostModelClient>>): List<PostModelClient> {
-            return posts.flatten().distinctBy { it.postID }.sortedByDescending { it.created }
-        }
-
-        // Queries multiple users' non-anon posts, making multiple tasks for more than 10 users
+        // Queries multiple users, making multiple tasks for more than 10 users
         fun queryMultiUserFeed(
             users: List<DocumentReference>
         ): Task<List<PostModelClient>> {
             if (users.size > 10) {
-                val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in users.indices step 10) {
                     val max = (x + 9).coerceAtMost(users.size)  // Kotlin's way of doing Math.min
                     taskList.add(queryMultiUserFeedSimple(users.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith { finished ->
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        finished.result!!.forEach {
-                            @Suppress("UNCHECKED_CAST")
+                        it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()
@@ -437,13 +403,12 @@ class FirestoreUtility {
             }
         }
 
-        // Queries non-anon posts posted by a given set of users (up to 10)
+        // Queries posts posted by a given set of users (up to 10)
         fun queryMultiUserFeedSimple(
             users: List<DocumentReference>
         ): Task<List<PostModelClient>> {
             return firestore.collection("posts")
                 .whereIn("poster", users)
-                .whereEqualTo("anon", false)
                 .orderBy("created")
                 .limit(feedLimit.toLong())
                 .get()
@@ -457,16 +422,15 @@ class FirestoreUtility {
             genres: List<String>
         ): Task<List<PostModelClient>> {
             if (genres.size > 10) {
-                val taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
+                var taskList: MutableList<Task<List<PostModelClient>>> = mutableListOf()
                 for (x in genres.indices step 10) {
                     val max = (x + 9).coerceAtMost(genres.size)   // Kotlin's way of doing Math.min
                     taskList.add(queryMultiGenreFeedSimple(genres.subList(x, max)))
                 }
                 return Tasks.whenAllComplete(taskList)
-                    .continueWith { finished ->
+                    .continueWith {
                         val postListList: MutableList<List<PostModelClient>> = mutableListOf()
-                        finished.result!!.forEach {
-                            @Suppress("UNCHECKED_CAST")
+                        it.result!!.forEach {
                             postListList.add(it.result!! as List<PostModelClient>)
                         }
                         return@continueWith postListList.flatten()
@@ -546,6 +510,90 @@ class FirestoreUtility {
                         )
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
+        }
+
+        fun savePost(postID: String): Task <Void> {
+            return queryForPostById(postID)
+                    .continueWithTask {
+                        val addToSaveList =
+                                it.result!!.update(
+                                        "saveList",
+                                        FieldValue.arrayUnion(currentUser.reference)
+                                )
+                        val addToSavedList =
+                                currentUser.reference.update(
+                                        "savedPosts",
+                                        FieldValue.arrayUnion(it.result!!)
+                                )
+                    }
+        }
+
+        fun unsavePost(postID: String): Task <Void> {
+            return queryForPostById(postID)
+                    .continueWithTask {
+                        val removeFromSaveList =
+                                it.result!!.update(
+                                        "saveList",
+                                        FieldValue.arrayRemove(currentUser.reference)
+                                )
+                        val removeFromSavedList =
+                                currentUser.reference.update(
+                                        "savedPosts",
+                                        FieldValue.arrayRemove(it.result!!)
+                                )
+                    }
+        }
+
+        fun UpVote(postID: String): Task<Void> {
+            return queryForPostById(postID)
+                    .continueWithTask {
+                        val addUpVote =
+                                it.result!!.update(
+                                        "upvoteList",
+                                        FieldValue.increment(1)
+                                )
+                        val addToUpVotes =
+                                it.result!!.update(
+                                        "upvoteList",
+                                        FieldValue.arrayUnion(currentUser.reference)
+                                )
+                        val addAsUpVote =
+                                currentUser.reference.update(
+                                        "upvotedPosts",
+                                        FieldValue.arrayUnion(it.result!!)
+                                )
+                    }
+        }
+
+        fun DownVote(postID: String): Task<Void> {
+            return queryForPostById(postID)
+                    .continueWithTask {
+                        val subtractUpVote =
+                                it.result!!.update(
+                                        "upvoteCount",
+                                        FieldValue.increment(-1)
+                                )
+                        val removeFromUpVotes =
+                                it.result!!.update(
+                                        "upvoteList",
+                                        FieldValue.arrayRemove(currentUser.reference)
+                                )
+                        val addToDownVotes =
+                                it.result!!.update(
+                                        "downvoteCount",
+                                        FieldValue.increment(1)
+                                )
+                        val subtractAsUpVote =
+                                currentUser.reference.update(
+                                        "upvotedPosts",
+                                        FieldValue.arrayRemove(it.result!!)
+                                )
+                        val addAsDownVote =
+                                currentUser.reference.update(
+                                        "downvotedPosts",
+                                        FieldValue.arrayUnion(it.result!!)
+                                )
+                    }
         }
     }
 }

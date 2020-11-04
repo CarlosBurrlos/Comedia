@@ -8,15 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.post_row.view.*
 
 // Recycler View Manager
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     lateinit var postArray: List<PostModelClient>
     lateinit var contextVar: Context
+    private val anonImages = hashSetOf<ImageView>()
 
     override fun getItemCount(): Int {
         return if (this::postArray.isInitialized) postArray.size
@@ -53,8 +56,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedPostGenre.text = post.genre
         contextVar = context
 
-        if (post.isAnon) view.feedProfileAuthor.text = "Anonymous"
-        else {
+        if (post.isAnon) {
+            view.feedProfileAuthor.text = "Anonymous"
+            view.feedProfileImage.setImageResource(R.drawable.anon_pic)
+            anonImages.add(view.feedProfileImage)
+        } else {
             FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
                 view.feedProfileAuthor.text = it.username
                 updateProfilePicture(view.feedProfileAuthor.text.toString(), view.feedProfileImage)
@@ -81,7 +87,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Setup Tapping on save post button
         view.feedBtnSave.setOnClickListener {
-            handlePostSave(post.postID, view.feedBtnSave)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                handlePostSave(post.postID, view.feedBtnSave)
+            } else {
+                Toast.makeText(context, "Sign in to save this post", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Setup Tapping on Genre
@@ -94,12 +104,20 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Setup Downvote functionality
         view.feedBtnDownvote.setOnClickListener {
-            performDownvote(post.postID)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                performDownvote(post.postID)
+            } else {
+                Toast.makeText(context, "Sign in to downvote post", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Setup Upvote functionality
         view.feedBtnUpvote.setOnClickListener {
-            performUpvote(post.postID)
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                performUpvote(post.postID)
+            } else {
+                Toast.makeText(context, "Sign in to upvote post", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
@@ -115,22 +133,18 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Todo: Save or Unsave the post
         if (beginSave) {
-            Firestore.Utility.savePost(postID)
+            // Save the post
         } else {
-            Firestore.Utility.unsavePost(postID)
+            // Unsave the post
         }
     }
 
     private fun performDownvote(postID: String) {
         // Todo: Downvote post based on post id
-        // Todo: Check if a user has already voted
-        FirestoreUtility.UpVote(postID)
     }
 
     private fun performUpvote(postID: String) {
         // Todo: Upvote post based on post id
-        // Todo: Check if a user has already voted
-        Firestore.Utility.DownVote(postID)
     }
 
     private fun goToProfile(view: View) {
@@ -140,6 +154,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     }
 
     private fun updateProfilePicture(username: String, profileImage: ImageView) {
+        if (username.toLowerCase() == "anonymous") return
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
             FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
                 ProfileTab.RetrieveImageTask(::setProfileImage, profileImage).execute(it.profileImage)
@@ -151,7 +166,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         val drawable: RoundedBitmapDrawable =
             RoundedBitmapDrawableFactory.create(contextVar.resources, image)
         drawable.isCircular = true
-        if (toSetProfileImg != null) {
+        if (toSetProfileImg != null && !anonImages.contains(toSetProfileImg)) {
             toSetProfileImg.setImageBitmap(image)
             toSetProfileImg.setImageDrawable(drawable)
         }
@@ -159,6 +174,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
     fun updateTable(posts: List<PostModelClient>) {
         postArray = posts
+        anonImages.clear()
         notifyDataSetChanged()
     }
 

@@ -36,7 +36,7 @@ class AuthUtility {
                 .continueWithTask { removeFromFollowLists(user.model) }
                 .continueWithTask { deleteUser(user.model) }
                 .continueWithTask { auth.currentUser!!.delete() }
-                .continueWith { auth.signOut() }
+                .continueWith { signOut() }
         }
 
         private fun removeInteractions(user: UserModel): Task<Void> {

@@ -48,7 +48,6 @@ class FirestoreUtility {
         }
 
         fun clearCurrentUserListener() {
-            if (userListener == null && profileListener == null) return
             userListener?.remove().also { userListener = null }
             profileListener?.remove().also { profileListener = null }
             currentUser = UserModelClient()

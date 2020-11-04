@@ -60,11 +60,8 @@ class ProfileTab : Fragment() {
     private fun updateView(user: UserModelClient) {
         loadProfileTabView(user.model)
         updateTableData()
-        if (theLoginBtn != null && auth.currentUser != null) {
-            theLoginBtn!!.text = "Sign Out"
-        } else if (theLoginBtn != null) {
-            theLoginBtn!!.text = "Sign In"
-        }
+        if (auth.currentUser != null) theLoginBtn!!.text = "Sign Out"
+        else theLoginBtn!!.text = "Sign In"
     }
 
     override fun onCreateView(

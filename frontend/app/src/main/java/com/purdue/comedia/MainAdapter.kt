@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.post_row.view.*
 
@@ -51,25 +52,25 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         val post = postArray[rowIndex]
 
-        view.feedPostTitle.text = post.title
-        view.feedPostBody.text = post.content
-        view.feedPostGenre.text = post.genre
+        view.feedPostTitle.text = post.model.title
+        view.feedPostBody.text = post.model.content
+        view.feedPostGenre.text = post.model.genre
         contextVar = context
 
-        if (post.isAnon) {
+        if (post.model.isAnon) {
             view.feedProfileAuthor.text = "Anonymous"
             view.feedProfileImage.setImageResource(R.drawable.anon_pic)
             anonImages.add(view.feedProfileImage)
-        } else {
-            FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
+        } else if (post.model.poster != null) {
+            FirestoreUtility.resolveUserReference(post.model.poster!!).addOnSuccessListener {
                 view.feedProfileAuthor.text = it.username
                 updateProfilePicture(view.feedProfileAuthor.text.toString(), view.feedProfileImage)
             }
         }
 
-        view.feedBtnUpvote.text = "Upvote (" + post.upvoteCount + ")"
-        view.feedBtnDownvote.text = "Downvote (" + post.downvoteCount + ")"
-        view.feedBtnComment.text = "Comments (" + post.comments.size + ")"
+        view.feedBtnUpvote.text = "Upvote (" + post.model.upvoteCount + ")"
+        view.feedBtnDownvote.text = "Downvote (" + post.model.downvoteCount + ")"
+        view.feedBtnComment.text = "Comments (" + post.model.comments.size + ")"
 
         // Setup tapping on title and comments button to go to Post Page
         view.feedPostTitle.setOnClickListener { goToPost(post, view) }
@@ -105,7 +106,17 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Setup Downvote functionality
         view.feedBtnDownvote.setOnClickListener {
             if (FirebaseAuth.getInstance().currentUser != null) {
-                performDownvote(post.postID)
+                if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
+                    removeDownvote(post)
+                } else {
+                    if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
+                        removeUpvote(post)
+                            .continueWithTask {
+                                addDownvote(post)
+                            }
+                    }
+                    else addDownvote(post)
+                }
             } else {
                 Toast.makeText(context, "Sign in to downvote post", Toast.LENGTH_SHORT).show()
             }
@@ -114,12 +125,66 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Setup Upvote functionality
         view.feedBtnUpvote.setOnClickListener {
             if (FirebaseAuth.getInstance().currentUser != null) {
-                performUpvote(post.postID)
+                if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
+                    removeUpvote(post)
+                } else {
+                    if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
+                        removeDownvote(post)
+                            .continueWithTask {
+                                addUpvote(post)
+                            }
+                    }
+                    else addUpvote(post)
+                }
             } else {
                 Toast.makeText(context, "Sign in to upvote post", Toast.LENGTH_SHORT).show()
             }
         }
 
+    }
+
+    private fun addDownvote(post: PostModelClient): Task<PostModel> {
+        return FirestoreUtility.downvote(post.postID)
+            .continueWithTask {
+                FirestoreUtility.resolvePostReference(post.reference)
+            }
+            .addOnSuccessListener {
+                post.model = it
+                notifyDataSetChanged()
+            }
+    }
+
+    private fun removeDownvote(post: PostModelClient): Task<PostModel> {
+        return FirestoreUtility.undownvote(post.postID)
+            .continueWithTask {
+                FirestoreUtility.resolvePostReference(post.reference)
+            }
+            .addOnSuccessListener {
+                post.model = it
+                notifyDataSetChanged()
+            }
+    }
+
+    private fun addUpvote(post: PostModelClient): Task<PostModel> {
+        return FirestoreUtility.upvote(post.postID)
+            .continueWithTask {
+                FirestoreUtility.resolvePostReference(post.reference)
+            }
+            .addOnSuccessListener {
+                post.model = it
+                notifyDataSetChanged()
+            }
+    }
+
+    private fun removeUpvote(post: PostModelClient): Task<PostModel> {
+        return FirestoreUtility.unupvote(post.postID)
+            .continueWithTask {
+                FirestoreUtility.resolvePostReference(post.reference)
+            }
+            .addOnSuccessListener {
+                post.model = it
+                notifyDataSetChanged()
+            }
     }
 
     private fun goToPost(post: PostModelClient, view: View) {
@@ -137,16 +202,6 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         } else {
             FirestoreUtility.unsavePost(postID)
         }
-    }
-
-    private fun performDownvote(postID: String) {
-        // Todo: Downvote post based on post id
-        FirestoreUtility.downvote(postID)
-    }
-
-    private fun performUpvote(postID: String) {
-        // Todo: Upvote post based on post id
-        FirestoreUtility.upvote(postID)
     }
 
     private fun goToProfile(view: View) {

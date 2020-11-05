@@ -138,7 +138,7 @@ class FirestoreUtility {
 
         @Suppress("UNCHECKED_CAST")
         private fun convertToPostClient(snapshot: DocumentSnapshot): PostModelClient {
-            val model = PostModelClient()
+            val model = PostModel()
             model.comments = snapshot.get("comments")!! as ArrayList<DocumentReference>
             model.content = snapshot.get("content")!! as String
             model.downvoteCount = snapshot.get("downvoteCount")!! as Long
@@ -151,10 +151,12 @@ class FirestoreUtility {
             model.title = snapshot.get("title")!! as String
             model.type = snapshot.get("type")!! as String
             model.genre = snapshot.get("genre")!! as String
-            model.postID = snapshot.id
-            model.reference = snapshot.reference
-            model.created = snapshot.get("created")!! as Timestamp
-            return model
+            val client = PostModelClient()
+            client.postID = snapshot.id
+            client.reference = snapshot.reference
+            client.created = snapshot.get("created")!! as Timestamp
+            client.model = model
+            return client
         }
 
         private fun convertToComment(snapshot: DocumentSnapshot): CommentModel {
@@ -590,6 +592,22 @@ class FirestoreUtility {
             return Tasks.whenAll(addAsUpvote, addToUpvote)
         }
 
+        fun unupvote(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val addAsUpvote =
+                post.update(
+                    "upvoteCount",
+                    FieldValue.increment(-1),
+                    "upvoteList",
+                    FieldValue.arrayRemove(currentUser.reference)
+                )
+            val addToUpvote = currentUser.reference.update(
+                "upvotedPosts",
+                FieldValue.arrayRemove(post)
+            )
+            return Tasks.whenAll(addAsUpvote, addToUpvote)
+        }
+
         fun downvote(postID: String): Task<Void> {
             val post = postRefById(postID)
             val addAsDownvote = post.update(
@@ -601,6 +619,21 @@ class FirestoreUtility {
             val addToUpvote = currentUser.reference.update(
                 "downvotedPosts",
                 FieldValue.arrayUnion(post)
+            )
+            return Tasks.whenAll(addAsDownvote, addToUpvote)
+        }
+
+        fun undownvote(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val addAsDownvote = post.update(
+                "downvoteCount",
+                FieldValue.increment(-1),
+                "downvoteList",
+                FieldValue.arrayRemove(currentUser.reference)
+            )
+            val addToUpvote = currentUser.reference.update(
+                "downvotedPosts",
+                FieldValue.arrayRemove(post)
             )
             return Tasks.whenAll(addAsDownvote, addToUpvote)
         }

@@ -3,10 +3,10 @@ package com.purdue.comedia
 import com.google.firebase.firestore.DocumentReference
 
 open class PostModel {
-    lateinit var content: String
-    lateinit var title: String
-    lateinit var genre: String
-    lateinit var type: String
+    var content: String = ""
+    var title: String = ""
+    var genre: String = ""
+    var type: String = ""
     var isAnon: Boolean = false
     var upvoteCount: Number = 0
     var downvoteCount: Number = 0

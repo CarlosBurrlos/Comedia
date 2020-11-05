@@ -199,8 +199,14 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Todo: Save or Unsave the post
         if (beginSave) {
             FirestoreUtility.savePost(postID)
+                .addOnSuccessListener {
+                    saveBtn.text = "unsave"
+                }
         } else {
             FirestoreUtility.unsavePost(postID)
+                .addOnSuccessListener {
+                    saveBtn.text = "save"
+                }
         }
     }
 

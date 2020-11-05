@@ -22,12 +22,13 @@ class FirestoreUtility {
         private var userListener: ListenerRegistration? = null
         private var profileListener: ListenerRegistration? = null
         private val currentUserSubscribers = mutableListOf<(UserModelClient) -> Unit>()
+        private var subscribersEnabled = true
 
         fun addListenerForCurrentUser() {
             if (auth.uid == null) return
             userListener = userRefByUID(auth.uid!!)
                 .addSnapshotListener { value, _ ->
-                    if (value == null) return@addSnapshotListener
+                    if (value == null || value.data == null) return@addSnapshotListener
                     currentUser.reference = value.reference
                     currentUser.model = convertToUser(value)
                     if (profileListener == null) addListenerForCurrentUserProfile(currentUser.model)
@@ -37,14 +38,22 @@ class FirestoreUtility {
 
         private fun addListenerForCurrentUserProfile(user: UserModel) {
             profileListener = user.profile?.addSnapshotListener { value, _ ->
-                if (value == null) return@addSnapshotListener
+                if (value == null || value.data == null) return@addSnapshotListener
                 currentProfile = convertToProfile(value)
                 notifySubscribers()
             }
         }
 
         private fun notifySubscribers() {
-            currentUserSubscribers.forEach { it(currentUser) }
+            if (subscribersEnabled) currentUserSubscribers.forEach { it(currentUser) }
+        }
+
+        fun enableSubscribers() {
+            subscribersEnabled = true
+        }
+
+        fun disableSubscribers() {
+            subscribersEnabled = false
         }
 
         fun clearCurrentUserListener() {
@@ -312,7 +321,7 @@ class FirestoreUtility {
         fun convertQueryToPosts(
             qs: QuerySnapshot
         ): List<PostModelClient> {
-            val list: MutableList<PostModelClient> = mutableListOf()
+            val list = mutableListOf<PostModelClient>()
             qs.iterator().forEachRemaining {
                 list.add(convertToPostClient(it))
             }
@@ -564,6 +573,10 @@ class FirestoreUtility {
 
         fun unsavePost(postID: String): Task<Void> {
             val post = postRefById(postID)
+            return unsavePost(post)
+        }
+
+        fun unsavePost(post: DocumentReference): Task<Void> {
             val unsaveAsPost = post.update(
                 "saveList",
                 FieldValue.arrayRemove(currentUser.reference)
@@ -594,6 +607,10 @@ class FirestoreUtility {
 
         fun unupvote(postID: String): Task<Void> {
             val post = postRefById(postID)
+            return unupvote(post)
+        }
+
+        fun unupvote(post: DocumentReference): Task<Void> {
             val addAsUpvote =
                 post.update(
                     "upvoteCount",
@@ -625,6 +642,10 @@ class FirestoreUtility {
 
         fun undownvote(postID: String): Task<Void> {
             val post = postRefById(postID)
+            return undownvote(post)
+        }
+
+        fun undownvote(post: DocumentReference): Task<Void> {
             val addAsDownvote = post.update(
                 "downvoteCount",
                 FieldValue.increment(-1),

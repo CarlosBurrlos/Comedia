@@ -30,59 +30,54 @@ class AuthUtility {
         fun deleteAccount(): Task<Unit> {
             if (auth.uid == null) return Tasks.call { throw Exception("No user logged in.") }
             val user = FirestoreUtility.currentUser
-            FirestoreUtility.clearCurrentUserListener()
+            FirestoreUtility.disableSubscribers()
             return removeInteractions(user.model)
                 .continueWithTask { deletePosts(user.model) }
                 .continueWithTask { removeFromFollowLists(user.model) }
                 .continueWithTask { deleteUser(user.model) }
                 .continueWithTask { auth.currentUser!!.delete() }
-                .continueWith { signOut() }
+                .continueWith {
+                    FirestoreUtility.enableSubscribers()
+                    signOut()
+                }
         }
 
         private fun removeInteractions(user: UserModel): Task<Void> {
             return Tasks.whenAll(
                 deleteComments(user.comments),
+                unsaveSavedPosts(user.savedPosts),
                 revertVoteCounts(user)
             )
         }
 
+        private fun unsaveSavedPosts(savedPosts: Collection<DocumentReference>): Task<*>? {
+            return Tasks.whenAll(savedPosts.map { FirestoreUtility.unsavePost(it) })
+        }
+
         private fun deleteComments(comments: List<DocumentReference>): Task<Void> {
-            val commentTasks = ArrayList<Task<Void>>()
-            for (comment in comments) {
-                commentTasks.add(FirestoreUtility.resolveCommentReference(comment)
-                    .continueWithTask {
-                        Tasks.whenAll(
-                            it.result!!.parent.update(
-                                "comments",
-                                FieldValue.arrayRemove(comment)
-                            ),
-                            comment.delete()
-                        )
-                    })
-            }
+            val commentTasks = comments.map { deleteComment(it) }
             return Tasks.whenAll(commentTasks)
         }
 
+        private fun deleteComment(comment: DocumentReference): Task<Void> {
+            return FirestoreUtility.resolveCommentReference(comment)
+                .continueWithTask {
+                    Tasks.whenAll(
+                        it.result!!.parent.update(
+                            "comments",
+                            FieldValue.arrayRemove(comment)
+                        ),
+                        comment.delete()
+                    )
+                }
+        }
+
         private fun revertVoteCounts(user: UserModel): Task<Void> {
-            val reversionTasks = ArrayList<Task<Void>>()
-            val userRef = FirestoreUtility.userRefByUID(auth.uid!!)
-            for (post in user.upvotedPosts) {
-                reversionTasks.add(
-                    Tasks.whenAll(
-                        post.update("upvoteCount", FieldValue.increment(-1)),
-                        post.update("upvoteList", FieldValue.arrayRemove(userRef))
-                    )
-                )
-            }
-            for (post in user.downvotedPosts) {
-                reversionTasks.add(
-                    Tasks.whenAll(
-                        post.update("downvoteCount", FieldValue.increment(-1)),
-                        post.update("downvoteList", FieldValue.arrayRemove(userRef))
-                    )
-                )
-            }
-            return Tasks.whenAll(reversionTasks)
+            val upvoteReversionTask =
+                Tasks.whenAll(user.upvotedPosts.map { FirestoreUtility.unupvote(it) })
+            val downvoteReversionTask =
+                Tasks.whenAll(user.downvotedPosts.map { FirestoreUtility.undownvote(it) })
+            return Tasks.whenAll(upvoteReversionTask, downvoteReversionTask)
         }
 
         private fun deletePosts(user: UserModel): Task<Void> {

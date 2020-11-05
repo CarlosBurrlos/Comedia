@@ -218,11 +218,13 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
     private fun updateProfilePicture(username: String, profileImage: ImageView) {
         if (username.toLowerCase() == "anonymous") return
-        FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
-            FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
+        FirestoreUtility.queryForUserByName(username)
+            .continueWithTask {
+                FirestoreUtility.resolveProfileReference(it.result!!.profile!!)
+            }
+            .addOnSuccessListener {
                 ProfileTab.RetrieveImageTask(::setProfileImage, profileImage).execute(it.profileImage)
             }
-        }
     }
 
     private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {

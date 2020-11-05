@@ -2,7 +2,7 @@ package com.purdue.comedia
 
 import com.google.firebase.firestore.DocumentReference
 
-open class PostModel {
+class PostModel {
     var content: String = ""
     var title: String = ""
     var genre: String = ""

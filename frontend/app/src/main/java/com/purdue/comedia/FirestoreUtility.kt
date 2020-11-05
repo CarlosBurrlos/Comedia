@@ -546,5 +546,63 @@ class FirestoreUtility {
                     return@continueWithTask Tasks.whenAll(addAsFollower, addToFollowing)
                 }
         }
+
+        fun savePost(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val saveAsPost = post.update(
+                "saveList",
+                FieldValue.arrayUnion(currentUser.reference)
+            )
+            val saveToSavedPosts = currentUser.reference.update(
+                "savedPosts",
+                FieldValue.arrayUnion(post)
+            )
+            return Tasks.whenAll(saveAsPost, saveToSavedPosts)
+        }
+
+        fun unsavePost(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val unsaveAsPost = post.update(
+                "saveList",
+                FieldValue.arrayRemove(currentUser.reference)
+            )
+            val unsaveAPost = currentUser.reference.update(
+                "savedPosts",
+                FieldValue.arrayRemove(post)
+            )
+            return Tasks.whenAll(unsaveAsPost, unsaveAPost)
+        }
+
+
+        fun upvote(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val addAsUpvote =
+                post.update(
+                    "upvoteCount",
+                    FieldValue.increment(1),
+                    "upvoteList",
+                    FieldValue.arrayUnion(currentUser.reference)
+                )
+            val addToUpvote = currentUser.reference.update(
+                "upvotedPosts",
+                FieldValue.arrayUnion(post)
+            )
+            return Tasks.whenAll(addAsUpvote, addToUpvote)
+        }
+
+        fun downvote(postID: String): Task<Void> {
+            val post = postRefById(postID)
+            val addAsDownvote = post.update(
+                "downvoteCount",
+                FieldValue.increment(1),
+                "downvoteList",
+                FieldValue.arrayUnion(currentUser.reference)
+            )
+            val addToUpvote = currentUser.reference.update(
+                "downvotedPosts",
+                FieldValue.arrayUnion(post)
+            )
+            return Tasks.whenAll(addAsDownvote, addToUpvote)
+        }
     }
 }

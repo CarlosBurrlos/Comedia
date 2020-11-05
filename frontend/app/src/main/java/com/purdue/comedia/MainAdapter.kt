@@ -133,18 +133,20 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
         // Todo: Save or Unsave the post
         if (beginSave) {
-            // Save the post
+            FirestoreUtility.savePost(postID)
         } else {
-            // Unsave the post
+            FirestoreUtility.unsavePost(postID)
         }
     }
 
     private fun performDownvote(postID: String) {
         // Todo: Downvote post based on post id
+        FirestoreUtility.downvote(postID)
     }
 
     private fun performUpvote(postID: String) {
         // Todo: Upvote post based on post id
+        FirestoreUtility.upvote(postID)
     }
 
     private fun goToProfile(view: View) {

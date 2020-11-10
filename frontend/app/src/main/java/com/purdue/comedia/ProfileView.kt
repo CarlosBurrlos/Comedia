@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageView
@@ -32,7 +31,7 @@ class ProfileView : AppCompatActivity() {
         userProfileUsername.text = username
 
         // Hide follow button if viewing your own profile
-        hideFollowButtonIfSelf(username, userbtnFollow)
+        determineHideFollowBtn(username, userbtnFollow)
 
         FirestoreUtility.queryForUserByName(username).addOnSuccessListener {
             FirestoreUtility.resolveProfileReference(it.profile!!).addOnSuccessListener {
@@ -74,20 +73,33 @@ class ProfileView : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this) // Position to absolute pos.
         adapter = MainAdapter()
         recyclerView.adapter = adapter // Setup table logic
-        updateTableData(username)
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            updateTableData(username)
+            mustLoginUserlineText.text = ""
+        } else {
+            mustLoginUserlineText.text = "Login to View\n$username's Userline"
+        }
 
     }
 
-    private fun hideFollowButtonIfSelf(username: String, followButton: Button) {
-        val currUID = FirebaseAuth.getInstance().uid
-        if (currUID != null) {
-            FirestoreUtility.queryForUserByUID(currUID, {
-                if (it.username == username) {
-                    followButton.alpha = 0F
-                    followButton.isClickable = false
-                    followButton.isFocusable = false
-                }
-            })
+    private fun determineHideFollowBtn(username: String, followButton: Button) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            followButton.alpha = 0F
+            followButton.isClickable = false
+            followButton.isFocusable = false
+            followButton.isEnabled = false
+        } else {
+            val currUID = FirebaseAuth.getInstance().uid
+            if (currUID != null) {
+                FirestoreUtility.queryForUserByUID(currUID, {
+                    if (it.username == username) {
+                        followButton.alpha = 0F
+                        followButton.isClickable = false
+                        followButton.isFocusable = false
+                        followButton.isEnabled = false
+                    }
+                })
+            }
         }
     }
 

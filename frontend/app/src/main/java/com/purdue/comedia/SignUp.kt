@@ -174,6 +174,7 @@ class SignUp : AppCompatActivity() {
             registerEmail.alpha = 1F
             registerEmail.isClickable = true
             registerEmail.isFocusable = true
+            registerEmail.isFocusableInTouchMode = true
             btnRegister.text = "Register"
             btnToggleRegister.text = "Already have an account? Login here"
         } else {

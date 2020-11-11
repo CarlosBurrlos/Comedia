@@ -217,8 +217,10 @@ class ProfileTab : Fragment() {
         } else FirestoreUtility.resolveProfileReference(profile)
             .addOnSuccessListener { loadProfileFields(it) }
 
-        if (user.username.isEmpty()) profileUsername.text = "USERNAME"
-        else profileUsername.text = user.username
+        if (profileUsername != null) {
+            if (user.username.isEmpty()) profileUsername.text = "USERNAME"
+            else profileUsername.text = user.username
+        }
     }
 
     private fun loadProfileFields(profile: ProfileModel) {

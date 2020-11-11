@@ -77,6 +77,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             }
         }
 
+        view.feedBtnUpvote.isClickable = true
+        view.feedBtnUpvote.isEnabled = true
+        view.feedBtnDownvote.isClickable = true
+        view.feedBtnDownvote.isEnabled = true
+
         view.feedBtnUpvote.text = "Upvote (" + post.model.upvoteCount + ")"
         view.feedBtnDownvote.text = "Downvote (" + post.model.downvoteCount + ")"
         view.feedBtnComment.text = "Comments (" + post.model.comments.size + ")"
@@ -152,9 +157,25 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             view.context.startActivity(intent)
         }
 
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
+                var text = view.feedBtnDownvote.text.toString().toLowerCase()
+                text = text.replace("downvote", "Downvoted")
+                view.feedBtnDownvote.text = text
+            }
+            if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
+                var text = view.feedBtnUpvote.text.toString().toLowerCase()
+                text = text.replace("upvote", "Upvoted")
+                view.feedBtnUpvote.text = text
+            }
+        }
+
         // Setup Downvote functionality
         view.feedBtnDownvote.setOnClickListener {
             if (FirebaseAuth.getInstance().currentUser != null) {
+                view.feedBtnUpvote.isClickable = false
+                view.feedBtnDownvote.isClickable = false
+                view.feedBtnDownvote.isEnabled = false
                 if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
                     removeDownvote(post)
                 } else {
@@ -174,6 +195,9 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Setup Upvote functionality
         view.feedBtnUpvote.setOnClickListener {
             if (FirebaseAuth.getInstance().currentUser != null) {
+                view.feedBtnUpvote.isClickable = false
+                view.feedBtnDownvote.isClickable = false
+                view.feedBtnUpvote.isEnabled = false
                 if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
                     removeUpvote(post)
                 } else {

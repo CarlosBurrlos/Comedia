@@ -74,11 +74,15 @@ class ProfileView : AppCompatActivity() {
         adapter = MainAdapter()
         recyclerView.adapter = adapter // Setup table logic
         if (FirebaseAuth.getInstance().currentUser != null) {
-            updateTableData(username)
             mustLoginUserlineText.text = ""
+            if (radioUserPosts.isChecked) updateTableData(username)
+            else updateTableDataWithInteractions(username)
         } else {
             mustLoginUserlineText.text = "Login to View\n$username's Userline"
         }
+
+        radioUserPosts.setOnClickListener { updateTableData(username) }
+        radioUserInteractions.setOnClickListener { updateTableDataWithInteractions(username) }
 
     }
 
@@ -116,6 +120,11 @@ class ProfileView : AppCompatActivity() {
         FirestoreUtility.queryUserFeed(username).addOnSuccessListener {
             adapter.updateTable(FirestoreUtility.convertQueryToPosts(it))
         }
+    }
+
+    private fun updateTableDataWithInteractions(username: String) {
+        if (!this::adapter.isInitialized) return
+        // Todo: Update adapter with the interactions of the specified user
     }
 
     private fun followOrUnfollowUser(username: String, followBtn: Button) {

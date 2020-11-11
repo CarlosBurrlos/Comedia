@@ -3,6 +3,8 @@ package com.purdue.comedia
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +16,10 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.klinker.android.link_builder.Link
+import com.klinker.android.link_builder.applyLinks
 import kotlinx.android.synthetic.main.post_row.view.*
+import java.lang.Exception
 
 
 // Recycler View Manager
@@ -82,6 +87,21 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             view.feedImageView.alpha = 0F
             view.feedPostBody.alpha = 1F
             view.feedImageView.layoutParams.height = 0
+            if (post.model.type == "url") {
+                val bodyUrl = post.model.content
+                val link = Link(bodyUrl)
+                    .setTextColor(Color.BLUE)
+                    .setHighlightAlpha(.4F)
+                    .setUnderlined(true)
+                    .setBold(true)
+                    .setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse(bodyUrl)
+                        try { view.context.startActivity(intent) }
+                        catch (e: Exception) {}
+                    }
+                view.feedPostBody.applyLinks(link)
+            }
         }
 
         // Setup tapping on title and comments button to go to Post Page

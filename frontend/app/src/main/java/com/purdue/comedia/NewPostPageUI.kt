@@ -3,6 +3,8 @@ package com.purdue.comedia
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -15,8 +17,11 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.klinker.android.link_builder.Link
+import com.klinker.android.link_builder.applyLinks
 import kotlinx.android.synthetic.main.activity_new_post_page_ui.*
 import kotlinx.android.synthetic.main.post_row.view.*
+import java.lang.Exception
 
 class NewPostPageUI : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +67,7 @@ class NewPostPageUI : AppCompatActivity() {
     private fun displayPost(post: PostModel) {
         if (post.isAnon) {
             postPageUsername.text = "Anonymous"
+            postPageImage.setImageResource(R.drawable.anon_pic)
         } else {
             FirestoreUtility.resolveUserReference(post.poster!!).addOnSuccessListener {
                 postPageUsername.text = it.username
@@ -79,6 +85,23 @@ class NewPostPageUI : AppCompatActivity() {
         postPageBody.text = post.content
         postPageTitle.text = post.title
         postPageGenre.text = post.genre
+
+        if (post.type == "url") {
+            val bodyUrl = post.content
+            val link = Link(bodyUrl)
+                .setTextColor(Color.BLUE)
+                .setHighlightAlpha(.4F)
+                .setUnderlined(true)
+                .setBold(true)
+                .setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(bodyUrl)
+                    try { startActivity(intent) }
+                    catch (e: Exception) {}
+                }
+            postPageBody.applyLinks(link)
+        }
+
     }
 
     private fun postComment() {

@@ -323,10 +323,12 @@ class ProfileTab : Fragment() {
     }
 
     private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView?) {
-        val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
-        drawable.isCircular = true
-        profileImage.setImageBitmap(image)
-        profileImage.setImageDrawable(drawable)
+        try {
+            val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
+            drawable.isCircular = true
+            profileImage.setImageBitmap(image)
+            profileImage.setImageDrawable(drawable)
+        } catch (e: java.lang.Exception) {}
     }
 
     private fun textInputAlert() {

@@ -35,6 +35,12 @@ class FeedTab : Fragment() {
 
         // Setup the elements of the view here
 
+        // Setup Reload button
+        val btnReloadFeed: Button = root.findViewById(R.id.btnReloadFeed)
+        btnReloadFeed.setOnClickListener{
+            (activity as MainActivity).recreate()
+        }
+
         // Setup Recycler View
         val recyclerView: RecyclerView = root.findViewById(R.id.feedRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position

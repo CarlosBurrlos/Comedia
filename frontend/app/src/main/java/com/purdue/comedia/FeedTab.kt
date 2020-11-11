@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,8 +34,6 @@ class FeedTab : Fragment() {
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.feed_tab, container, false)
 
-        // Setup the elements of the view here
-
         // Setup Reload button
         val btnReloadFeed: Button = root.findViewById(R.id.btnReloadFeed)
         btnReloadFeed.setOnClickListener{
@@ -46,7 +45,15 @@ class FeedTab : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context) // Positions to absolute position
         adapter = MainAdapter()
         recyclerView.adapter = adapter // Setup table logic
-        updateTableData()
+
+        val radioChronological: RadioButton = root.findViewById(R.id.radioChronological)
+        val radioRelevance: RadioButton = root.findViewById(R.id.radioRelevance)
+
+        if (radioChronological.isChecked) updateTableData()
+        else updateTableDataWithRelevance()
+
+        radioChronological.setOnClickListener { updateTableData() }
+        radioRelevance.setOnClickListener { updateTableDataWithRelevance() }
 
         return root
     }
@@ -57,6 +64,11 @@ class FeedTab : Fragment() {
         FirestoreUtility.queryMainFeed().addOnSuccessListener {
             adapter.updateTable(it)
         }
+    }
+
+    private fun updateTableDataWithRelevance() {
+        if (!this::adapter.isInitialized) return
+        // Todo: Update adapter with posts sorted by relevance
     }
 
 }

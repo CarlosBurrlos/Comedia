@@ -54,7 +54,7 @@
         android:orientation="horizontal">
 
         <RadioButton
-            android:id="@+id/radioUserPosts"
+            android:id="@+id/radioChronological"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -64,7 +64,7 @@
             android:text="User Posts" />
 
         <RadioButton
-            android:id="@+id/radioUserInteraction"
+            android:id="@+id/radioRelevance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"

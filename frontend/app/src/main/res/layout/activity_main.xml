@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_menu_add"
-        android:contentDescription="New_Post" />
+        android:contentDescription="New_Post"
+        app:srcCompat="@android:drawable/ic_menu_edit" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

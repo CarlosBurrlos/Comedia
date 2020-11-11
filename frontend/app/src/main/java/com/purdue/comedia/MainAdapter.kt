@@ -1,9 +1,12 @@
 package com.purdue.comedia
 
+import android.R.attr.text
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +22,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.klinker.android.link_builder.Link
 import com.klinker.android.link_builder.applyLinks
 import kotlinx.android.synthetic.main.post_row.view.*
-import java.lang.Exception
+import java.lang.Math.ceil
 
 
 // Recycler View Manager
@@ -78,6 +81,14 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedBtnDownvote.text = "Downvote (" + post.model.downvoteCount + ")"
         view.feedBtnComment.text = "Comments (" + post.model.comments.size + ")"
 
+        val title = view.feedPostTitle
+
+        // Set correct title view height
+        var bounds = Rect()
+        title.paint.getTextBounds(title.text, 0, title.text.length, bounds)
+        var width = bounds.width().toFloat()
+        title.layoutParams.height = (kotlin.math.ceil(width/622) * 98).toInt()
+
         if (post.model.type == "img") {
             view.feedImageView.alpha = 1F
             view.feedPostBody.alpha = 0F
@@ -87,20 +98,26 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             view.feedImageView.alpha = 0F
             view.feedPostBody.alpha = 1F
             view.feedImageView.layoutParams.height = 0
+
+            val body = view.feedPostBody
+
+            // Set correct body view height
+            bounds = Rect()
+            body.paint.getTextBounds(body.text, 0, body.text.length, bounds)
+            width = bounds.width().toFloat()
+            body.layoutParams.height = (kotlin.math.ceil(width/982) * 78).toInt()
+
+            // Show text as hyperlink
             if (post.model.type == "url") {
                 val bodyUrl = post.model.content
-                val link = Link(bodyUrl)
-                    .setTextColor(Color.BLUE)
-                    .setHighlightAlpha(.4F)
-                    .setUnderlined(true)
-                    .setBold(true)
-                    .setOnClickListener {
+                val link = Link(bodyUrl).setTextColor(Color.BLUE).setHighlightAlpha(.4F)
+                    .setUnderlined(true).setBold(true).setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data = Uri.parse(bodyUrl)
                         try { view.context.startActivity(intent) }
                         catch (e: Exception) {}
                     }
-                view.feedPostBody.applyLinks(link)
+                body.applyLinks(link)
             }
         }
 

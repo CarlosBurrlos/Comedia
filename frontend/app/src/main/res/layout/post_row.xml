@@ -23,31 +23,18 @@
 
     <TextView
         android:id="@+id/feedPostGenre"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="123dp"
+        android:layout_height="29dp"
         android:fontFamily="casual"
         android:text="Genre"
+        android:textAlignment="textEnd"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/feedPostTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.83"
+        app:layout_constraintHorizontal_bias="0.384"
         app:layout_constraintStart_toEndOf="@+id/feedPostTitle"
-        app:layout_constraintTop_toTopOf="@+id/feedPostTitle" />
-
-    <TextView
-        android:id="@+id/feedPostBody"
-        android:layout_width="143dp"
-        android:layout_height="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"
-        android:fontFamily="casual"
-        android:text="Joke Body"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
-        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle" />
+        app:layout_constraintTop_toTopOf="@+id/feedPostTitle"
+        app:layout_constraintVertical_bias="0.0" />
 
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/feedImageView"
@@ -60,6 +47,21 @@
         app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
         app:layout_constraintTop_toBottomOf="@+id/feedPostTitle"
         app:srcCompat="@drawable/loading_indicator" />
+
+    <TextView
+        android:id="@+id/feedPostBody"
+        android:layout_width="359dp"
+        android:layout_height="29dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:fontFamily="casual"
+        android:text="Joke Body"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier"

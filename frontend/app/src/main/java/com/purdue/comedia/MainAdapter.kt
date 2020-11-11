@@ -53,7 +53,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         val post = postArray[rowIndex]
 
         view.feedPostTitle.text = post.model.title
-        view.feedPostBody.text = post.model.content
+        if (post.model.type != "img") view.feedPostBody.text = post.model.content
         view.feedPostGenre.text = post.model.genre
         contextVar = context
 
@@ -71,6 +71,18 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedBtnUpvote.text = "Upvote (" + post.model.upvoteCount + ")"
         view.feedBtnDownvote.text = "Downvote (" + post.model.downvoteCount + ")"
         view.feedBtnComment.text = "Comments (" + post.model.comments.size + ")"
+
+        if (post.model.type == "txt") {
+            view.feedImageView.alpha = 0F
+            view.feedPostBody.alpha = 1F
+        } else if (post.model.type == "img") {
+            view.feedImageView.alpha = 1F
+            view.feedPostBody.alpha = 0F
+            ProfileTab.RetrieveImageTask(::setFeedImage, view.feedImageView).execute(post.model.content)
+        } else if (post.model.type == "url") {
+            view.feedImageView.alpha = 0F
+            view.feedPostBody.alpha = 1F
+        }
 
         // Setup tapping on title and comments button to go to Post Page
         view.feedPostTitle.setOnClickListener { goToPost(post, view) }
@@ -141,6 +153,10 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             }
         }
 
+    }
+
+    private fun setFeedImage(image: Bitmap?, toSetProfileImg: ImageView?) {
+        toSetProfileImg?.setImageBitmap(image)
     }
 
     private fun addDownvote(post: PostModelClient): Task<PostModel> {

@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.post_row.view.*
 
+
 // Recycler View Manager
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     lateinit var postArray: List<PostModelClient>
@@ -72,16 +73,15 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         view.feedBtnDownvote.text = "Downvote (" + post.model.downvoteCount + ")"
         view.feedBtnComment.text = "Comments (" + post.model.comments.size + ")"
 
-        if (post.model.type == "txt") {
-            view.feedImageView.alpha = 0F
-            view.feedPostBody.alpha = 1F
-        } else if (post.model.type == "img") {
+        if (post.model.type == "img") {
             view.feedImageView.alpha = 1F
             view.feedPostBody.alpha = 0F
+            view.feedImageView.setImageResource(R.drawable.loading_indicator)
             ProfileTab.RetrieveImageTask(::setFeedImage, view.feedImageView).execute(post.model.content)
-        } else if (post.model.type == "url") {
+        } else {
             view.feedImageView.alpha = 0F
             view.feedPostBody.alpha = 1F
+            view.feedImageView.layoutParams.height = 0
         }
 
         // Setup tapping on title and comments button to go to Post Page
@@ -157,6 +157,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
 
     private fun setFeedImage(image: Bitmap?, toSetProfileImg: ImageView?) {
         toSetProfileImg?.setImageBitmap(image)
+        toSetProfileImg?.alpha = 1F
     }
 
     private fun addDownvote(post: PostModelClient): Task<PostModel> {

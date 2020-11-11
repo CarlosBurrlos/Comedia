@@ -19,22 +19,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/feedProfileImage"
-        app:layout_constraintVertical_bias="0.073" />
-
-    <TextView
-        android:id="@+id/feedPostBody"
-        android:layout_width="139dp"
-        android:layout_height="28dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"
-        android:fontFamily="casual"
-        android:text="Joke Body"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
-        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle" />
+        app:layout_constraintVertical_bias="0.104" />
 
     <TextView
         android:id="@+id/feedPostGenre"
@@ -49,6 +34,40 @@
         app:layout_constraintStart_toEndOf="@+id/feedPostTitle"
         app:layout_constraintTop_toTopOf="@+id/feedPostTitle" />
 
+    <TextView
+        android:id="@+id/feedPostBody"
+        android:layout_width="143dp"
+        android:layout_height="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:fontFamily="casual"
+        android:text="Joke Body"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle" />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/feedImageView"
+        android:layout_width="210dp"
+        android:layout_height="164dp"
+        android:layout_marginTop="12dp"
+        android:contentDescription="PostImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
+        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle"
+        app:srcCompat="@drawable/loading_indicator" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="feedPostBody,feedImageView" />
+
     <Button
         android:id="@+id/feedBtnUpvote"
         android:layout_width="wrap_content"
@@ -57,7 +76,7 @@
         android:fontFamily="casual"
         android:text="Upvote"
         app:layout_constraintStart_toStartOf="@+id/feedPostBody"
-        app:layout_constraintTop_toBottomOf="@+id/feedPostBody" />
+        app:layout_constraintTop_toBottomOf="@+id/barrier" />
 
     <Button
         android:id="@+id/feedBtnDownvote"
@@ -124,16 +143,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.953"
         app:layout_constraintStart_toEndOf="@+id/feedProfileAuthor" />
-
-    <ImageView
-        android:id="@+id/feedImageView"
-        android:layout_width="85dp"
-        android:layout_height="47dp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/feedPostTitle"
-        app:layout_constraintTop_toBottomOf="@+id/feedPostTitle"
-        app:srcCompat="@drawable/button_generic_background" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

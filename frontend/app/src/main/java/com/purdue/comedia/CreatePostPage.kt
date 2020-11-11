@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.activity_create_post_page.*
 class CreatePostPage : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +36,7 @@ class CreatePostPage : AppCompatActivity() {
 
     }
 
-    public fun createPost() {
+    fun createPost() {
         val new_post = PostModel()
         new_post.type = grabPostType()
         new_post.title = postTitleField.text.toString()
@@ -58,6 +57,11 @@ class CreatePostPage : AppCompatActivity() {
         }
         if (new_post.content.isEmpty()) {
             postBodyField.error = "A body is required"
+            postBodyField.requestFocus()
+            return
+        }
+        if (new_post.content.length > 1000 && new_post.type == "txt") {
+            postBodyField.error = "Too many characters. Limit is 1000."
             postBodyField.requestFocus()
             return
         }

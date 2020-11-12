@@ -1,54 +1,82 @@
 package com.purdue.comedia
 
 import android.content.Intent
-import android.content.Intent.getIntent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_genres_and_user_list.*
 import kotlinx.android.synthetic.main.genres_and_users_row.view.*
 
 
 class GenresAndUserList : AppCompatActivity() {
+    private var alphabetically = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_genres_and_user_list)
 
         val isGenre = intent.extras!!.getBoolean(MainAdapter.IS_GENRE)
-        var anStr = "Genre"
+        if (isGenre) supportActionBar?.title = "Genres Following"
+        else supportActionBar?.title = "Users Following"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
         if (isGenre) {
-            supportActionBar?.title = "Genres Following"
+            radioGroupUsers.alpha = 0F
+            radioUserAlphabetical.isEnabled = false
+            radioUserRelevance.isEnabled = false
+            genresAndUsersRecyclerView.layoutParams.height = 1830
         } else {
-            supportActionBar?.title = "Users Following"
-            anStr = "User"
+            radioGroupUsers.alpha = 1F
+            radioUserAlphabetical.isEnabled = true
+            radioUserRelevance.isEnabled = true
+            genresAndUsersRecyclerView.layoutParams.height = 1700
         }
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
+
+        radioUserAlphabetical.isChecked = alphabetically
+        radioUserRelevance.isChecked = !alphabetically
+
+        val model = FirestoreUtility.currentUser.model
 
         // Setup Recycler View
         val recyclerView: RecyclerView = findViewById(R.id.genresAndUsersRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this) // Position to absolute pos.
+
+        // Re-fetch list
+        radioUserAlphabetical.setOnClickListener {
+            alphabetically = true
+            fetchUsersAlphabetically(recyclerView, model, isGenre)
+        }
+        radioUserRelevance.setOnClickListener {
+            alphabetically = false
+            fetchUsersByRelevance(recyclerView, model, isGenre)
+        }
+
         if (isGenre) {
-            val stringArray = grabGenresFollowing()
+            val stringArray: List<String> = model.genresFollowing
             recyclerView.adapter = GenresUsersAdapter(isGenre, stringArray) // Setup table logic
         } else {
-            FirestoreUtility.resolveUserReferences(
-                FirestoreUtility.currentUser!!.model.usersFollowing
-            )
-                .addOnSuccessListener { resolvedUsers ->
-                    val usersFollowing = resolvedUsers.map { it.username }
-                    recyclerView.adapter = GenresUsersAdapter(isGenre, usersFollowing)
-                }
+            if (alphabetically) fetchUsersAlphabetically(recyclerView, model, isGenre)
+            else fetchUsersByRelevance(recyclerView, model, isGenre)
         }
     }
 
-    fun grabGenresFollowing(): List<String> {
-        return FirestoreUtility.currentUser!!.model.genresFollowing
+    private fun fetchUsersAlphabetically(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean) {
+        // Todo: Ensure this sorts alphabetically
+        FirestoreUtility.resolveUserReferences(model.usersFollowing)
+            .addOnSuccessListener { resolvedUsers ->
+                val usersFollowing = resolvedUsers.map { it.username }
+                recyclerView.adapter = GenresUsersAdapter(isGenre, usersFollowing)
+            }
+    }
+
+    private fun fetchUsersByRelevance(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean) {
+        // Todo: Fetch user list sorted by relevance
+
     }
 
     // Allow back button to work
@@ -64,7 +92,7 @@ class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
     RecyclerView.Adapter<CustomViewHolder>() {
 
     override fun getItemCount(): Int {
-        return itemStrings.size // Arbitrary placeholder
+        return itemStrings.size
     }
 
     // Initialize Row View
@@ -113,7 +141,8 @@ class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
                         .addOnSuccessListener { resolvedUsers ->
                             itemStrings = resolvedUsers.map { it.username }
                             notifyDataSetChanged()
-                            Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT)
+                                .show()
                         }
                 }
             }

@@ -291,13 +291,18 @@ class ProfileTab : Fragment() {
             FirestoreUtility.followGenre(genre).addOnSuccessListener {
                 toast("Successfully Followed \"$genre\"")
             }
-        } else toast("Genre '$genre' does not yet exist.")
+        } else toast("Genre \"$genre\" does not yet exist.")
     }
 
     private fun viewProfile(username: String) {
-        val intent = Intent(context, ProfileView::class.java)
-        intent.putExtra(MainAdapter.USERNAME, username)
-        startActivity(intent)
+        // Todo: Check if user exists
+        val exists = true // Update this value
+
+        if (exists) {
+            val intent = Intent(context, ProfileView::class.java)
+            intent.putExtra(MainAdapter.USERNAME, username)
+            startActivity(intent)
+        } else toast("User \"$username\" does not exist.")
     }
 
     class RetrieveImageTask(

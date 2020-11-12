@@ -274,7 +274,6 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     private fun handlePostSave(postID: String, saveBtn: Button) {
         val beginSave = (saveBtn.text.toString().toLowerCase() == "save")
 
-        // Todo: Save or Unsave the post
         if (beginSave) {
             FirestoreUtility.savePost(postID)
                 .addOnSuccessListener {

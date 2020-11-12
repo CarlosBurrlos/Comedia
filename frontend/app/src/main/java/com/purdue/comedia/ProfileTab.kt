@@ -10,10 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.graphics.drawable.RoundedBitmapDrawable
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
@@ -36,7 +33,11 @@ class ProfileTab : Fragment() {
     private var promptedForProfile = false
 
     private val defaultAvatar = "https://paradisevalleychristian.org/wp-content/uploads/2017/01/Blank-Profile.png"
+
     private var theLoginBtn: Button? = null
+    private lateinit var profileUsername: TextView
+    private lateinit var bioTextProfilePage: TextView
+    private lateinit var profileImage: ImageView
 
     override fun onStart() {
         super.onStart()
@@ -74,6 +75,9 @@ class ProfileTab : Fragment() {
         FirestoreUtility.subscribeToUserChange { updateView(it) }
 
         /** Setup the elements of the view here **/
+        profileUsername = root.findViewById(R.id.profileUsername)
+        bioTextProfilePage = root.findViewById(R.id.bioTextProfilePage)
+        profileImage = root.findViewById(R.id.profileImage)
 
         // View saved posts
         val btnViewSavedPosts: Button = root.findViewById(R.id.btnViewSavedPosts)
@@ -217,10 +221,8 @@ class ProfileTab : Fragment() {
         } else FirestoreUtility.resolveProfileReference(profile)
             .addOnSuccessListener { loadProfileFields(it) }
 
-        if (profileUsername != null) {
-            if (user.username.isEmpty()) profileUsername.text = "USERNAME"
-            else profileUsername.text = user.username
-        }
+        if (user.username.isEmpty()) profileUsername.text = "USERNAME"
+        else profileUsername.text = user.username
     }
 
     private fun loadProfileFields(profile: ProfileModel) {

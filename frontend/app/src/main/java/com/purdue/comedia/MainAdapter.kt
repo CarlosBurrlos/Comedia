@@ -177,10 +177,10 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
                 view.feedBtnDownvote.isClickable = false
                 view.feedBtnDownvote.isEnabled = false
                 if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
-                    removeDownvote(post)
+                    removeDownvote(post, true)
                 } else {
                     if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
-                        removeUpvote(post)
+                        removeUpvote(post, false)
                             .continueWithTask {
                                 addDownvote(post)
                             }
@@ -199,10 +199,10 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
                 view.feedBtnDownvote.isClickable = false
                 view.feedBtnUpvote.isEnabled = false
                 if (FirestoreUtility.currentUser.reference in post.model.upvoteList) {
-                    removeUpvote(post)
+                    removeUpvote(post, true)
                 } else {
                     if (FirestoreUtility.currentUser.reference in post.model.downvoteList) {
-                        removeDownvote(post)
+                        removeDownvote(post, false)
                             .continueWithTask {
                                 addUpvote(post)
                             }
@@ -232,14 +232,14 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             }
     }
 
-    private fun removeDownvote(post: PostModelClient): Task<PostModel> {
+    private fun removeDownvote(post: PostModelClient, onlyDownvote: Boolean): Task<PostModel> {
         return FirestoreUtility.undownvote(post.postID)
             .continueWithTask {
                 FirestoreUtility.resolvePostReference(post.reference)
             }
             .addOnSuccessListener {
                 post.model = it
-                notifyDataSetChanged()
+                if (onlyDownvote) notifyDataSetChanged()
             }
     }
 
@@ -254,14 +254,14 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             }
     }
 
-    private fun removeUpvote(post: PostModelClient): Task<PostModel> {
+    private fun removeUpvote(post: PostModelClient, onlyUpvote: Boolean): Task<PostModel> {
         return FirestoreUtility.unupvote(post.postID)
             .continueWithTask {
                 FirestoreUtility.resolvePostReference(post.reference)
             }
             .addOnSuccessListener {
                 post.model = it
-                notifyDataSetChanged()
+                if (onlyUpvote) notifyDataSetChanged()
             }
     }
 
@@ -288,9 +288,11 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
     }
 
     private fun goToProfile(view: View) {
-        val intent = Intent(contextVar, ProfileView::class.java)
-        intent.putExtra(USERNAME, view.feedProfileAuthor.text.toString())
-        view.context.startActivity(intent)
+        if (view.feedProfileAuthor.text.toString().toLowerCase() != "anonymous") {
+            val intent = Intent(contextVar, ProfileView::class.java)
+            intent.putExtra(USERNAME, view.feedProfileAuthor.text.toString())
+            view.context.startActivity(intent)
+        }
     }
 
     private fun updateProfilePicture(username: String, profileImage: ImageView) {

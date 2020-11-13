@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.view.MenuItem
 import android.widget.EditText
 import android.widget.ImageView
@@ -35,9 +36,13 @@ class NewPostPageUI : AppCompatActivity() {
         FirestoreUtility.queryForPostById(postID)
             .addOnSuccessListener {
                 displayPost(it)
+                updateComments(postID)
             }
 
-        updateComments(postID)
+        commentsString.movementMethod = ScrollingMovementMethod()
+        postPageUsername.text = ""
+        postPageTitle.text = ""
+        postPageGenre.text = "Genre: "
 
         postPageBtnComment.setOnClickListener {
             if (FirebaseAuth.getInstance().currentUser != null) {
@@ -54,7 +59,7 @@ class NewPostPageUI : AppCompatActivity() {
     }
 
     private fun updateComments(postID: String) {
-        commentsString.text = ""
+        commentsString.text = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38"
         FirestoreUtility.queryForPostById(postID).continueWithTask {
             FirestoreUtility.resolveCommentReferences(it.result!!.comments)
         }.addOnSuccessListener {
@@ -84,7 +89,7 @@ class NewPostPageUI : AppCompatActivity() {
 
         postPageBody.text = post.content
         postPageTitle.text = post.title
-        postPageGenre.text = post.genre
+        postPageGenre.text = "Genre: " + post.genre
 
         if (post.type == "url") {
             val bodyUrl = post.content

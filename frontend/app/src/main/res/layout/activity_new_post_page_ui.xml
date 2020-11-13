@@ -10,8 +10,8 @@
         android:id="@+id/postPageImage"
         android:layout_width="84dp"
         android:layout_height="77dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:src="@drawable/blank_profile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,10 +25,10 @@
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.203"
+        app:layout_constraintHorizontal_bias="0.053"
         app:layout_constraintStart_toEndOf="@+id/postPageImage"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.04" />
+        app:layout_constraintVertical_bias="0.061" />
 
     <TextView
         android:id="@+id/postPageTitle"
@@ -36,6 +36,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="casual"
         android:text="TITLE"
+        android:textAlignment="center"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,8 +46,8 @@
 
     <TextView
         android:id="@+id/postPageBody"
-        android:layout_width="357dp"
-        android:layout_height="138dp"
+        android:layout_width="358dp"
+        android:layout_height="wrap_content"
         android:fontFamily="casual"
         android:text="body of post"
         android:textSize="18sp"
@@ -55,7 +56,7 @@
         app:layout_constraintHorizontal_bias="0.555"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/postPageTitle"
-        app:layout_constraintVertical_bias="0.112" />
+        app:layout_constraintVertical_bias="0.09" />
 
     <TextView
         android:id="@+id/postPageGenre"
@@ -77,18 +78,24 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.505" />
+        app:layout_constraintTop_toBottomOf="@+id/postPageBody"
+        app:layout_constraintVertical_bias="0.103" />
 
     <TextView
         android:id="@+id/commentsString"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="364dp"
+        android:layout_height="253dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="130dp"
+        android:scrollbars="vertical"
         android:text="Comments List"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+        app:layout_constraintTop_toBottomOf="@+id/textView4"
+        app:layout_constraintVertical_bias="0.02" />
 
     <Button
         android:id="@+id/postPageBtnComment"

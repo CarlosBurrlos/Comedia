@@ -106,6 +106,11 @@ class NewPostPageUI : AppCompatActivity() {
                     catch (e: Exception) {}
                 }
             postPageBody.applyLinks(link)
+        } else if (post.type == "img") {
+            postPageImageView.setImageResource(R.drawable.loading_indicator)
+            postPageImageView.alpha = 1F
+            postPageBody.text = "\n".repeat(7)
+            ProfileTab.RetrieveImageTask(::setProfileImage, postPageImageView).execute(post.content)
         }
 
     }
@@ -154,11 +159,15 @@ class NewPostPageUI : AppCompatActivity() {
         }
     }
 
-    private fun setProfileImage(image: Bitmap?, toSetProfileImg: ImageView? = null) {
-        val drawable: RoundedBitmapDrawable = RoundedBitmapDrawableFactory.create(resources, image)
-        drawable.isCircular = true
-        postPageImage.setImageBitmap(image)
-        postPageImage.setImageDrawable(drawable)
+    private fun setProfileImage(image: Bitmap?, toSetImg: ImageView? = null) {
+        return if (toSetImg != null) toSetImg.setImageBitmap(image)
+        else {
+            val drawable: RoundedBitmapDrawable =
+                RoundedBitmapDrawableFactory.create(resources, image)
+            drawable.isCircular = true
+            postPageImage.setImageBitmap(image)
+            postPageImage.setImageDrawable(drawable)
+        }
     }
 
     // Allow back button to work

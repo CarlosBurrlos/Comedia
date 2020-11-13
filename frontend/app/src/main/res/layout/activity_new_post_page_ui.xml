@@ -44,6 +44,17 @@
         app:layout_constraintTop_toBottomOf="@+id/postPageUsername"
         app:layout_constraintVertical_bias="0.054" />
 
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/postPageImageView"
+        android:layout_width="360dp"
+        android:layout_height="211dp"
+        android:layout_marginTop="44dp"
+        android:contentDescription="PostImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/postPageTitle"
+        app:srcCompat="@drawable/loading_indicator" />
+
     <TextView
         android:id="@+id/postPageBody"
         android:layout_width="358dp"

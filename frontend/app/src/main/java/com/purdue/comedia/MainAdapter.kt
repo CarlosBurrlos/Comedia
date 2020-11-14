@@ -47,6 +47,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
         // Profile
         const val NAV_TITLE = "NAV_TITLE"
         const val IS_GENRE = "IS_GENRE"
+        const val IS_VIEW_FOLLOWING = "IS_VIEW_FOLLOWING"
 
         // Feed
         const val USERNAME = "USERNAME"

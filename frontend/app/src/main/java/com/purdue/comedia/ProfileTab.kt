@@ -143,9 +143,23 @@ class ProfileTab : Fragment() {
             if (FirebaseAuth.getInstance().currentUser != null) {
                 val intent = Intent(view!!.context, GenresAndUserList::class.java)
                 intent.putExtra(MainAdapter.IS_GENRE, true)
+                intent.putExtra(MainAdapter.IS_VIEW_FOLLOWING, true)
                 startActivity(intent)
             } else {
                 snack("Sign in to view genres you follow.", root)
+            }
+        }
+
+        // Followers Button functionality
+        val btnViewFollowers: Button = root.findViewById(R.id.btnViewFollowers)
+        btnViewFollowers.setOnClickListener {
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                val intent = Intent(view!!.context, GenresAndUserList::class.java)
+                intent.putExtra(MainAdapter.IS_GENRE, false)
+                intent.putExtra(MainAdapter.IS_VIEW_FOLLOWING, false)
+                startActivity(intent)
+            } else {
+                snack("Sign in to view users following you.", root)
             }
         }
 
@@ -155,6 +169,7 @@ class ProfileTab : Fragment() {
             if (FirebaseAuth.getInstance().currentUser != null) {
                 val intent = Intent(view!!.context, GenresAndUserList::class.java)
                 intent.putExtra(MainAdapter.IS_GENRE, false)
+                intent.putExtra(MainAdapter.IS_VIEW_FOLLOWING, true)
                 startActivity(intent)
             } else {
                 snack("Sign in to view users you follow.", root)

@@ -92,15 +92,15 @@
 
     <Button
         android:id="@+id/btnBrowseGenre"
-        android:layout_width="148dp"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="48dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="124dp"
+        android:layout_marginStart="119dp"
         android:layout_marginTop="389dp"
-        android:layout_marginEnd="137dp"
+        android:layout_marginEnd="125dp"
         android:fontFamily="casual"
         android:text="Follow Genre" />
 
@@ -135,10 +135,22 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_centerInParent="true"
-        android:layout_marginStart="116dp"
+        android:layout_marginStart="212dp"
         android:layout_marginTop="281dp"
         android:fontFamily="casual"
-        android:text="Users Following" />
+        android:text="View Following" />
+
+    <Button
+        android:id="@+id/btnViewFollowers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="283dp"
+        android:fontFamily="casual"
+        android:text="View Followers" />
 
     <Button
         android:id="@+id/btnDeleteAccount"

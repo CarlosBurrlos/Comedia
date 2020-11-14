@@ -21,8 +21,10 @@ class GenresAndUserList : AppCompatActivity() {
         setContentView(R.layout.activity_genres_and_user_list)
 
         val isGenre = intent.extras!!.getBoolean(MainAdapter.IS_GENRE)
+        val isUsersFollowing = intent.extras!!.getBoolean(MainAdapter.IS_VIEW_FOLLOWING)
         if (isGenre) supportActionBar?.title = "Genres Following"
-        else supportActionBar?.title = "Users Following"
+        else if (isUsersFollowing) supportActionBar?.title = "Users You Follow"
+        else supportActionBar?.title = "Your Followers"
         supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enable back button
 
         if (isGenre) {
@@ -49,34 +51,40 @@ class GenresAndUserList : AppCompatActivity() {
         // Re-fetch list
         radioUserAlphabetical.setOnClickListener {
             alphabetically = true
-            fetchUsersAlphabetically(recyclerView, model, isGenre)
+            fetchUsersAlphabetically(recyclerView, model, isGenre, isUsersFollowing)
         }
         radioUserRelevance.setOnClickListener {
             alphabetically = false
-            fetchUsersByRelevance(recyclerView, model, isGenre)
+            fetchUsersByRelevance(recyclerView, model, isGenre, isUsersFollowing)
         }
 
         if (isGenre) {
             val stringArray: List<String> = model.genresFollowing
-            recyclerView.adapter = GenresUsersAdapter(isGenre, stringArray) // Setup table logic
+            recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, stringArray) // Setup table logic
         } else {
-            if (alphabetically) fetchUsersAlphabetically(recyclerView, model, isGenre)
-            else fetchUsersByRelevance(recyclerView, model, isGenre)
+            if (alphabetically) fetchUsersAlphabetically(recyclerView, model, isGenre, isUsersFollowing)
+            else fetchUsersByRelevance(recyclerView, model, isGenre, isUsersFollowing)
         }
     }
 
-    private fun fetchUsersAlphabetically(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean) {
-        // Todo: Ensure this sorts alphabetically
-        FirestoreUtility.resolveUserReferences(model.usersFollowing)
-            .addOnSuccessListener { resolvedUsers ->
+    private fun fetchUsersAlphabetically(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean, isUsersFollowing: Boolean) {
+        if (isUsersFollowing) {
+            // Todo: Ensure this sorts alphabetically
+            FirestoreUtility.resolveUserReferences(model.usersFollowing).addOnSuccessListener { resolvedUsers ->
                 val usersFollowing = resolvedUsers.map { it.username }
-                recyclerView.adapter = GenresUsersAdapter(isGenre, usersFollowing)
+                recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
             }
+        } else {
+            // Todo: Grab the FOLLOWERS of the current user sorted alphabetically
+        }
     }
 
-    private fun fetchUsersByRelevance(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean) {
-        // Todo: Fetch user list sorted by relevance
-
+    private fun fetchUsersByRelevance(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean, isUsersFollowing: Boolean) {
+        if (isUsersFollowing) {
+            // Todo: Fetch user list sorted by relevance
+        } else {
+            // Todo: Grab the FOLLOWERS of the current user sorted by relevance
+        }
     }
 
     // Allow back button to work
@@ -88,7 +96,7 @@ class GenresAndUserList : AppCompatActivity() {
 }
 
 // Recycler View Manager
-class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
+class GenresUsersAdapter(private val isGenre: Boolean, val isUsersFollowing: Boolean, var itemStrings: List<String>) :
     RecyclerView.Adapter<CustomViewHolder>() {
 
     override fun getItemCount(): Int {
@@ -124,28 +132,36 @@ class GenresUsersAdapter(val isGenre: Boolean, var itemStrings: List<String>) :
             }
         }
 
-        // Setup unfollow button
-        view.btnUnfollowGenreOrUser.setOnClickListener {
-            val str = itemStrings[rowIndex]
-            if (isGenre) {
-                FirestoreUtility.unfollowGenre(str).addOnSuccessListener {
-                    itemStrings = FirestoreUtility.currentUser.model.genresFollowing
-                    notifyDataSetChanged()
-                    Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                FirestoreUtility.unfollowUser(str).continueWithTask {
-                    FirestoreUtility.resolveUserReferences(
-                        FirestoreUtility.currentUser.model.usersFollowing
-                    )
-                        .addOnSuccessListener { resolvedUsers ->
-                            itemStrings = resolvedUsers.map { it.username }
-                            notifyDataSetChanged()
-                            Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT)
-                                .show()
-                        }
+        if (isUsersFollowing) {
+            view.btnUnfollowGenreOrUser.isEnabled = true
+            view.btnUnfollowGenreOrUser.alpha = 1F
+
+            // Setup unfollow button
+            view.btnUnfollowGenreOrUser.setOnClickListener {
+                val str = itemStrings[rowIndex]
+                if (isGenre) {
+                    FirestoreUtility.unfollowGenre(str).addOnSuccessListener {
+                        itemStrings = FirestoreUtility.currentUser.model.genresFollowing
+                        notifyDataSetChanged()
+                        Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    FirestoreUtility.unfollowUser(str).continueWithTask {
+                        FirestoreUtility.resolveUserReferences(
+                            FirestoreUtility.currentUser.model.usersFollowing
+                        )
+                            .addOnSuccessListener { resolvedUsers ->
+                                itemStrings = resolvedUsers.map { it.username }
+                                notifyDataSetChanged()
+                                Toast.makeText(context, "Unfollowed \"$str\"", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    }
                 }
             }
+        } else {
+            view.btnUnfollowGenreOrUser.isEnabled = false
+            view.btnUnfollowGenreOrUser.alpha = 0F
         }
 
     }

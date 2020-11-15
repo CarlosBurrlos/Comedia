@@ -85,6 +85,13 @@ class NewPostPageUI : AppCompatActivity() {
                     startActivity(intent)
                 }
 
+                postPageGenre.setOnClickListener {
+                    val username = postPageGenre.text.toString().substring(7)
+                    val intent = Intent(baseContext, CustomFeed::class.java)
+                    intent.putExtra(MainAdapter.NAV_TITLE, username)
+                    intent.putExtra(MainAdapter.GENRE, username)
+                    startActivity(intent)
+                }
             }
         }
 

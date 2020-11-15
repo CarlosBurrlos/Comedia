@@ -1,11 +1,9 @@
 package com.purdue.comedia
 
-import android.R.attr.text
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
 import android.view.LayoutInflater
@@ -22,8 +20,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.klinker.android.link_builder.Link
 import com.klinker.android.link_builder.applyLinks
 import kotlinx.android.synthetic.main.post_row.view.*
-import java.lang.Math.ceil
-
 
 // Recycler View Manager
 class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {

@@ -69,13 +69,15 @@ class GenresAndUserList : AppCompatActivity() {
 
     private fun fetchUsersAlphabetically(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean, isUsersFollowing: Boolean) {
         if (isUsersFollowing) {
-            // Todo: Ensure this sorts alphabetically
             FirestoreUtility.resolveUserReferences(model.usersFollowing).addOnSuccessListener { resolvedUsers ->
-                val usersFollowing = resolvedUsers.map { it.username }
+                val usersFollowing = resolvedUsers.map { it.username }.sorted()
                 recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
             }
         } else {
-            // Todo: Grab the FOLLOWERS of the current user sorted alphabetically
+            FirestoreUtility.resolveUserReferences(model.followers).addOnSuccessListener { resolvedUsers ->
+                val usersFollowing = resolvedUsers.map { it.username }.sorted()
+                recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
+            }
         }
     }
 

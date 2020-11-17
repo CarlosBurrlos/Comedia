@@ -168,6 +168,20 @@ class FirestoreUtility {
             return client
         }
 
+        @Suppress("UNCHECKED_CAST")
+        private fun convertToGenre(snapshot: DocumentSnapshot): GenreModel {
+            val model = GenreModel()
+            model.posts = snapshot.get("posts")!! as MutableList<DocumentReference>
+            return model
+        }
+
+        private fun convertToGenreClient(snapshot: DocumentSnapshot): GenreModelClient {
+            val client = GenreModelClient()
+            client.model = convertToGenre(snapshot)
+            client.reference = snapshot.reference
+            return client
+        }
+
         private fun convertToComment(snapshot: DocumentSnapshot): CommentModel {
             val model = CommentModel()
             model.content = snapshot.get("content")!! as String
@@ -198,6 +212,10 @@ class FirestoreUtility {
             return reference.get().continueWith(convertResult(::convertToPostClient))
         }
 
+        fun resolveGenreClientReference(reference: DocumentReference): Task<GenreModelClient> {
+            return reference.get().continueWith(convertResult(::convertToGenreClient))
+        }
+
         fun resolveCommentReferences(references: Collection<DocumentReference>): Task<List<CommentModel>> {
             val resolutionTasks = references.map { resolveCommentReference(it) }
             return Tasks.whenAll(resolutionTasks)
@@ -211,6 +229,11 @@ class FirestoreUtility {
         fun userRefByUID(uid: String): DocumentReference {
             return firestore.collection("users")
                 .document(uid)
+        }
+
+        fun genreRefByName(genreName: String): DocumentReference {
+            return firestore.collection("genres")
+                .document(genreName)
         }
 
         fun queryForUserByUID(
@@ -281,21 +304,37 @@ class FirestoreUtility {
             new_post.poster = firestore.collection("users").document(uid!!)
 
             // Add the post model to the database
-            firestore.collection("posts").add(new_post).addOnSuccessListener {
+            firestore.collection("posts").add(new_post).continueWithTask {
+                if (!it.isSuccessful) return@continueWithTask Tasks.forResult(null)
                 // On a newly created post, get the post reference (for references)
-                    newPost ->
                 val timestamp = FieldValue.serverTimestamp()
                 // Callback not needed
-                newPost.update("created", timestamp)
+                val addTimestamp = it.result!!.update("created", timestamp)
 
                 // Update the user object's createdPosts
-                firestore.collection("users")
-                    .document(uid)
+                val updateCreatedPosts = userRefByUID(uid)
                     .update(
                         "createdPosts",
-                        FieldValue.arrayUnion(newPost)
+                        FieldValue.arrayUnion(it.result)
                     )
+
+                val updateGenres = addPostToGenre(new_post, it.result!!)
+
+                return@continueWithTask Tasks.whenAll(addTimestamp, updateCreatedPosts, updateGenres)
             }
+        }
+
+        private fun addPostToGenre(newPost: PostModel, postRef: DocumentReference): Task<Void> {
+            val genreRef = genreRefByName(newPost.genre)
+            return genreRef
+                .update("posts", FieldValue.arrayUnion(postRef))
+                .continueWithTask { update ->
+                    if (update.isSuccessful) return@continueWithTask Tasks.forResult(null)
+
+                    genreRef.set(with(GenreModel()) {
+                        posts = mutableListOf(postRef)
+                    })
+                }
         }
 
         // Creates a comment on a post

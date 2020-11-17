@@ -100,6 +100,18 @@ class AuthUtility {
                 .map { it.update("upvotedPosts", FieldValue.arrayRemove(post)) }
             val savedPostTasks = postModel.saveList
                 .map { it.update("savedPosts", FieldValue.arrayRemove(post)) }
+            val genreRef = FirestoreUtility.genreRefByName(postModel.genre)
+            val postInGenreTasks = genreRef
+                .update("posts", FieldValue.arrayRemove(post))
+                .continueWithTask {
+                    FirestoreUtility.resolveGenreClientReference(genreRef)
+                        .continueWithTask {
+                            if (it.result!!.model.posts.isEmpty()) {
+                                return@continueWithTask it.result!!.reference!!.delete()
+                            }
+                            Tasks.forResult(null)
+                        }
+                }
 
             return Tasks.whenAll(
                 Tasks.whenAll(downvoteTasks),

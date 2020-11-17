@@ -299,14 +299,16 @@ class ProfileTab : Fragment() {
     }
 
     private fun followGenre(genre: String) {
-        // Todo: Check if genre exists
-        val exists = true // Update this value
-
-        if (exists) {
-            FirestoreUtility.followGenre(genre).addOnSuccessListener {
-                toast("Successfully Followed \"$genre\"")
+        val genreRef = FirestoreUtility.genreRefByName(genre)
+        FirestoreUtility.resolveGenreClientReference(genreRef)
+            .addOnSuccessListener {
+                FirestoreUtility.followGenre(genre).addOnSuccessListener {
+                    toast("Successfully Followed \"$genre\"")
+                }
             }
-        } else toast("Genre \"$genre\" does not yet exist.")
+            .addOnFailureListener {
+                toast("Genre \"$genre\" does not yet exist.")
+            }
     }
 
     private fun viewProfile(username: String) {

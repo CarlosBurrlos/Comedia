@@ -81,8 +81,6 @@ class FeedTab : Fragment() {
         }.setPositiveButton("OK") { dialog, which ->
             if (!checkedItems.contains(true)) {
                 Toast.makeText(context, "You must include at least 1 genre", Toast.LENGTH_SHORT).show()
-                if (onChronological) radioChronological.isChecked = true
-                else radioRelevance.isChecked = true
                 builder.create().show()
             } else {
                 val chosenGenres: ArrayList<String> = genres.toCollection(ArrayList())
@@ -92,6 +90,8 @@ class FeedTab : Fragment() {
                 updateTableWithGenres(chosenGenres)
             }
         }.setNegativeButton("Cancel") {  dialog, which ->
+            if (onChronological) radioChronological.isChecked = true
+            else radioRelevance.isChecked = true
             dialog.cancel()
         }.create().show()
     }

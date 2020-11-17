@@ -82,7 +82,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="27dp"
         android:layout_marginTop="110dp"
-        android:background="@color/common_google_signin_btn_text_dark_pressed"
         android:fontFamily="casual"
         android:text="Follow" />
 

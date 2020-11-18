@@ -128,12 +128,7 @@ class ProfileView : AppCompatActivity() {
         // Todo: Update adapter with the interactions of the specified user
 
         FirestoreUtility.getPostInteractions(username).addOnSuccessListener {
-            it.forEach{
-                Log.w("FEEDSUCCESS",it.model.title)
-            }
             adapter.updateTable(it)
-        }.addOnFailureListener{
-            Log.w("FEEDERROR",it.toString());
         }
     }
 

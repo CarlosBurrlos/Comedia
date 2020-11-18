@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -99,6 +100,7 @@ class ProfileTab : Fragment() {
         } else {
             loginBtn.text = "Sign In"
         }
+
 
         loginBtn.setOnClickListener {
             promptedForProfile = false

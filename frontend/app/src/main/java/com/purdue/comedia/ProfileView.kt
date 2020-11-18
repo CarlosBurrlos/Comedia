@@ -125,6 +125,31 @@ class ProfileView : AppCompatActivity() {
     private fun updateTableDataWithInteractions(username: String) {
         if (!this::adapter.isInitialized) return
         // Todo: Update adapter with the interactions of the specified user
+        // The below are the tasks that will return a list of "xModel" or "xModelClient" objects
+
+        // Comments:
+        //FirestoreUtility.resolveCommentReferences(FirestoreUtility.currentUser.model.comments)
+
+        // Followers:
+        //FirestoreUtility.resolveUserReferences(FirestoreUtility.currentUser.model.followers)
+
+        // Users Following:
+        //FirestoreUtility.resolveUserReferences(FirestoreUtility.currentUser.model.usersFollowing)
+
+        // Genres Following: (not a task)
+        //FirestoreUtility.currentUser.model.genresFollowing
+
+        // Created Posts:
+        //FirestoreUtility.resolvePostClientReferences(FirestoreUtility.currentUser.model.createdPosts)
+
+        // Saved Posts:
+        //FirestoreUtility.resolvePostClientReferences(FirestoreUtility.currentUser.model.savedPosts)
+
+        // Upvoted Posts:
+        //FirestoreUtility.resolvePostClientReferences(FirestoreUtility.currentUser.model.upvotedPosts)
+
+        // Downvoted Posts:
+        //FirestoreUtility.resolvePostClientReferences(FirestoreUtility.currentUser.model.downvotedPosts)
     }
 
     private fun followOrUnfollowUser(username: String, followBtn: Button) {

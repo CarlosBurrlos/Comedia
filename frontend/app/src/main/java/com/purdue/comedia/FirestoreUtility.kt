@@ -212,6 +212,12 @@ class FirestoreUtility {
             return reference.get().continueWith(convertResult(::convertToPostClient))
         }
 
+        fun resolvePostClientReferences(references: Collection<DocumentReference>): Task<List<PostModelClient>> {
+            val resolutionTasks = references.map { resolvePostClientReference(it) }
+            return Tasks.whenAll(resolutionTasks)
+                .continueWith { resolutionTasks.map { it.result!! } }
+        }
+
         fun resolveGenreClientReference(reference: DocumentReference): Task<GenreModelClient> {
             return reference.get().continueWith(convertResult(::convertToGenreClient))
         }
@@ -542,13 +548,20 @@ class FirestoreUtility {
         fun followGenre(
             genre: String
         ): Task<Void> {
-            val uid: String = FirebaseAuth.getInstance().uid!!
-            return firestore.collection("users")
-                .document(uid)
-                .update(
-                    "genresFollowing",
-                    FieldValue.arrayUnion(genre)
-                )
+            val genreRef = genreRefByName(genre)
+            return genreRef.get().continueWithTask{ document ->
+                if (document.result == null) {
+                    throw Exception("Must enter a valid genre")
+                } else {
+                    val uid: String = FirebaseAuth.getInstance().uid!!
+                    return@continueWithTask firestore.collection("users")
+                    .document(uid)
+                    .update(
+                        "genresFollowing",
+                        FieldValue.arrayUnion(genre)
+                    )
+                }
+            }
         }
 
         fun unfollowGenre(

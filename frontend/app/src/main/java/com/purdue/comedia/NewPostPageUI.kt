@@ -65,7 +65,7 @@ class NewPostPageUI : AppCompatActivity() {
             FirestoreUtility.resolveCommentReferences(it.result!!.comments)
         }.addOnSuccessListener {
             for (comment in it) {
-                commentsString.text = commentsString.text.toString() + comment.content + "\n"
+                commentsString.text = "${commentsString.text}${comment.content}\n"
             }
         }
     }

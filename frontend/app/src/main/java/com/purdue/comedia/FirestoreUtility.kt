@@ -1,5 +1,6 @@
 package com.purdue.comedia
 
+import android.util.Log
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -542,6 +543,67 @@ class FirestoreUtility {
                 .get()
                 .continueWith {
                     return@continueWith convertQueryToPosts(it.result!!)
+                }
+        }
+
+        // Gets the posts the user has interacted with
+        fun getPostInteractions(
+            username: String
+        ): Task<List<PostModelClient>> {
+            return queryForUserByName(username).continueWithTask {
+                if (it.result!!.comments.isEmpty()) {
+                    return@continueWithTask Tasks.whenAllComplete(
+                        resolvePostClientReferences(it.result!!.savedPosts),
+                        resolvePostClientReferences(it.result!!.upvotedPosts),
+                        resolvePostClientReferences(it.result!!.downvotedPosts)
+                    )
+                } else {
+                    return@continueWithTask Tasks.whenAllComplete(
+                        resolveParentPosts(it.result!!.comments),
+                        resolvePostClientReferences(it.result!!.savedPosts),
+                        resolvePostClientReferences(it.result!!.upvotedPosts),
+                        resolvePostClientReferences(it.result!!.downvotedPosts)
+                    )
+                }
+            }.continueWith { finished ->
+                val postListList: MutableList<List<PostModelClient>> = mutableListOf()
+                finished.result!!.forEach {
+                    @Suppress("UNCHECKED_CAST")
+                    postListList.add(it.result!! as List<PostModelClient>)
+                }
+                return@continueWith mergePostList(postListList)
+            }
+        }
+
+        // Gets the parents of several comments
+        // NOTE: Can have duplicates
+        fun resolveParentPosts(
+            commentList: List<DocumentReference>
+        ): Task<List<PostModelClient>> {
+            Log.w("RESOLVEPARENTPOSTS",commentList.toString())
+            return resolveCommentReferences(commentList)
+                .continueWithTask {
+                    if (it.result != null) {
+                        Log.w("RESOLVEPARENTPOSTS",it.result.toString())
+                    } else {
+                        Log.w("RESOLVEPARENTPOSTS","it is null")
+                    }
+
+                    val comments = it.result!!
+                    val postTaskList = mutableListOf<Task<PostModelClient>>()
+                    comments.forEach { comment ->
+                        postTaskList.add(resolvePostClientReference(comment.parent))
+                    }
+                    Log.w("RESOLVEPARENTPOSTS",comments.toString())
+                    return@continueWithTask Tasks.whenAllComplete(postTaskList)
+                }
+                .continueWith{
+                    val postList = mutableListOf<PostModelClient>()
+                    it.result!!.forEach{ post ->
+                        @Suppress("UNCHECKED_CAST")
+                        postList.add(post.result!! as PostModelClient)
+                    }
+                    return@continueWith postList
                 }
         }
 

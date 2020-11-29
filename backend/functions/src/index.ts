@@ -30,10 +30,26 @@ const firestore = admin.firestore();
 //     res.json({result: `Message with ID: ${writeResult.id} added.`});
 // });
 
+const resolvers: {[index: string]: (req: https.Request) => Promise<object>} = {
+    '/relevantUsers': relevantUsers,
+    '/relevantPosts': relevantPosts,
+};
+
 // This was me late at night trying to write a function, it's probably all wrong
 exports.calcRelevancyUser = https.onRequest(async (req, res) => {
+    const response = await resolvers[req.path](req);
+    res.json(response);
+});
+
+async function relevantUsers(req: https.Request): Promise<object> {
+    // TODO: Return users sorted by relevance
+    return {};
+}
+
+// NOTE: The params here may change depending on what we need it to do
+async function calculateUserRelevancy(req: https.Request): Promise<number> {
     // Grab the parameters
-    if (!(req.query.user && req.query.target)) return;
+    if (!(req.query.user && req.query.target)) return -1;
 
     const uid: string = req.query.user?.toString();
     const t_uid: string = req.query.target?.toString();
@@ -44,10 +60,13 @@ exports.calcRelevancyUser = https.onRequest(async (req, res) => {
 
     let rel = -1;
     if (user.exists && target.exists) {
-        // calculate relevancy
+        // TODO: Calculate relevancy for two users
     }
 
-    res.json({
-        relevancy: rel
-    });
-});
+    return rel;
+}
+
+async function relevantPosts(req: https.Request): Promise<object> {
+    // TODO: Return posts sorted by relevance
+    return {};
+}

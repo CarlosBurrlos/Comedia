@@ -1,5 +1,6 @@
 import admin from 'firebase-admin';
 import {https} from "firebase-functions";
+import { DocumentSnapshot } from 'firebase-functions/lib/providers/firestore';
 // import createServer from './server/CreateGraphQLServer';
 
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
@@ -30,6 +31,10 @@ const firestore = admin.firestore();
 //     res.json({result: `Message with ID: ${writeResult.id} added.`});
 // });
 
+function commonLength(array1: any[], array2: any[]): number {
+    return array1.filter(value => array2.includes(value)).length;
+}
+
 // This was me late at night trying to write a function, it's probably all wrong
 exports.calcRelevancyUser = https.onRequest(async (req, res) => {
     // Grab the parameters
@@ -42,9 +47,30 @@ exports.calcRelevancyUser = https.onRequest(async (req, res) => {
     const user = await firestore.collection('users').doc(uid).get();
     const target = await firestore.collection('users').doc(t_uid).get();
 
-    let rel = -1;
+    let rel = 0;
     if (user.exists && target.exists) {
         // calculate relevancy
+        let user_data = user.data()
+        let target_data = target.data()
+
+        let rel_mult = 1;
+        if (user.get("usersFollowing").contains(target.ref)) {
+            rel_mult *= 1.5;
+        }
+        if (user.get("followers").contains(target.ref)) {
+            rel_mult *= 1.5;
+        }
+
+        // The number of times the user has upvoted the target's posts
+        rel += commonLength(user.get("upvotedPosts"),target.get("createdPosts"));
+        
+        // The number of times the user has downvoted the target's posts
+        rel -= commonLength(user.get("downvotedPosts"),target.get("createdPosts"));
+
+        // The number of times the user has commented on the target's posts
+        //rel += commonLength(user.get("upvoteList"),target.get("createdPosts"));
+
+        rel *= rel_mult;
     }
 
     res.json({

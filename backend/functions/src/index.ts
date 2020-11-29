@@ -18,21 +18,9 @@ const firestoreInstance = admin.firestore();
 
 // export {api};
 
-
-// Take the text parameter passed to this HTTP endpoint and insert it into 
-// Cloud Firestore under the path /messages/:documentId/original
-// exports.addMessage = functions.https.onRequest(async (req: { query: { text: any; }; }, res: { json: (arg0: { result: string; }) => void; }) => {
-//     // Grab the text parameter.
-//     const original = req.query.text;
-//     // Push the new message into Cloud Firestore using the Firebase Admin SDK.
-//     const writeResult = await admin.firestore().collection('messages').add({original: original});
-//     // Send back a message that we've succesfully written the message
-//     res.json({result: `Message with ID: ${writeResult.id} added.`});
-// });
-
 const resolvers: {[index: string]: (req: https.Request) => Promise<object>} = {
     '/relevantUsers': relevantUsers,
-    '/relevantPosts': relevantPosts,
+    '/relevantPosts': relevantPosts
 };
 
 exports.calcRelevancy = https.onRequest(async (req, res) => {
@@ -68,20 +56,37 @@ async function relevantUsers(req: https.Request): Promise<object> {
             let target_snap = await target.get();
             let new_pair: UserRelevancyPair = {
                 doc_snap: target_snap,
-                doc_rel: await calculateUserRelevancy(user,target_snap)
+                doc_rel: await calculateUserRelevancy(user, target_snap)
             };
             return new_pair;
         }
     ));
 
     // Sort by relevancy and return the document snapshots
-    UserRelevancyPairs.sort((a,b) => a.doc_rel - b.doc_rel);
-    return UserRelevancyPairs.map(pair => pair.doc_snap);
+    UserRelevancyPairs.sort((a,b) => b.doc_rel - a.doc_rel);
+    //logRelevancy(UserRelevancyPairs);
+    return UserRelevancyPairs.map(pair => pair.doc_snap.ref.path);
 }
 
-function commonLength(array1: any[], array2: any[]): number {
-    return array1.filter(value => array2.includes(value)).length;
+function commonLength(array1: firestore.DocumentReference[], array2: firestore.DocumentReference[]): number {
+    let num = 0;
+    // Algorithm won't need to be very efficient
+    array1.forEach(doc1 => {
+        array2.forEach(doc2 => {
+            if (doc1.id == doc2.id) {
+                num++;
+            }
+        })
+    })
+    return num;
+    //return array1.filter(value => array2.includes(value)).length;
 }
+
+// function logRelevancy(array: UserRelevancyPair[]): void {
+//     array.forEach(pair => {
+//         console.log(`${pair.doc_snap.get("username")}: ${pair.doc_rel}\n`);
+//     });
+// }
 
 async function calculateUserRelevancy(user: firestore.DocumentSnapshot, target: firestore.DocumentSnapshot): Promise<number> {
     // Default relevancy is zero
@@ -90,10 +95,12 @@ async function calculateUserRelevancy(user: firestore.DocumentSnapshot, target: 
         // calculate relevancy
 
         let rel_mult = 1;
-        if (user.get("usersFollowing").contains(target.ref)) {
+        let user_list: firestore.DocumentReference[] = user.get("usersFollowing");
+        if (user_list.map(u => (u.id == target.id)).includes(true)) {
             rel_mult *= 1.5;
         }
-        if (user.get("followers").contains(target.ref)) {
+        user_list = user.get("followers");
+        if (user_list.map(u => (u.id == target.id)).includes(true)) {
             rel_mult *= 1.5;
         }
 
@@ -105,10 +112,16 @@ async function calculateUserRelevancy(user: firestore.DocumentSnapshot, target: 
         // The number of times the user has downvoted the target's posts
         rel -= commonLength(user.get("downvotedPosts"), targetPosts);
 
+        // The number of times the user has downvoted the target's posts
+        rel += 8 * commonLength(user.get("savedPosts"), targetPosts);
+
         // The number of times the user has commented on the target's posts
         let comment_list: firestore.DocumentReference[] = user.get("comments");
-        let post_list = comment_list.map(async x => await x.get().then(y => y.get("parent")));
-        rel += 2 * commonLength(post_list, targetPosts);
+        let post_list: firestore.DocumentReference[] = await Promise.all(comment_list.map(async x => {
+            let snap: firestore.DocumentSnapshot = await x.get();
+            return snap.get("parent");
+        }));
+        rel += 4 * commonLength(post_list, targetPosts);
 
         if (rel > 0) {
             rel *= rel_mult;

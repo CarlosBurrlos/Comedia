@@ -35,7 +35,7 @@ const resolvers: {[index: string]: (req: https.Request) => Promise<object>} = {
     '/relevantPosts': relevantPosts,
 };
 
-exports.calcRelevancyUser = https.onRequest(async (req, res) => {
+exports.calcRelevancy = https.onRequest(async (req, res) => {
     const response = await resolvers[req.path](req);
     res.json(response);
 });

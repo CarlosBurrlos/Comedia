@@ -1,6 +1,5 @@
 import admin, { firestore } from 'firebase-admin';
 import {https} from "firebase-functions";
-import { DocumentSnapshot } from 'firebase-functions/lib/providers/firestore';
 // import createServer from './server/CreateGraphQLServer';
 
 // The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
@@ -89,8 +88,6 @@ async function calculateUserRelevancy(user: firestore.DocumentSnapshot, target: 
     let rel = 0;
     if (user.exists && target.exists) {
         // calculate relevancy
-        let user_data = user.data();
-        let target_data = target.data();
 
         let rel_mult = 1;
         if (user.get("usersFollowing").contains(target.ref)) {

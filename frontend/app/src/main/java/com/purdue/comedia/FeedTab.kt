@@ -135,7 +135,7 @@ class FeedTab : Fragment() {
                 val array = response.getJSONArray("posts")
                 val references = mutableListOf<DocumentReference>()
                 for (i in 0 until array.length()) {
-                    FirestoreUtility.postRefById(array[i] as String)
+                    references.add(FirestoreUtility.postRefById(array[i] as String))
                 }
                 FirestoreUtility.resolvePostClientReferences(references)
                     .addOnSuccessListener {

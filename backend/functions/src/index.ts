@@ -276,7 +276,7 @@ async function relevantPosts(req: https.Request): Promise<RelevantPostResponse> 
         };
     });
     const mostRelevantCandidates = candidatesWithScores
-        .sort((a, b) => a.score - b.score)
+        .sort((a, b) => b.score - a.score)
         .slice(0, maxPosts);
     const result = mostRelevantCandidates.map(pair => pair.post);
 

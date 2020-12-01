@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF">
+    android:background="#0F0B13">
 
     <Button
         android:id="@+id/btnUnfollowGenreOrUser"
@@ -13,7 +13,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:fontFamily="casual"
+        android:fontFamily="sans-serif-black"
         android:text="Unfollow"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -26,8 +26,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:fontFamily="casual"
+        android:fontFamily="sans-serif-black"
         android:text="Genre"
+        android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

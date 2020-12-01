@@ -55,7 +55,10 @@ async function relevantUsers(req: https.Request): Promise<object> {
     const mode: string = req.query.mode?.toString();
 
     // Get the user and the set of target users to use
-    const user = await firestore.collection('users').doc(uid).get();
+    const user = await firestore.collection('users').doc(uid).get().catch(error => {null});
+    if (user == null || !user.exists) {
+        return {};
+    }
     let targets: DocumentReference[];
     if (mode === "followers") {
         targets = user.get("followers");

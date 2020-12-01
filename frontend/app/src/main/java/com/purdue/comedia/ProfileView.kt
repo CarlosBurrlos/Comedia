@@ -125,7 +125,6 @@ class ProfileView : AppCompatActivity() {
 
     private fun updateTableDataWithInteractions(username: String) {
         if (!this::adapter.isInitialized) return
-        // Todo: Update adapter with the interactions of the specified user
 
         FirestoreUtility.getPostInteractions(username).addOnSuccessListener {
             adapter.updateTable(it)

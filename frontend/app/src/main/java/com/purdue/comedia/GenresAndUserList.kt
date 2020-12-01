@@ -17,6 +17,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.synthetic.main.activity_create_post_page.*
 import kotlinx.android.synthetic.main.activity_genres_and_user_list.*
 import kotlinx.android.synthetic.main.genres_and_users_row.view.*
@@ -98,7 +99,6 @@ class GenresAndUserList : AppCompatActivity() {
         var url = "https://us-central1-comedia-6f804.cloudfunctions.net/calcRelevancy/relevantUsers?uid=${auth.uid}&mode="
 
         // Decide between followers and following
-        // TODO: user relevancy
         if (isUsersFollowing) {
             url += "following";
         } else {
@@ -107,7 +107,17 @@ class GenresAndUserList : AppCompatActivity() {
 
         val jsonObjectRequest = JsonArrayRequest(Request.Method.GET, url, null,
             { response ->
-                Log.w("E",response.toString())
+                Log.w("HTTPS",response.toString())
+                val ref_list = mutableListOf<DocumentReference>()
+                for (i in 0 until response.length()) {
+                    ref_list.add(FirestoreUtility.userRefByUID(response.getString(i)))
+                    Log.w("HTTPS",response.getString(i))
+                }
+                FirestoreUtility.resolveUserReferences(ref_list).addOnSuccessListener {
+                    resolvedUsers ->
+                    val usersFollowing = resolvedUsers.map { it.username }
+                    recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
+                }
             },
             { error ->
                 Log.w("ERROR",error.message)

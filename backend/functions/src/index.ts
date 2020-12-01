@@ -245,14 +245,6 @@ async function postRelevancy(postReference: DocumentReference, userReference: Do
     relevanceScore += genreIsFollowed? 1 : 0;
     relevanceScore += posterIsFollowed? 2 : 0;
 
-    console.log(`relevanceScore: ${relevanceScore}`);
-    console.log(`hasDownvoted: ${hasDownvoted}`);
-    console.log(`hasUpvoted: ${hasUpvoted}`);
-    console.log(`commentsMade: ${commentsMade}`);
-    console.log(`isSaved: ${isSaved}`);
-    console.log(`genreIsFollowed: ${genreIsFollowed}`);
-    console.log(`posterIsFollowed: ${posterIsFollowed}`);
-
     return relevanceScore;
 }
 

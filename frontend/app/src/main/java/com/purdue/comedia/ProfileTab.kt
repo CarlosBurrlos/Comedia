@@ -314,14 +314,15 @@ class ProfileTab : Fragment() {
     }
 
     private fun viewProfile(username: String) {
-        // Todo: Check if user exists
-        val exists = true // Update this value
-
-        if (exists) {
-            val intent = Intent(context, ProfileView::class.java)
-            intent.putExtra(MainAdapter.USERNAME, username)
-            startActivity(intent)
-        } else toast("User \"$username\" does not exist.")
+        FirestoreUtility.queryForUserRefByName(username)
+            .addOnSuccessListener {
+                val intent = Intent(context, ProfileView::class.java)
+                intent.putExtra(MainAdapter.USERNAME, username)
+                startActivity(intent)
+            }
+            .addOnFailureListener {
+                toast("User \"$username\" does not exist.")
+            }
     }
 
     class RetrieveImageTask(

@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:fontFamily="casual"
-            android:text="Chronological"
+            android:text="Alphabetical"
             android:textStyle="bold" />
 
         <RadioButton

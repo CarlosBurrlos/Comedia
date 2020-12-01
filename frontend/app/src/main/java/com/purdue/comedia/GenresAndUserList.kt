@@ -95,7 +95,7 @@ class GenresAndUserList : AppCompatActivity() {
 
     private fun fetchUsersByRelevance(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean, isUsersFollowing: Boolean) {
         // Get volley queue and URL
-        val queue = Volley.newRequestQueue(this)
+        val queue = Volley.newRequestQueue(baseContext)
         var url = "https://us-central1-comedia-6f804.cloudfunctions.net/calcRelevancy/relevantUsers?uid=${auth.uid}&mode="
 
         // Decide between followers and following

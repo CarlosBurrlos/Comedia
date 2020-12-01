@@ -73,6 +73,11 @@ class CreatePostPage : AppCompatActivity() {
             postBodyField.requestFocus()
             return
         }
+        if (new_post.genre.contains(" ")) {
+            postGenreField.error = "Genre cannot contain spaces"
+            postGenreField.requestFocus()
+            return
+        }
 
         FirestoreUtility.createPost(auth.uid, new_post)
         Toast.makeText(baseContext, "Post Created.", Toast.LENGTH_SHORT).show()

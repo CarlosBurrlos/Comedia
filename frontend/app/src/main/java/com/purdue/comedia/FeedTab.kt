@@ -27,11 +27,15 @@ import org.w3c.dom.Document
 class FeedTab : Fragment() {
     // 3. Declare Parameters here
     private lateinit var adapter: MainAdapter
-    var onChronological = true
+    private lateinit var savedGenres: ArrayList<String>
 
     override fun onResume() {
         super.onResume()
-        updateTableData()
+        when {
+            radioChronological.isChecked -> updateTableData()
+            radioRelevance.isChecked -> updateTableDataWithRelevance()
+            this::savedGenres.isInitialized -> updateTableWithGenres(savedGenres)
+        }
     }
 
     override fun onCreateView(
@@ -56,20 +60,32 @@ class FeedTab : Fragment() {
         val radioChronological: RadioButton = root.findViewById(R.id.radioChronological)
         val radioRelevance: RadioButton = root.findViewById(R.id.radioRelevance)
         val radioGenres: RadioButton = root.findViewById(R.id.radioGenres)
-        onChronological = radioChronological.isChecked
+
+        radioChronological.isChecked = MainActivity.onChronological
+        radioRelevance.isChecked = MainActivity.onRelevance
+        radioGenres.isChecked = MainActivity.onGenre
 
         if (radioChronological.isChecked) updateTableData()
-        else updateTableDataWithRelevance()
+        else if (radioRelevance.isChecked) updateTableDataWithRelevance()
 
         radioChronological.setOnClickListener {
-            onChronological = true
+            MainActivity.onChronological = true
+            MainActivity.onRelevance = false
+            MainActivity.onGenre = false
             updateTableData()
         }
         radioRelevance.setOnClickListener {
-            onChronological = false
+            MainActivity.onChronological = false
+            MainActivity.onRelevance = true
+            MainActivity.onGenre = false
             updateTableDataWithRelevance()
         }
-        radioGenres.setOnClickListener { updateWithGenres() }
+        radioGenres.setOnClickListener {
+            MainActivity.onChronological = false
+            MainActivity.onRelevance = false
+            MainActivity.onGenre = true
+            updateWithGenres()
+        }
 
         return root
     }
@@ -95,10 +111,11 @@ class FeedTab : Fragment() {
                 for (i in chosenGenres.indices.reversed()) {
                     if (!checkedItems[i]) chosenGenres.removeAt(i)
                 }
+                savedGenres = chosenGenres
                 updateTableWithGenres(chosenGenres)
             }
         }.setNegativeButton("Cancel") {  dialog, which ->
-            if (onChronological) radioChronological.isChecked = true
+            if (MainActivity.onChronological) radioChronological.isChecked = true
             else radioRelevance.isChecked = true
             dialog.cancel()
         }.create().show()

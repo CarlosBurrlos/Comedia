@@ -221,7 +221,6 @@ interface CommentModel {
 }
 
 async function postRelevancy(postReference: DocumentReference, userReference: DocumentReference, user: UserModel): Promise<number> {
-    // upvotes - downvotes + 2 * comments
     const postData = (await postReference.get()).data();
     if (!postData) return -1;
     const post = postData as PostModel;
@@ -237,15 +236,16 @@ async function postRelevancy(postReference: DocumentReference, userReference: Do
     const hasDownvoted = post.downvoteList.includes(userReference);
     const commentsMade = comments.filter(comment => comment.poster == userReference).length;
 
+    // Relevancy = 2 * Comments - 2 * Downvotes + Upvotes + 2 * IsSaved + GenreIsFollowed + 2 * PosterIsFollowed
     let relevanceScore = 0;
-    relevanceScore += hasDownvoted? -1 : 0;
+    relevanceScore += hasDownvoted? -2 : 0;
     relevanceScore += hasUpvoted? 1 : 0;
     relevanceScore += 2 * commentsMade;
     relevanceScore += isSaved? 2 : 0;
+    relevanceScore += genreIsFollowed? 1 : 0;
+    relevanceScore += posterIsFollowed? 2 : 0;
 
-    if (!posterIsFollowed && genreIsFollowed) relevanceScore *= 1;
-    else if (posterIsFollowed && !genreIsFollowed) relevanceScore *= 2;
-    else relevanceScore *= 3;
+    console.log(relevanceScore);
 
     return relevanceScore;
 }

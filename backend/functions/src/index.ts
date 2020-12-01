@@ -229,12 +229,12 @@ async function postRelevancy(postReference: DocumentReference, userReference: Do
         return (await reference.get()).data() as CommentModel;
     }))
 
-    const isSaved = user.savedPosts.includes(postReference);
-    const posterIsFollowed = user.usersFollowing.includes(post.poster);
+    const isSaved = user.savedPosts.findIndex(savedPost => savedPost.path == postReference.path) != -1;
+    const posterIsFollowed = user.usersFollowing.findIndex(ref => ref.path == post.poster.path) != -1;
     const genreIsFollowed = user.genresFollowing.includes(post.genre);
-    const hasUpvoted = post.upvoteList.includes(userReference);
-    const hasDownvoted = post.downvoteList.includes(userReference);
-    const commentsMade = comments.filter(comment => comment.poster == userReference).length;
+    const hasUpvoted = post.upvoteList.findIndex(upvoter => upvoter.path == userReference.path) != -1;
+    const hasDownvoted = post.downvoteList.findIndex(downvoter => downvoter.path == userReference.path) != -1;
+    const commentsMade = comments.filter(comment => comment.poster.path == userReference.path).length;
 
     // Relevancy = 2 * Comments - 2 * Downvotes + Upvotes + 2 * IsSaved + GenreIsFollowed + 2 * PosterIsFollowed
     let relevanceScore = 0;

@@ -22,6 +22,10 @@ class AuthUtility {
                 .addOnSuccessListener { FirestoreUtility.addListenerForCurrentUser() }
         }
 
+        fun uid(): String? {
+            return auth.uid
+        }
+
         fun signOut() {
             auth.signOut()
             FirestoreUtility.clearCurrentUserListener()

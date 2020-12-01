@@ -165,10 +165,6 @@ interface GenreModel {
     posts: DocumentReference[];
 }
 
-class RelevantPostResponse {
-    posts: PostModel[] = [];
-}
-
 type VariableDepthArray<T> = T | VariableDepthArray<T>[];
 
 function flatten<T>(arr: VariableDepthArray<T>[], result: T[] = []): T[] {
@@ -251,6 +247,10 @@ async function postRelevancy(postReference: DocumentReference, userReference: Do
 const POST_LIMIT_DEFAULT = 10;
 const POST_LIMIT_MAXIMUM = 30;
 
+class RelevantPostResponse {
+    posts: string[] = [];
+}
+
 async function relevantPosts(req: https.Request): Promise<RelevantPostResponse> {
     if (!req.query.uid) return new RelevantPostResponse();
     const uid = req.query.uid.toString();
@@ -278,9 +278,9 @@ async function relevantPosts(req: https.Request): Promise<RelevantPostResponse> 
     const mostRelevantCandidates = candidatesWithScores
         .sort((a, b) => a.score - b.score)
         .slice(0, maxPosts);
-    const result = await Promise.all(mostRelevantCandidates.map(pair => pair.post.get()));
+    const result = mostRelevantCandidates.map(pair => pair.post);
 
     return {
-        posts: result.map(post => post.data() as PostModel),
+        posts: result.map(post => post.id),
     };
 }

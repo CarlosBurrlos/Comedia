@@ -50,8 +50,8 @@ interface UserRelevancyPair {
 
 async function relevantUsers(req: https.Request): Promise<object> {
     // Get query parameters
-    if (!(req.query.user && req.query.mode)) return {};
-    const uid: string = req.query.user?.toString();
+    if (!(req.query.uid && req.query.mode)) return {};
+    const uid: string = req.query.uid?.toString();
     const mode: string = req.query.mode?.toString();
 
     // Get the user and the set of target users to use

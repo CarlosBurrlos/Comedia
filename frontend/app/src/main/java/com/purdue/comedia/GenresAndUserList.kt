@@ -2,6 +2,7 @@ package com.purdue.comedia
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -9,16 +10,26 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.activity_create_post_page.*
 import kotlinx.android.synthetic.main.activity_genres_and_user_list.*
 import kotlinx.android.synthetic.main.genres_and_users_row.view.*
 
 
 class GenresAndUserList : AppCompatActivity() {
     private var alphabetically = true
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_genres_and_user_list)
+
 
         val isGenre = intent.extras!!.getBoolean(MainAdapter.IS_GENRE)
         val isUsersFollowing = intent.extras!!.getBoolean(MainAdapter.IS_VIEW_FOLLOWING)
@@ -82,11 +93,27 @@ class GenresAndUserList : AppCompatActivity() {
     }
 
     private fun fetchUsersByRelevance(recyclerView: RecyclerView, model: UserModel, isGenre: Boolean, isUsersFollowing: Boolean) {
+        // Get volley queue and URL
+        val queue = Volley.newRequestQueue(this)
+        var url = "https://us-central1-comedia-6f804.cloudfunctions.net/calcRelevancy/relevantUsers?uid=${auth.uid}&mode="
+
+        // Decide between followers and following
+        // TODO: user relevancy
         if (isUsersFollowing) {
-            // Todo: Fetch user list sorted by relevance
+            url += "following";
         } else {
-            // Todo: Grab the FOLLOWERS of the current user sorted by relevance
+            url += "followers";
         }
+
+        val jsonObjectRequest = JsonArrayRequest(Request.Method.GET, url, null,
+            { response ->
+                Log.w("E",response.toString())
+            },
+            { error ->
+                Log.w("ERROR",error.message)
+            }
+        )
+        queue.add(jsonObjectRequest)
     }
 
     // Allow back button to work

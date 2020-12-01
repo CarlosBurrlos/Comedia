@@ -2,6 +2,7 @@ package com.purdue.comedia
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +12,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.synthetic.main.feed_tab.*
+import org.json.JSONObject
+import org.w3c.dom.Document
 
 /**
  * A Fragment representing the Feed Tab
@@ -114,7 +122,32 @@ class FeedTab : Fragment() {
 
     private fun updateTableDataWithRelevance() {
         if (!this::adapter.isInitialized) return
-        // Todo: Update adapter with posts sorted by relevance
+        if (AuthUtility.uid() == null) return
+
+        // Get volley queue and URL
+        val queue = Volley.newRequestQueue(this.context)
+        val url = "https://us-central1-comedia-6f804.cloudfunctions.net/calcRelevancy/relevantPosts?uid=${AuthUtility.uid()}"
+
+        val jsonObjectRequest = JsonObjectRequest(
+            Request.Method.GET, url, null,
+            { response ->
+                Log.w("E", response.toString())
+                val array = response.getJSONArray("posts")
+                val references = mutableListOf<DocumentReference>()
+                for (i in 0 until array.length()) {
+                    FirestoreUtility.postRefById(array[i] as String)
+                }
+                FirestoreUtility.resolvePostClientReferences(references)
+                    .continueWith {
+                        adapter.updateTable(it.result!!)
+                    }
+            },
+            { error ->
+                Log.w("ERROR", error.message)
+            }
+        )
+        queue.add(jsonObjectRequest)
+        queue.start()
     }
 
 }

@@ -83,7 +83,7 @@ async function relevantUsers(req: https.Request): Promise<object> {
     // Sort by relevancy and return the document snapshots
     UserRelevancyPairs.sort((a,b) => b.doc_rel - a.doc_rel);
     //logRelevancy(UserRelevancyPairs);
-    return UserRelevancyPairs.map(pair => pair.doc_snap.ref.path);
+    return UserRelevancyPairs.map(pair => pair.doc_snap.data() as UserModel);
 }
 
 function commonLength(array1: DocumentReference[], array2: DocumentReference[]): number {

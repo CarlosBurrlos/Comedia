@@ -107,11 +107,11 @@ class GenresAndUserList : AppCompatActivity() {
 
         val jsonObjectRequest = JsonArrayRequest(Request.Method.GET, url, null,
             { response ->
-                Log.w("HTTPS",response.toString())
+                //Log.w("HTTPS",response.toString())
                 val ref_list = mutableListOf<DocumentReference>()
                 for (i in 0 until response.length()) {
                     ref_list.add(FirestoreUtility.userRefByUID(response.getString(i)))
-                    Log.w("HTTPS",response.getString(i))
+                    //Log.w("HTTPS",response.getString(i))
                 }
                 FirestoreUtility.resolveUserReferences(ref_list).addOnSuccessListener {
                     resolvedUsers ->

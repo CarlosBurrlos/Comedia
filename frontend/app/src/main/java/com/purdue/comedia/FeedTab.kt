@@ -138,8 +138,8 @@ class FeedTab : Fragment() {
                     FirestoreUtility.postRefById(array[i] as String)
                 }
                 FirestoreUtility.resolvePostClientReferences(references)
-                    .continueWith {
-                        adapter.updateTable(it.result!!)
+                    .addOnSuccessListener {
+                        adapter.updateTable(it)
                     }
             },
             { error ->

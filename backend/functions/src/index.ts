@@ -196,7 +196,7 @@ async function getUserPostCandidates(user: UserModel): Promise<DocumentReference
     const unprocessedCandidates = await Promise.all([followedUsers, followedGenres]);
     const mergedUnprocessedCandidates = flatten(unprocessedCandidates);
     return mergedUnprocessedCandidates.filter((item, index) => {
-        return index === mergedUnprocessedCandidates.indexOf(item);
+        return index == mergedUnprocessedCandidates.indexOf(item);
     });
 }
 
@@ -245,7 +245,13 @@ async function postRelevancy(postReference: DocumentReference, userReference: Do
     relevanceScore += genreIsFollowed? 1 : 0;
     relevanceScore += posterIsFollowed? 2 : 0;
 
-    console.log(relevanceScore);
+    console.log(`relevanceScore: ${relevanceScore}`);
+    console.log(`hasDownvoted: ${hasDownvoted}`);
+    console.log(`hasUpvoted: ${hasUpvoted}`);
+    console.log(`commentsMade: ${commentsMade}`);
+    console.log(`isSaved: ${isSaved}`);
+    console.log(`genreIsFollowed: ${genreIsFollowed}`);
+    console.log(`posterIsFollowed: ${posterIsFollowed}`);
 
     return relevanceScore;
 }

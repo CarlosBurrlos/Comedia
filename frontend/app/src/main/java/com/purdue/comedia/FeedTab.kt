@@ -106,7 +106,10 @@ class FeedTab : Fragment() {
 
     private fun updateTableWithGenres(chosenGenres: ArrayList<String>) {
         if (!this::adapter.isInitialized) return
-        // Todo: Update table with the selected genres
+
+        FirestoreUtility.queryMultiGenreFeed(chosenGenres).addOnSuccessListener {
+            adapter.updateTable(it)
+        }
     }
 
     private fun updateTableDataWithRelevance() {

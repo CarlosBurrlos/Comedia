@@ -102,7 +102,7 @@ class NewPostPageUI : AppCompatActivity() {
         if (post.type == "url") {
             val bodyUrl = post.content
             val link = Link(bodyUrl)
-                .setTextColor(Color.BLUE)
+                .setTextColor(Color.CYAN)
                 .setHighlightAlpha(.4F)
                 .setUnderlined(true)
                 .setBold(true)

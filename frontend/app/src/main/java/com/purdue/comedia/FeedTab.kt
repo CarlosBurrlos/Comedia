@@ -1,6 +1,7 @@
 package com.purdue.comedia
 
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,13 +14,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Request
-import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.synthetic.main.feed_tab.*
-import org.json.JSONObject
-import org.w3c.dom.Document
+
 
 /**
  * A Fragment representing the Feed Tab
@@ -28,6 +27,7 @@ class FeedTab : Fragment() {
     // 3. Declare Parameters here
     private lateinit var adapter: MainAdapter
     private lateinit var savedGenres: ArrayList<String>
+    private lateinit var progress: ProgressDialog
 
     override fun onResume() {
         super.onResume()
@@ -68,13 +68,23 @@ class FeedTab : Fragment() {
         if (radioChronological.isChecked) updateTableData()
         else if (radioRelevance.isChecked) updateTableDataWithRelevance()
 
+        progress = ProgressDialog(context)
+
         radioChronological.setOnClickListener {
+            progress.setMessage("Loading Main Feed")
+            progress.setCancelable(false)
+            progress.show()
+
             MainActivity.onChronological = true
             MainActivity.onRelevance = false
             MainActivity.onGenre = false
             updateTableData()
         }
         radioRelevance.setOnClickListener {
+            progress.setMessage("Loading Relevance Feed")
+            progress.setCancelable(false)
+            progress.show()
+
             MainActivity.onChronological = false
             MainActivity.onRelevance = true
             MainActivity.onGenre = false
@@ -112,9 +122,12 @@ class FeedTab : Fragment() {
                     if (!checkedItems[i]) chosenGenres.removeAt(i)
                 }
                 savedGenres = chosenGenres
+                progress.setMessage("Loading Genre Feed")
+                progress.setCancelable(false)
+                progress.show()
                 updateTableWithGenres(chosenGenres)
             }
-        }.setNegativeButton("Cancel") {  dialog, which ->
+        }.setNegativeButton("Cancel") { dialog, which ->
             if (MainActivity.onChronological) radioChronological.isChecked = true
             else radioRelevance.isChecked = true
             dialog.cancel()
@@ -125,6 +138,7 @@ class FeedTab : Fragment() {
     private fun updateTableData() {
         if (!this::adapter.isInitialized) return
         FirestoreUtility.queryMainFeed().addOnSuccessListener {
+            progress.dismiss()
             adapter.updateTable(it)
         }
     }
@@ -133,6 +147,7 @@ class FeedTab : Fragment() {
         if (!this::adapter.isInitialized) return
 
         FirestoreUtility.queryMultiGenreFeed(chosenGenres).addOnSuccessListener {
+            progress.dismiss()
             adapter.updateTable(it)
         }
     }
@@ -156,6 +171,7 @@ class FeedTab : Fragment() {
                 }
                 FirestoreUtility.resolvePostClientReferences(references)
                     .addOnSuccessListener {
+                        progress.dismiss()
                         adapter.updateTable(it)
                     }
             },

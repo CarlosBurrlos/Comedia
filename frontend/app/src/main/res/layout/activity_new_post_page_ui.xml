@@ -124,7 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
-        android:fontFamily="casual"
+        android:fontFamily="sans-serif-black"
         android:text="Post Comment"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

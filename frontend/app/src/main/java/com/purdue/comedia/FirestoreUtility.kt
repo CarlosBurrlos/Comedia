@@ -16,6 +16,8 @@ class FirestoreUtility {
 
         private val auth = FirebaseAuth.getInstance()
         private const val feedLimit = 100
+        private const val postTitleLimit = 100
+        private const val postTextLimit = 9000
         var currentUser: UserModelClient = UserModelClient().also { addListenerForCurrentUser() }
             private set
         var currentProfile: ProfileModel = ProfileModel()
@@ -309,6 +311,10 @@ class FirestoreUtility {
             new_post: PostModel
         ) {
             new_post.poster = firestore.collection("users").document(uid!!)
+            if (new_post.type == "txt") {
+                new_post.content = new_post.content.take(postTextLimit)
+            }
+            new_post.title = new_post.title.take(postTextLimit)
 
             // Add the post model to the database
             firestore.collection("posts").add(new_post).continueWithTask {
@@ -336,11 +342,18 @@ class FirestoreUtility {
             return genreRef
                 .update("posts", FieldValue.arrayUnion(postRef))
                 .continueWithTask { update ->
-                    if (update.isSuccessful) return@continueWithTask Tasks.forResult(null)
+                    if (update.isSuccessful) {
+                        return@continueWithTask Tasks.forResult(null)
+                    }
 
-                    genreRef.set(with(GenreModel()) {
-                        posts = mutableListOf(postRef)
-                    })
+                    val gm = GenreModel()
+                    gm.posts = mutableListOf(postRef)
+                    return@continueWithTask genreRef.set(gm)
+
+                    // Legacy code
+//                    genreRef.set(with(GenreModel()) {
+//                        posts = mutableListOf(postRef)
+//                    })
                 }
         }
 

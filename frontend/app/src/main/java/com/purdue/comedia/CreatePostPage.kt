@@ -55,6 +55,11 @@ class CreatePostPage : AppCompatActivity() {
             postTitleField.requestFocus()
             return
         }
+        if (new_post.title.length > 100) {
+            postTitleField.error = "Too many characters. Limit is 100."
+            postTitleField.requestFocus()
+            return
+        }
         if (new_post.content.isEmpty()) {
             postBodyField.error = "A body is required"
             postBodyField.requestFocus()

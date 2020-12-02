@@ -43,7 +43,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="133dp"
         android:layout_marginTop="64dp"
-        android:fontFamily="sans-serif-black"
+        android:fontFamily="sans-serif-condensed-medium"
         android:text="BIO"
         android:textColor="#FFFFFF"
         android:textSize="16sp" />

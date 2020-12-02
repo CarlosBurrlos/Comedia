@@ -112,7 +112,7 @@ class MainAdapter : RecyclerView.Adapter<CustomViewHolder>() {
             // Show text as hyperlink
             if (post.model.type == "url") {
                 val bodyUrl = post.model.content
-                val link = Link(bodyUrl).setTextColor(Color.BLUE).setHighlightAlpha(.4F)
+                val link = Link(bodyUrl).setTextColor(Color.CYAN).setHighlightAlpha(.4F)
                     .setUnderlined(true).setBold(true).setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data = Uri.parse(bodyUrl)

@@ -35,6 +35,7 @@
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:textColor="#FFFFFF"
+        android:textColorHint="#B8B8B8"
         app:layout_constraintBottom_toTopOf="@+id/postBodyField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
@@ -52,6 +53,7 @@
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
         android:textColor="@color/cardview_light_background"
+        android:textColorHint="#B8B8B8"
         app:layout_constraintBottom_toTopOf="@+id/postGenreField"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.485"
@@ -76,6 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="#BB5DC6"
             android:fontFamily="sans-serif-black"
             android:text="Text"
             android:textColor="#FFFFFF" />
@@ -85,6 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="#BB5DC6"
             android:fontFamily="sans-serif-black"
             android:text="Image"
             android:textColor="#FFFFFF" />
@@ -94,6 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="#BB5DC6"
             android:fontFamily="sans-serif-black"
             android:text="URL"
             android:textColor="#FFFFFF" />
@@ -112,6 +117,7 @@
         android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:textColor="#FFFFFF"
+        android:textColorHint="#B8B8B8"
         app:layout_constraintBottom_toTopOf="@+id/postAnonymousSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.169"

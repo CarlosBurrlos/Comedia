@@ -24,6 +24,7 @@
             android:id="@+id/radioUserAlphabetical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:buttonTint="#BB5DC6"
             android:checked="true"
             android:fontFamily="sans-serif-black"
             android:text="Alphabetical"
@@ -32,8 +33,9 @@
 
         <RadioButton
             android:id="@+id/radioUserRelevance"
-            android:layout_width="wrap_content"
+            android:layout_width="108dp"
             android:layout_height="wrap_content"
+            android:buttonTint="#BB5DC6"
             android:fontFamily="sans-serif-black"
             android:text="Relevance"
             android:textColor="#FFFFFF"

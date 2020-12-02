@@ -26,7 +26,7 @@
         android:id="@+id/feedPostGenre"
         android:layout_width="123dp"
         android:layout_height="29dp"
-        android:fontFamily="sans-serif-black"
+        android:fontFamily="sans-serif-light"
         android:text="Genre"
         android:textAlignment="textEnd"
         android:textColor="#FFFFFF"

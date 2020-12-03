@@ -300,9 +300,12 @@ class ProfileTab : Fragment() {
             .setMessage(message)
             .setPositiveButton("Confirm") { dialog, _ ->
                 // Handle new profile information
-                val textVal = inputText.text.toString()
-                if (textVal.isEmpty()) dialog.cancel()
-                else performBrowse(isGenre = browsingGenre, textVal.trim())
+                val textVal = inputText.text.toString().trim()
+                if (textVal.isEmpty()) {
+                    toast("Please provide a genre.")
+                    dialog.cancel()
+                }
+                else performBrowse(isGenre = browsingGenre, textVal)
                 dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->

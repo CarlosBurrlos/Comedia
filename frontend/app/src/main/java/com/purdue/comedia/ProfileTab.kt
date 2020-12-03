@@ -193,11 +193,16 @@ class ProfileTab : Fragment() {
                         progress.setMessage("Deleting Account...")
                         progress.setCancelable(false)
                         progress.show()
-                        AuthUtility.deleteAccount()
-                            .addOnSuccessListener {
-                                progress.dismiss()
-                                snack("Successfully deleted account.", root)
-                            }
+                        if (FirestoreUtility.isInternetWorking()) {
+                            AuthUtility.deleteAccount()
+                                .addOnSuccessListener {
+                                    progress.dismiss()
+                                    snack("Successfully deleted account.", root)
+                                }
+                        } else {
+                            progress.dismiss()
+                            snack("Connection failed. Please check internet and try again.", root)
+                        }
                         dialog.cancel()
                     }.setNegativeButton("Cancel") { dialog, _ ->
                         dialog.cancel()

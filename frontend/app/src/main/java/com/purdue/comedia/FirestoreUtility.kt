@@ -795,7 +795,7 @@ class FirestoreUtility {
         fun isInternetWorking(): Boolean {
             var success = false
             try {
-                val url = URL("https://google.com")
+                val url = URL("https://firebase.google.com")
                 val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
                 connection.setConnectTimeout(5000)
                 connection.connect()

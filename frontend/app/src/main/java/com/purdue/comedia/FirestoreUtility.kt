@@ -797,7 +797,7 @@ class FirestoreUtility {
             try {
                 val url = URL("https://google.com")
                 val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                connection.setConnectTimeout(10000)
+                connection.setConnectTimeout(5000)
                 connection.connect()
                 success = connection.getResponseCode() == 200
             } catch (e: IOException) {

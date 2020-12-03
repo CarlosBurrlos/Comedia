@@ -1,6 +1,7 @@
 package com.purdue.comedia
 
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -39,6 +40,7 @@ class ProfileTab : Fragment() {
     private lateinit var profileUsername: TextView
     private lateinit var bioTextProfilePage: TextView
     private lateinit var profileImage: ImageView
+    private lateinit var progress: ProgressDialog
 
     override fun onStart() {
         super.onStart()
@@ -178,6 +180,8 @@ class ProfileTab : Fragment() {
             }
         }
 
+        progress = ProgressDialog(context)
+
         // Delete Button Functionality
         val btnDeleteAccount: Button = root.findViewById(R.id.btnDeleteAccount)
         btnDeleteAccount.setOnClickListener {
@@ -186,8 +190,14 @@ class ProfileTab : Fragment() {
                     .setTitle("Delete Account")
                     .setMessage("Are you sure you want to delete your account and all its data?")
                     .setPositiveButton("Confirm") { dialog, _ ->
+                        progress.setMessage("Deleting Account...")
+                        progress.setCancelable(false)
+                        progress.show()
                         AuthUtility.deleteAccount()
-                            .addOnSuccessListener { snack("Successfully deleted account.", root) }
+                            .addOnSuccessListener {
+                                progress.dismiss()
+                                snack("Successfully deleted account.", root)
+                            }
                         dialog.cancel()
                     }.setNegativeButton("Cancel") { dialog, _ ->
                         dialog.cancel()

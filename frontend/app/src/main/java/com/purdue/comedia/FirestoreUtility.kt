@@ -7,8 +7,10 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
-import kotlin.collections.ArrayList
 
 class FirestoreUtility {
     companion object {
@@ -333,7 +335,11 @@ class FirestoreUtility {
 
                 val updateGenres = addPostToGenre(new_post, it.result!!)
 
-                return@continueWithTask Tasks.whenAll(addTimestamp, updateCreatedPosts, updateGenres)
+                return@continueWithTask Tasks.whenAll(
+                    addTimestamp,
+                    updateCreatedPosts,
+                    updateGenres
+                )
             }
         }
 
@@ -593,13 +599,13 @@ class FirestoreUtility {
         fun resolveParentPosts(
             commentList: List<DocumentReference>
         ): Task<List<PostModelClient>> {
-            Log.w("RESOLVEPARENTPOSTS",commentList.toString())
+            Log.w("RESOLVEPARENTPOSTS", commentList.toString())
             return resolveCommentReferences(commentList)
                 .continueWithTask {
                     if (it.result != null) {
-                        Log.w("RESOLVEPARENTPOSTS",it.result.toString())
+                        Log.w("RESOLVEPARENTPOSTS", it.result.toString())
                     } else {
-                        Log.w("RESOLVEPARENTPOSTS","it is null")
+                        Log.w("RESOLVEPARENTPOSTS", "it is null")
                     }
 
                     val comments = it.result!!
@@ -607,7 +613,7 @@ class FirestoreUtility {
                     comments.forEach { comment ->
                         postTaskList.add(resolvePostClientReference(comment.parent))
                     }
-                    Log.w("RESOLVEPARENTPOSTS",comments.toString())
+                    Log.w("RESOLVEPARENTPOSTS", comments.toString())
                     return@continueWithTask Tasks.whenAllComplete(postTaskList)
                 }
                 .continueWith{
@@ -784,6 +790,20 @@ class FirestoreUtility {
                 FieldValue.arrayRemove(post)
             )
             return Tasks.whenAll(addAsDownvote, addToUpvote)
+        }
+
+        fun isInternetWorking(): Boolean {
+            var success = false
+            try {
+                val url = URL("https://google.com")
+                val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                connection.setConnectTimeout(5000)
+                connection.connect()
+                success = connection.getResponseCode() == 200
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            return success
         }
     }
 }

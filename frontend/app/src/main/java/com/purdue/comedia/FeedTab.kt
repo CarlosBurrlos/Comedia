@@ -2,6 +2,7 @@ package com.purdue.comedia
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +18,8 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.synthetic.main.feed_tab.*
 
@@ -82,20 +85,30 @@ class FeedTab : Fragment() {
             updateTableData()
         }
         radioRelevance.setOnClickListener {
-            progress.setMessage("Loading Relevance Feed")
-            progress.setCancelable(false)
-            progress.show()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                progress.setMessage("Loading Relevance Feed")
+                progress.setCancelable(false)
+                progress.show()
 
-            MainActivity.onChronological = false
-            MainActivity.onRelevance = true
-            MainActivity.onGenre = false
-            updateTableDataWithRelevance()
+                MainActivity.onChronological = false
+                MainActivity.onRelevance = true
+                MainActivity.onGenre = false
+                updateTableDataWithRelevance()
+            } else {
+                radioChronological.isChecked = true
+                snack("Sign in to sort by relevance.", root)
+            }
         }
         radioGenres.setOnClickListener {
-            MainActivity.onChronological = false
-            MainActivity.onRelevance = false
-            MainActivity.onGenre = true
-            updateWithGenres()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                MainActivity.onChronological = false
+                MainActivity.onRelevance = false
+                MainActivity.onGenre = true
+                updateWithGenres()
+            } else {
+                radioChronological.isChecked = true
+                snack("Sign in to sort by genres.", root)
+            }
         }
 
         return root
@@ -185,6 +198,15 @@ class FeedTab : Fragment() {
             DefaultRetryPolicy(5000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         queue.add(jsonObjectRequest)
         queue.start()
+    }
+
+    private fun snack(str: String, root: View) {
+        Snackbar.make(
+            root.findViewById(R.id.feedScreen), str, Snackbar.LENGTH_LONG
+        )
+            .setAction("Login") {
+                startActivity(Intent(view!!.context, SignUp::class.java))
+            }.show()
     }
 
 }

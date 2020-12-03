@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -177,8 +178,11 @@ class FeedTab : Fragment() {
             },
             { error ->
                 Log.w("ERROR", error.message)
+                Toast.makeText(this.context, "An error occurred. Check your network connection and try again.", Toast.LENGTH_SHORT).show()
             }
         )
+        jsonObjectRequest.retryPolicy =
+            DefaultRetryPolicy(5000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         queue.add(jsonObjectRequest)
         queue.start()
     }

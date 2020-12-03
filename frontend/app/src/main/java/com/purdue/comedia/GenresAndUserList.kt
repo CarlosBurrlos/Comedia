@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -113,16 +114,20 @@ class GenresAndUserList : AppCompatActivity() {
                     ref_list.add(FirestoreUtility.userRefByUID(response.getString(i)))
                     //Log.w("HTTPS",response.getString(i))
                 }
-                FirestoreUtility.resolveUserReferences(ref_list).addOnSuccessListener {
-                    resolvedUsers ->
-                    val usersFollowing = resolvedUsers.map { it.username }
-                    recyclerView.adapter = GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
-                }
+                FirestoreUtility.resolveUserReferences(ref_list)
+                    .addOnSuccessListener { resolvedUsers ->
+                        val usersFollowing = resolvedUsers.map { it.username }
+                        recyclerView.adapter =
+                            GenresUsersAdapter(isGenre, isUsersFollowing, usersFollowing)
+                    }
             },
             { error ->
-                Log.w("ERROR",error.message)
+                Log.w("ERROR", error.message)
+                Toast.makeText(baseContext, "An error occurred. Check your network connection and try again.", Toast.LENGTH_SHORT).show()
             }
         )
+        jsonObjectRequest.retryPolicy =
+            DefaultRetryPolicy(5000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         queue.add(jsonObjectRequest)
     }
 

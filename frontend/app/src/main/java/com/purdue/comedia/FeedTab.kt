@@ -177,8 +177,8 @@ class FeedTab : Fragment() {
                     }
             },
             { error ->
-                Log.w("ERROR", error.message)
-                Toast.makeText(this.context, "An error occurred. Check your network connection and try again.", Toast.LENGTH_SHORT).show()
+                progress.dismiss()
+                Toast.makeText(this.context, "An error occurred. Check your network connection and try again.", Toast.LENGTH_LONG).show()
             }
         )
         jsonObjectRequest.retryPolicy =

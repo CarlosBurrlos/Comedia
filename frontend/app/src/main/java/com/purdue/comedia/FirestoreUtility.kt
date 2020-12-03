@@ -1,5 +1,6 @@
 package com.purdue.comedia
 
+import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -792,18 +793,21 @@ class FirestoreUtility {
             return Tasks.whenAll(addAsDownvote, addToUpvote)
         }
 
-        fun isInternetWorking(): Boolean {
-            var success = false
-            try {
-                val url = URL("https://firebase.google.com")
-                val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-                connection.setConnectTimeout(5000)
-                connection.connect()
-                success = connection.getResponseCode() == 200
-            } catch (e: IOException) {
-                e.printStackTrace()
+        fun isInternetWorking(successCallback: (Boolean) -> Unit) {
+            AsyncTask.execute {
+                var success = false
+                try {
+                    val url = URL("https://firebase.google.com")
+                    val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+                    connection.setConnectTimeout(5000)
+                    connection.connect()
+                    success = connection.getResponseCode() == 200
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+                successCallback(success)
             }
-            return success
         }
     }
 }

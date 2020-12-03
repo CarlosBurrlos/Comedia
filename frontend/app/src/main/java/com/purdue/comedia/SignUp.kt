@@ -69,28 +69,30 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun performFirebaseLogin(email: String) {
-        if (FirestoreUtility.isInternetWorking()) {
-            AuthUtility.signIn(email, registerPassword.text.toString())
-                .addOnSuccessListener {
-                    // Sign in success, update UI with the signed-in user's information
-                    val user = auth.currentUser
-                    signInLoader.isVisible = false
-                    if (user!!.isEmailVerified) {
-                        updateUI(true, user)
-                    } else {
-                        AuthUtility.signOut()
-                        snack("Please verify your email address")
+        FirestoreUtility.isInternetWorking { isWorking ->
+            if (isWorking) {
+                AuthUtility.signIn(email, registerPassword.text.toString())
+                    .addOnSuccessListener {
+                        // Sign in success, update UI with the signed-in user's information
+                        val user = auth.currentUser
+                        signInLoader.isVisible = false
+                        if (user!!.isEmailVerified) {
+                            updateUI(true, user)
+                        } else {
+                            AuthUtility.signOut()
+                            snack("Please verify your email address")
+                        }
                     }
-                }
-                .addOnFailureListener {
-                    // If sign in fails, display why to the user.
-                    Log.w("*Fail", "createUserWithEmail:failure", it)
-                    signInLoader.isVisible = false
-                    snack(it.message.toString())
-                }
-        } else {
-            signInLoader.isVisible = false
-            snack("Please check internet connection and try again.")
+                    .addOnFailureListener {
+                        // If sign in fails, display why to the user.
+                        Log.w("*Fail", "createUserWithEmail:failure", it)
+                        signInLoader.isVisible = false
+                        snack(it.message.toString())
+                    }
+            } else {
+                signInLoader.isVisible = false
+                snack("Please check internet connection and try again.")
+            }
         }
     }
 
